@@ -1,0 +1,202 @@
+[
+  {
+    "symbol": "AAC",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "AAMC",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "AAOI",
+    "status": "success",
+    "candles": 3214,
+    "windows": 595,
+    "up_rate": 0.47563,
+    "avg_future_return_pct": 5.068997
+  },
+  {
+    "symbol": "AAON",
+    "status": "success",
+    "candles": 7536,
+    "windows": 1459,
+    "up_rate": 0.569568,
+    "avg_future_return_pct": 2.09944
+  },
+  {
+    "symbol": "AAT",
+    "status": "success",
+    "candles": 3893,
+    "windows": 731,
+    "up_rate": 0.540356,
+    "avg_future_return_pct": 0.41213
+  },
+  {
+    "symbol": "AAVL",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "AAWW",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABAX",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABCB",
+    "status": "success",
+    "candles": 7450,
+    "windows": 1442,
+    "up_rate": 0.540222,
+    "avg_future_return_pct": 1.034267
+  },
+  {
+    "symbol": "ABCD",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABCO",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABCW",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABEO",
+    "status": "success",
+    "candles": 6579,
+    "windows": 1268,
+    "up_rate": 0.417981,
+    "avg_future_return_pct": 0.669832
+  },
+  {
+    "symbol": "ABG",
+    "status": "success",
+    "candles": 6116,
+    "windows": 1175,
+    "up_rate": 0.553191,
+    "avg_future_return_pct": 2.093432
+  },
+  {
+    "symbol": "ABM",
+    "status": "success",
+    "candles": 7550,
+    "windows": 1462,
+    "up_rate": 0.563611,
+    "avg_future_return_pct": 0.741231
+  },
+  {
+    "symbol": "ABMD",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ABY",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ACAD",
+    "status": "success",
+    "candles": 5559,
+    "windows": 1064,
+    "up_rate": 0.504699,
+    "avg_future_return_pct": 2.829949
+  },
+  {
+    "symbol": "ACAT",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ACCO",
+    "status": "success",
+    "candles": 5257,
+    "windows": 1004,
+    "up_rate": 0.498008,
+    "avg_future_return_pct": 0.913585
+  },
+  {
+    "symbol": "ACET",
+    "status": "success",
+    "candles": 2123,
+    "windows": 377,
+    "up_rate": 0.437666,
+    "avg_future_return_pct": -1.592566
+  },
+  {
+    "symbol": "ACHN",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  },
+  {
+    "symbol": "ACIW",
+    "status": "success",
+    "candles": 4769,
+    "windows": 906,
+    "up_rate": 0.547461,
+    "avg_future_return_pct": 1.380578
+  },
+  {
+    "symbol": "ACLS",
+    "status": "success",
+    "candles": 6537,
+    "windows": 1260,
+    "up_rate": 0.522222,
+    "avg_future_return_pct": 1.944974
+  },
+  {
+    "symbol": "ACOR",
+    "status": "success",
+    "candles": 0,
+    "windows": 0,
+    "up_rate": null,
+    "avg_future_return_pct": null
+  }
+]

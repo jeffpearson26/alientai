@@ -1,0 +1,83 @@
+# Secrets and broker/API credentials
+.env
+.env.*
+!.env.example
+token.json
+token_*.json
+**/token.json
+**/token_*.json
+credentials*.json
+secrets*.json
+*.pem
+*.key
+
+# Local Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs, temporary files, and local process state
+*.log
+*.tmp
+*.temp
+*.pid
+*.lock
+~$*
+
+# Historical snapshots and one-off backups
+archive_*/
+old_system_reference/
+*_BACKUP_*
+*_backup_*
+main_backup*.py
+
+# Large downloaded market data and generated training libraries
+data_v2/training_library/
+data_v2/*_history/
+data_v2/russell_2000_5m_schwab/
+data_v2/russell_2000_5m_schwab_max/
+data_v2/*_training/
+data_v2/options_research/
+
+# Mutable paper-trading accounts, dashboards, upload state, and reports
+data_v2/*account*.json
+data_v2/engine_accounts/
+data_v2/*sandbox/
+data_v2/v2_status.json
+data_v2/*upload_state.json
+data_v2/*upload_report.csv
+data_v2/*upload_summary.json
+data_v2/*replay_report*.json
+data_v2/*replay_summary*.json
+data_v2/*replay_summary*.csv
+
+# Generated model binaries and bulky analytical artifacts
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+*.pickle
+*.npz
+*.npy
+*.parquet
+*.feather
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
