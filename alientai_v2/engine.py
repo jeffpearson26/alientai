@@ -74,18 +74,33 @@ def save_status(extra: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def get_status() -> Dict[str, Any]:
-    if STATUS_FILE.exists():
-        status = load_json(STATUS_FILE, {})
-        if isinstance(status, dict) and status:
-            status["v2_engine_running"] = is_running()
-            status["old_scanner_decision_making_enabled"] = False
-            return status
+    """
+    Return current V2 status with freshly calculated account metrics.
 
-    return save_status({
-        "last_message": "V2 status created.",
-        "last_action": "WAIT",
-        "last_scan_time": None,
+    The saved status file is used only to preserve descriptive information
+    such as the last scan message, candidates, and actions. Financial values
+    are always recalculated from the live paper-account file.
+    """
+    saved_status = {}
+
+    if STATUS_FILE.exists():
+        loaded = load_json(STATUS_FILE, {})
+        if isinstance(loaded, dict):
+            saved_status = loaded
+
+    refreshed = save_status({
+        "last_message": saved_status.get("last_message", "V2 status created."),
+        "last_action": saved_status.get("last_action", "WAIT"),
+        "last_scan_time": saved_status.get("last_scan_time"),
+        "top_v2_candidates": saved_status.get("top_v2_candidates", []),
+        "buy_actions": saved_status.get("buy_actions", []),
+        "sell_actions": saved_status.get("sell_actions", []),
+        "buy_window": saved_status.get("buy_window", {}),
     })
+
+    refreshed["v2_engine_running"] = is_running()
+    refreshed["old_scanner_decision_making_enabled"] = False
+    return refreshed
 
 
 def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> List[Dict[str, Any]]:
