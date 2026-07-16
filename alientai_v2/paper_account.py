@@ -41,7 +41,22 @@ def save_account(account: Dict[str, Any]) -> None:
 
 
 def calculate_account_metrics(account: Dict[str, Any], settings: Dict[str, Any]) -> Dict[str, Any]:
-    starting_cash = safe_float(settings.get("starting_cash"), 10000.0)
+    # The account file is the source of truth for its original balance.
+    # This prevents later settings changes or cash deposits from creating
+    # incorrect profit-and-loss calculations.
+    starting_cash = safe_float(
+        account.get(
+            "starting_balance",
+            account.get(
+                "starting_cash",
+                account.get(
+                    "initial_cash",
+                    settings.get("starting_cash", 20000.0),
+                ),
+            ),
+        ),
+        20000.0,
+    )
     cash = safe_float(account.get("cash"), starting_cash)
     open_positions = account.get("open_positions", {})
 
