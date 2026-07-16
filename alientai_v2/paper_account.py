@@ -171,6 +171,8 @@ def buy_position(account: Dict[str, Any], candidate: Dict[str, Any], settings: D
         "prediction_horizon_minutes": prediction_horizon_minutes,
         "prediction_horizon_days": prediction_horizon_days,
         "minimum_hold_minutes": minimum_hold_minutes,
+        "scheduled_exit_time": candidate.get("scheduled_exit_time"),
+        "exit_rule": candidate.get("exit_rule"),
         "allow_stop_before_min_hold": bool(settings.get("allow_stop_before_min_hold", False)),
         "allow_trailing_before_min_hold": bool(settings.get("allow_trailing_before_min_hold", False)),
         "allow_take_profit_before_min_hold": bool(settings.get("allow_take_profit_before_min_hold", False)),

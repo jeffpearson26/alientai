@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, Dict, List
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 
 ENGINE_ID = "prediction_friday"
@@ -118,6 +120,34 @@ def move_pct(row: Dict[str, Any], price: float) -> float:
     return 0.0
 
 
+
+def next_friday_noon_pacific() -> str:
+    """
+    Return the next Friday at 12:00 PM America/Los_Angeles.
+
+    If it is currently Friday before noon, use today at noon.
+    If it is Friday at or after noon, use the following Friday.
+    """
+    tz = ZoneInfo("America/Los_Angeles")
+    now = datetime.now(tz)
+
+    days_until_friday = (4 - now.weekday()) % 7
+    target_date = now.date() + timedelta(days=days_until_friday)
+    target = datetime(
+        target_date.year,
+        target_date.month,
+        target_date.day,
+        12,
+        0,
+        0,
+        tzinfo=tz,
+    )
+
+    if target <= now:
+        target += timedelta(days=7)
+
+    return target.isoformat(timespec="seconds")
+
 def decision_for_policy(policy: str, score: float, settings: Dict[str, Any]) -> str:
     policy = str(policy or "NO_DATA").upper().strip()
 
@@ -221,8 +251,10 @@ def scan(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[st
                 "score": 0.0,
                 "decision": "AVOID",
                 "price": quote_price(quote),
-                "prediction_horizon_days": 5.0,
-                "minimum_hold_minutes": safe_float(settings.get("prediction_friday_minimum_hold_minutes"), 7200.0),
+                "prediction_horizon_days": 0.0,
+                "minimum_hold_minutes": 0.0,
+                "scheduled_exit_time": next_friday_noon_pacific(),
+                "exit_rule": "friday_noon_pacific",
                 "source": ENGINE_ID,
                 "prediction_friday_policy": "NO_DATA",
                 "reason": "No Friday policy for this symbol.",
@@ -267,9 +299,11 @@ def scan(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[st
             "score": score,
             "decision": decision,
             "price": price,
-            "prediction_horizon_minutes": 7200.0,
-            "prediction_horizon_days": 5.0,
-            "minimum_hold_minutes": safe_float(settings.get("prediction_friday_minimum_hold_minutes"), 7200.0),
+            "prediction_horizon_minutes": 0.0,
+            "prediction_horizon_days": 0.0,
+            "minimum_hold_minutes": 0.0,
+            "scheduled_exit_time": next_friday_noon_pacific(),
+            "exit_rule": "friday_noon_pacific",
             "source": ENGINE_ID,
             "reason": " ".join(reason_parts),
             "reasons": reason_parts,

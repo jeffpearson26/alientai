@@ -155,7 +155,29 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
 
         prediction_horizon_days = safe_float(pos.get("prediction_horizon_days"), default_prediction_horizon_days)
         minimum_hold_minutes = safe_float(pos.get("minimum_hold_minutes"), default_minimum_hold_minutes)
-        min_hold_complete = age_minutes >= minimum_hold_minutes
+
+        scheduled_exit_time = str(pos.get("scheduled_exit_time") or "").strip()
+        scheduled_exit_reached = False
+
+        if scheduled_exit_time:
+            try:
+                scheduled_exit_dt = datetime.fromisoformat(scheduled_exit_time)
+                now_pacific = datetime.now(ZoneInfo("America/Los_Angeles"))
+
+                if scheduled_exit_dt.tzinfo is None:
+                    scheduled_exit_dt = scheduled_exit_dt.replace(
+                        tzinfo=ZoneInfo("America/Los_Angeles")
+                    )
+
+                scheduled_exit_reached = now_pacific >= scheduled_exit_dt
+            except Exception as exc:
+                pos["scheduled_exit_error"] = str(exc)
+
+        min_hold_complete = (
+            scheduled_exit_reached
+            if pos.get("exit_rule") == "friday_noon_pacific"
+            else age_minutes >= minimum_hold_minutes
+        )
 
         pos["unrealized_pnl_pct"] = round(pnl_pct, 4)
         pos["trail_drop_pct"] = round(trail_drop_pct, 4)
@@ -168,6 +190,17 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
         allow_stop_before = bool(pos.get("allow_stop_before_min_hold", settings.get("allow_stop_before_min_hold", False)))
         allow_trailing_before = bool(pos.get("allow_trailing_before_min_hold", settings.get("allow_trailing_before_min_hold", False)))
         allow_take_profit_before = bool(pos.get("allow_take_profit_before_min_hold", settings.get("allow_take_profit_before_min_hold", False)))
+
+        if pos.get("exit_rule") == "friday_noon_pacific" and scheduled_exit_reached:
+            trade = sell_position(
+                account,
+                symbol,
+                new_price,
+                f"Friday engine scheduled exit reached: {scheduled_exit_time}",
+            )
+            if trade:
+                actions.append(trade)
+            continue
 
         if not min_hold_complete:
             blocked = []
