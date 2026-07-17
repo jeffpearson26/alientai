@@ -19,6 +19,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     # Fail closed: research engines cannot buy the shared main account until
     # they pass validation and are explicitly added here.
     "main_account_enabled_buy_engines": [],
+    "shadow_signal_journal_enabled": True,
+    "shadow_signal_decisions": ["BUY_CANDIDATE", "STRONG_BUY_CANDIDATE"],
 
     "starting_cash": 10000.0,
 

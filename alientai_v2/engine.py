@@ -18,6 +18,7 @@ from alientai_v2.engines.engine_registry import run_enabled_engines
 from alientai_v2.schwab_client import get_real_v2_quotes
 from alientai_v2.settings import load_settings
 from alientai_v2.options_paper import maybe_buy_from_research_rows
+from alientai_v2.shadow_signals import record_shadow_signals
 from alientai_v2.utils import DATA_DIR, load_json, minutes_since_iso, now_iso, safe_float, save_json
 
 
@@ -560,6 +561,12 @@ def run_one_scan() -> Dict[str, Any]:
 
     scored = run_enabled_engines(quotes, settings)
 
+    shadow_signal_result: Dict[str, Any] = {}
+    try:
+        shadow_signal_result = record_shadow_signals(scored, settings)
+    except Exception as exc:
+        shadow_signal_result = {"status": "error", "recorded": 0, "error": str(exc)}
+
     options_paper_result = {}
     try:
         option_rows = [
@@ -695,6 +702,7 @@ def run_one_scan() -> Dict[str, Any]:
         "options_paper_manager": options_paper_result,
         "options_paper_account": options_paper_result.get("account") if isinstance(options_paper_result, dict) else {},
         "options_paper_actions": options_paper_result.get("actions", []) if isinstance(options_paper_result, dict) else [],
+        "shadow_signal_journal": shadow_signal_result,
         "buy_actions": buy_actions,
         "sell_actions": all_sell_actions,
         "buy_window": buy_window,
