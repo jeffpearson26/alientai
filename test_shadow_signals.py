@@ -34,6 +34,20 @@ class ShadowSignalTests(unittest.TestCase):
         settings = {"shadow_signal_decisions": ["WATCH"]}
         self.assertEqual(1, len(build_new_records([row], settings, "2026-07-17T08:00:00", set())))
 
+    def test_shadow_research_override_does_not_change_execution_decision(self):
+        row = {
+            "symbol": "NVDA",
+            "engine_id": "transformer_20day",
+            "decision": "AVOID",
+            "shadow_research_decision": "BUY_CANDIDATE",
+            "price": 200.0,
+            "prediction_horizon_minutes": 28800,
+        }
+        record = build_new_records([row], {}, "2026-07-17T08:00:00", set())[0]
+        self.assertEqual("BUY_CANDIDATE", record["decision"])
+        self.assertEqual("AVOID", record["execution_decision"])
+        self.assertTrue(record["shadow_research_only"])
+
     def test_preserves_scheduled_exit_and_execution_eligibility(self):
         row = {
             "symbol": "CACI",

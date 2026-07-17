@@ -19,11 +19,11 @@ def candidate_price(row: Dict[str, Any]) -> float:
     return 0.0
 
 
-def signal_key(row: Dict[str, Any], observed_at: str) -> str:
+def signal_key(row: Dict[str, Any], observed_at: str, decision: str = "") -> str:
     day = str(observed_at)[:10]
     engine = str(row.get("engine_id") or "unknown_engine").strip()
     symbol = str(row.get("symbol") or "").upper().strip()
-    decision = str(row.get("decision") or "").upper().strip()
+    decision = str(decision or row.get("decision") or "").upper().strip()
     return "|".join((day, engine, symbol, decision))
 
 
@@ -45,11 +45,13 @@ def build_new_records(
     for row in scored:
         if not isinstance(row, dict):
             continue
-        decision = str(row.get("decision") or "").upper().strip()
+        execution_decision = str(row.get("decision") or "").upper().strip()
+        shadow_decision = str(row.get("shadow_research_decision") or "").upper().strip()
+        decision = shadow_decision or execution_decision
         symbol = str(row.get("symbol") or "").upper().strip()
         if decision not in wanted or not symbol:
             continue
-        key = signal_key(row, observed_at)
+        key = signal_key(row, observed_at, decision)
         if key in seen_keys:
             continue
         seen_keys.add(key)
@@ -64,6 +66,8 @@ def build_new_records(
             "symbol": symbol,
             "engine_id": engine_id,
             "decision": decision,
+            "execution_decision": execution_decision,
+            "shadow_research_only": bool(shadow_decision),
             "score": safe_float(row.get("score"), 0.0),
             "observed_price": candidate_price(row),
             "prediction_horizon_minutes": safe_float(row.get("prediction_horizon_minutes"), 0.0),

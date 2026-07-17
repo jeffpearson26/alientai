@@ -537,6 +537,28 @@ def score_to_decision(
     return "AVOID", min(score, 39.0), reason + " Unknown policy blocks buy."
 
 
+def transformer_shadow_research_decision(
+    probability: float,
+    policy_info: Dict[str, Any],
+    settings: Dict[str, Any],
+) -> str:
+    """Return a journal-only decision without changing execution eligibility."""
+    if not bool(settings.get("transformer_20day_shadow_research_enabled", True)):
+        return ""
+
+    policy = str(policy_info.get("policy", "NO_DATA")).upper()
+    if policy not in {"ALLOW_BUY_STRONG", "ALLOW_BUY", "ALLOW_SMALL"}:
+        return ""
+
+    threshold = safe_float(
+        settings.get("transformer_20day_shadow_min_probability"),
+        0.55,
+    )
+    if probability >= threshold:
+        return "BUY_CANDIDATE"
+    return ""
+
+
 def scan(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[str, Any]]:
     candidates: List[Dict[str, Any]] = []
 
@@ -640,6 +662,15 @@ def scan(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[st
             candidates[-1]["transformer_20day_master_buy_win_rate_pct"] = policy_info.get("buy_candidate_win_rate_pct")
             candidates[-1]["transformer_20day_master_avg_buy_return_pct"] = policy_info.get("avg_buy_future_20d_return_pct")
             candidates[-1]["transformer_20day_daily_candles"] = len(candles)
+            candidates[-1]["shadow_research_decision"] = transformer_shadow_research_decision(
+                probability,
+                policy_info,
+                settings,
+            )
+            candidates[-1]["transformer_20day_shadow_min_probability"] = safe_float(
+                settings.get("transformer_20day_shadow_min_probability"),
+                0.55,
+            )
 
         except Exception as exc:
             candidates.append({

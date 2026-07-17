@@ -25,6 +25,11 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "shadow_scorecard_min_completed_signals": 100,
     "shadow_scorecard_min_profit_factor": 1.20,
 
+    # Transformer challenger signals are journaled for forward research only.
+    # This threshold never changes the engine's execution BUY threshold.
+    "transformer_20day_shadow_research_enabled": True,
+    "transformer_20day_shadow_min_probability": 0.55,
+
     "starting_cash": 10000.0,
 
     "small_position_dollars": 500.0,
