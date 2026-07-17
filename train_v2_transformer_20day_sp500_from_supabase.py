@@ -459,6 +459,64 @@ def standardize_train_val(
     return x_train_scaled.astype(np.float32), x_val_scaled.astype(np.float32), scaler
 
 
+def apply_standardizer(x: np.ndarray, scaler: Dict[str, Any]) -> np.ndarray:
+    mean_ = np.array(scaler["mean"], dtype=np.float32).reshape(1, 1, -1)
+    std_ = np.array(scaler["std"], dtype=np.float32).reshape(1, 1, -1)
+    std_[std_ < 1e-6] = 1.0
+    return ((x - mean_) / std_).astype(np.float32)
+
+
+def chronological_three_way_indices(
+    datetimes_ms: np.ndarray,
+    train_fraction: float = 0.60,
+    validation_fraction: float = 0.20,
+    embargo_calendar_days: int = 32,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
+    """Split by whole timestamps and purge labels near both boundaries."""
+    if not 0.0 < train_fraction < 1.0:
+        raise ValueError("train_fraction must be between 0 and 1")
+    if not 0.0 < validation_fraction < 1.0:
+        raise ValueError("validation_fraction must be between 0 and 1")
+    if train_fraction + validation_fraction >= 1.0:
+        raise ValueError("train and validation fractions must leave a test set")
+
+    unique_times = np.unique(datetimes_ms.astype(np.int64))
+    if len(unique_times) < 10:
+        raise ValueError("Not enough unique timestamps for a three-way split")
+
+    train_cutoff_position = max(0, int(len(unique_times) * train_fraction) - 1)
+    validation_cutoff_position = max(
+        train_cutoff_position + 1,
+        int(len(unique_times) * (train_fraction + validation_fraction)) - 1,
+    )
+    validation_cutoff_position = min(validation_cutoff_position, len(unique_times) - 2)
+
+    train_cutoff = int(unique_times[train_cutoff_position])
+    validation_cutoff = int(unique_times[validation_cutoff_position])
+    embargo_ms = max(0, int(embargo_calendar_days)) * 24 * 60 * 60 * 1000
+
+    train_indices = np.flatnonzero(datetimes_ms <= train_cutoff)
+    validation_indices = np.flatnonzero(
+        (datetimes_ms > train_cutoff + embargo_ms)
+        & (datetimes_ms <= validation_cutoff)
+    )
+    test_indices = np.flatnonzero(datetimes_ms > validation_cutoff + embargo_ms)
+
+    if not len(train_indices) or not len(validation_indices) or not len(test_indices):
+        raise ValueError("Three-way split produced an empty partition")
+
+    details = {
+        "method": "chronological_unique_timestamp_60_20_20_with_embargo",
+        "train_fraction": train_fraction,
+        "validation_fraction": validation_fraction,
+        "test_fraction": 1.0 - train_fraction - validation_fraction,
+        "embargo_calendar_days": int(embargo_calendar_days),
+        "train_cutoff_datetime_ms": train_cutoff,
+        "validation_cutoff_datetime_ms": validation_cutoff,
+    }
+    return train_indices, validation_indices, test_indices, details
+
+
 def binary_metrics(y_true: np.ndarray, probabilities: np.ndarray, threshold: float = 0.5) -> Dict[str, Any]:
     preds = (probabilities >= threshold).astype(np.int64)
 
@@ -563,6 +621,9 @@ def main() -> None:
     parser.add_argument("--dropout", type=float, default=0.10)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--delay", type=float, default=0.05)
+    parser.add_argument("--train-fraction", type=float, default=0.60)
+    parser.add_argument("--validation-fraction", type=float, default=0.20)
+    parser.add_argument("--split-embargo-calendar-days", type=int, default=32)
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -670,17 +731,33 @@ def main() -> None:
     future_returns = future_returns[order]
     all_meta = [all_meta[int(i)] for i in order]
 
-    split_index = int(len(x) * 0.80)
+    datetimes_ms = np.array(
+        [safe_int(m.get("datetime_ms"), 0) for m in all_meta],
+        dtype=np.int64,
+    )
+    train_indices, validation_indices, test_indices, split_details = (
+        chronological_three_way_indices(
+            datetimes_ms,
+            train_fraction=args.train_fraction,
+            validation_fraction=args.validation_fraction,
+            embargo_calendar_days=args.split_embargo_calendar_days,
+        )
+    )
 
-    x_train = x[:split_index]
-    y_train = y[:split_index]
-    returns_train = future_returns[:split_index]
+    x_train = x[train_indices]
+    y_train = y[train_indices]
+    returns_train = future_returns[train_indices]
 
-    x_val = x[split_index:]
-    y_val = y[split_index:]
-    returns_val = future_returns[split_index:]
+    x_val = x[validation_indices]
+    y_val = y[validation_indices]
+    returns_val = future_returns[validation_indices]
+
+    x_test = x[test_indices]
+    y_test = y[test_indices]
+    returns_test = future_returns[test_indices]
 
     x_train, x_val, scaler = standardize_train_val(x_train, x_val)
+    x_test = apply_standardizer(x_test, scaler)
 
     train_loader = DataLoader(
         TensorDataset(
@@ -789,6 +866,16 @@ def main() -> None:
         device=device,
     )
 
+    # This is deliberately evaluated only after all training epochs finish.
+    final_test_metrics = evaluate_model(
+        model=model,
+        x=x_test,
+        y=y_test,
+        future_returns=returns_test,
+        batch_size=args.batch_size,
+        device=device,
+    )
+
     model_path = OUT_DIR / "transformer_20day_sp500_model.pt"
     scaler_path = OUT_DIR / "transformer_20day_sp500_scaler.json"
     metrics_path = OUT_DIR / "transformer_20day_sp500_metrics.json"
@@ -830,12 +917,17 @@ def main() -> None:
         "total_windows": int(len(x)),
         "train_windows": int(len(x_train)),
         "validation_windows": int(len(x_val)),
+        "test_windows": int(len(x_test)),
+        "split": split_details,
         "train_base_up_rate": round(float(y_train.mean()), 6),
         "validation_base_up_rate": round(float(y_val.mean()), 6),
+        "test_base_up_rate": round(float(y_test.mean()), 6),
         "train_avg_future_return_pct": round(float(returns_train.mean()), 6),
         "validation_avg_future_return_pct": round(float(returns_val.mean()), 6),
+        "test_avg_future_return_pct": round(float(returns_test.mean()), 6),
         "train_metrics": final_train_metrics,
         "validation_metrics": final_val_metrics,
+        "test_metrics": final_test_metrics,
         "train_history": train_history,
         "model_path": str(model_path),
         "scaler_path": str(scaler_path),
