@@ -103,6 +103,51 @@ def get_status() -> Dict[str, Any]:
     return refreshed
 
 
+def symbol_stop_cooldown_reason(
+    account: Dict[str, Any],
+    symbol: str,
+    settings: Dict[str, Any],
+) -> str:
+    """Return a rejection reason when a symbol was recently sold by a stop."""
+    if not bool(settings.get("stop_reentry_cooldown_enabled", True)):
+        return ""
+
+    cooldown_hours = max(
+        0.0,
+        safe_float(settings.get("stop_reentry_cooldown_hours"), 168.0),
+    )
+    if cooldown_hours <= 0:
+        return ""
+
+    normalized_symbol = str(symbol or "").upper().strip()
+    closed_trades = account.get("closed_trades", [])
+    if not isinstance(closed_trades, list):
+        return ""
+
+    for trade in reversed(closed_trades):
+        if not isinstance(trade, dict):
+            continue
+        if str(trade.get("symbol") or "").upper().strip() != normalized_symbol:
+            continue
+
+        reason = str(trade.get("reason") or "").lower()
+        if "stop" not in reason:
+            continue
+
+        age_minutes = minutes_since_iso(str(trade.get("time") or ""))
+        if age_minutes is None:
+            continue
+        if 0.0 <= age_minutes < cooldown_hours * 60.0:
+            remaining = max(0.0, cooldown_hours - age_minutes / 60.0)
+            return (
+                f"Stop re-entry cooldown active for {normalized_symbol}: "
+                f"{remaining:.1f} hour(s) remaining."
+            )
+        break
+
+    return ""
+
+
 def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> List[Dict[str, Any]]:
     actions: List[Dict[str, Any]] = []
     open_positions = account.setdefault("open_positions", {})
@@ -514,7 +559,10 @@ def run_one_scan() -> Dict[str, Any]:
     buy_window = market_buy_window_status(settings)
 
     rotation_actions: List[Dict[str, Any]] = []
-    if buy_window.get("new_buys_allowed", False):
+    if (
+        settings.get("paper_trading_enabled", True)
+        and buy_window.get("new_buys_allowed", False)
+    ):
         rotation_actions = rotate_portfolio_for_better_candidates(account, settings, scored)
 
     buy_actions: List[Dict[str, Any]] = []
@@ -533,6 +581,16 @@ def run_one_scan() -> Dict[str, Any]:
                 continue
 
             engine_id_for_limit = str(candidate.get("engine_id") or "").strip()
+
+            cooldown_reason = symbol_stop_cooldown_reason(
+                account,
+                str(candidate.get("symbol") or ""),
+                settings,
+            )
+            if cooldown_reason:
+                candidate["manager_decision"] = "REJECTED"
+                candidate["manager_reason"] = cooldown_reason
+                continue
 
             if engine_id_for_limit == "prediction_friday":
                 max_friday_buys = int(safe_float(settings.get("prediction_friday_max_buys_per_scan"), 1))

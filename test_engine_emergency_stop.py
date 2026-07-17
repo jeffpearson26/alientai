@@ -91,6 +91,57 @@ class EmergencyStopTests(unittest.TestCase):
             "stop loss blocked before minimum hold",
         )
 
+    def test_recent_stop_blocks_reentry(self):
+        account = {
+            "closed_trades": [{
+                "time": "2026-07-17T06:32:54-07:00",
+                "symbol": "TEST",
+                "reason": "V2 emergency stop at -6.0% (limit -5.0%)",
+            }]
+        }
+        with patch.object(engine, "minutes_since_iso", return_value=4.0):
+            reason = engine.symbol_stop_cooldown_reason(
+                account,
+                "test",
+                make_settings(
+                    stop_reentry_cooldown_enabled=True,
+                    stop_reentry_cooldown_hours=168.0,
+                ),
+            )
+        self.assertIn("cooldown active", reason)
+
+    def test_expired_stop_allows_reentry(self):
+        account = {
+            "closed_trades": [{
+                "time": "2026-07-01T06:32:54-07:00",
+                "symbol": "TEST",
+                "reason": "V2 stop loss after minimum hold",
+            }]
+        }
+        with patch.object(engine, "minutes_since_iso", return_value=10_081.0):
+            reason = engine.symbol_stop_cooldown_reason(
+                account,
+                "TEST",
+                make_settings(stop_reentry_cooldown_hours=168.0),
+            )
+        self.assertEqual("", reason)
+
+    def test_non_stop_sale_does_not_trigger_cooldown(self):
+        account = {
+            "closed_trades": [{
+                "time": "2026-07-17T06:32:54-07:00",
+                "symbol": "TEST",
+                "reason": "V2 take profit",
+            }]
+        }
+        with patch.object(engine, "minutes_since_iso", return_value=4.0):
+            reason = engine.symbol_stop_cooldown_reason(
+                account,
+                "TEST",
+                make_settings(),
+            )
+        self.assertEqual("", reason)
+
 
 if __name__ == "__main__":
     unittest.main()

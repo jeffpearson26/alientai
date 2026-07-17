@@ -44,6 +44,10 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "emergency_stop_enabled": True,
     "emergency_stop_loss_pct": -5.0,
 
+    # Prevent an engine from immediately recreating a position just stopped out.
+    "stop_reentry_cooldown_enabled": True,
+    "stop_reentry_cooldown_hours": 168.0,
+
     "allow_stop_before_min_hold": False,
     "allow_trailing_before_min_hold": False,
     "allow_take_profit_before_min_hold": False,
