@@ -114,6 +114,8 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
     stop_loss_pct = safe_float(settings.get("stop_loss_pct"), -1.5)
     trailing_stop_pct = safe_float(settings.get("trailing_stop_pct"), 1.0)
     trailing_stop_activation_pct = safe_float(settings.get("trailing_stop_activation_pct"), 1.0)
+    emergency_stop_enabled = bool(settings.get("emergency_stop_enabled", True))
+    default_emergency_stop_loss_pct = safe_float(settings.get("emergency_stop_loss_pct"), -5.0)
 
     default_prediction_horizon_days = safe_float(settings.get("prediction_horizon_days"), 20.0)
     default_minimum_hold_minutes = safe_float(
@@ -190,6 +192,31 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
         allow_stop_before = bool(pos.get("allow_stop_before_min_hold", settings.get("allow_stop_before_min_hold", False)))
         allow_trailing_before = bool(pos.get("allow_trailing_before_min_hold", settings.get("allow_trailing_before_min_hold", False)))
         allow_take_profit_before = bool(pos.get("allow_take_profit_before_min_hold", settings.get("allow_take_profit_before_min_hold", False)))
+        position_emergency_stop_enabled = bool(
+            pos.get("emergency_stop_enabled", emergency_stop_enabled)
+        )
+        emergency_stop_loss_pct = safe_float(
+            pos.get("emergency_stop_loss_pct"),
+            default_emergency_stop_loss_pct,
+        )
+
+        # The prediction horizon controls the planned hold, not the maximum
+        # acceptable loss. This hard stop is intentionally evaluated before
+        # scheduled/minimum-hold gates so a losing position cannot be trapped.
+        if (
+            position_emergency_stop_enabled
+            and emergency_stop_loss_pct < 0.0
+            and pnl_pct <= emergency_stop_loss_pct
+        ):
+            trade = sell_position(
+                account,
+                symbol,
+                new_price,
+                f"V2 emergency stop at {round(pnl_pct, 2)}% (limit {emergency_stop_loss_pct}%)",
+            )
+            if trade:
+                actions.append(trade)
+            continue
 
         if pos.get("exit_rule") == "friday_noon_pacific" and scheduled_exit_reached:
             trade = sell_position(

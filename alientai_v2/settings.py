@@ -40,6 +40,10 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "trailing_stop_pct": 1.0,
     "trailing_stop_activation_pct": 1.0,
 
+    # A strategy horizon may delay ordinary exits, but never this hard-loss exit.
+    "emergency_stop_enabled": True,
+    "emergency_stop_loss_pct": -5.0,
+
     "allow_stop_before_min_hold": False,
     "allow_trailing_before_min_hold": False,
     "allow_take_profit_before_min_hold": False,
