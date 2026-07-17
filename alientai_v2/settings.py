@@ -22,6 +22,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "shadow_signal_journal_enabled": True,
     "shadow_signal_decisions": ["BUY_CANDIDATE", "STRONG_BUY_CANDIDATE"],
     "shadow_signal_round_trip_cost_pct": 0.25,
+    "shadow_scorecard_min_completed_signals": 100,
+    "shadow_scorecard_min_profit_factor": 1.20,
 
     "starting_cash": 10000.0,
 

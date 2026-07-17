@@ -62,6 +62,7 @@ data_v2/shadow_signals.jsonl
 data_v2/shadow_signals_index.json
 data_v2/shadow_signal_outcomes.jsonl
 data_v2/shadow_signal_outcomes_index.json
+data_v2/shadow_engine_scorecard.json
 data_v2/*upload_state.json
 data_v2/*upload_report.csv
 data_v2/*upload_summary.json
