@@ -21,6 +21,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "main_account_enabled_buy_engines": [],
     "shadow_signal_journal_enabled": True,
     "shadow_signal_decisions": ["BUY_CANDIDATE", "STRONG_BUY_CANDIDATE"],
+    "shadow_signal_round_trip_cost_pct": 0.25,
 
     "starting_cash": 10000.0,
 

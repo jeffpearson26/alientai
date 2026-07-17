@@ -19,6 +19,7 @@ from alientai_v2.schwab_client import get_real_v2_quotes
 from alientai_v2.settings import load_settings
 from alientai_v2.options_paper import maybe_buy_from_research_rows
 from alientai_v2.shadow_signals import record_shadow_signals
+from alientai_v2.shadow_outcomes import evaluate_due_shadow_signals
 from alientai_v2.utils import DATA_DIR, load_json, minutes_since_iso, now_iso, safe_float, save_json
 
 
@@ -558,6 +559,12 @@ def run_one_scan() -> Dict[str, Any]:
 
     watchlist = settings.get("watchlist", [])
     quotes = get_real_v2_quotes(watchlist)
+
+    try:
+        evaluate_due_shadow_signals(quotes, settings)
+    except Exception:
+        # Research accounting must never interrupt live monitoring or exits.
+        pass
 
     scored = run_enabled_engines(quotes, settings)
 
