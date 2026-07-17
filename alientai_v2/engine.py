@@ -148,6 +148,24 @@ def symbol_stop_cooldown_reason(
     return ""
 
 
+def engine_main_buying_rejection(
+    candidate: Dict[str, Any],
+    settings: Dict[str, Any],
+) -> str:
+    """Reject main-account buys unless the candidate engine is allowlisted."""
+    engine_id = str(candidate.get("engine_id") or "").strip()
+    configured = settings.get("main_account_enabled_buy_engines", [])
+    if not isinstance(configured, list):
+        configured = []
+    allowed = {str(value).strip() for value in configured if str(value).strip()}
+    if engine_id not in allowed:
+        return (
+            f"Main-account buying disabled for engine {engine_id or 'unknown_engine'}. "
+            "Engine is research-only until explicitly allowlisted."
+        )
+    return ""
+
+
 def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> List[Dict[str, Any]]:
     actions: List[Dict[str, Any]] = []
     open_positions = account.setdefault("open_positions", {})
@@ -581,6 +599,12 @@ def run_one_scan() -> Dict[str, Any]:
                 continue
 
             engine_id_for_limit = str(candidate.get("engine_id") or "").strip()
+
+            engine_rejection = engine_main_buying_rejection(candidate, settings)
+            if engine_rejection:
+                candidate["manager_decision"] = "REJECTED"
+                candidate["manager_reason"] = engine_rejection
+                continue
 
             cooldown_reason = symbol_stop_cooldown_reason(
                 account,

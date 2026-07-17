@@ -16,6 +16,10 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "paper_trading_enabled": True,
     "old_scanner_decision_making_enabled": False,
 
+    # Fail closed: research engines cannot buy the shared main account until
+    # they pass validation and are explicitly added here.
+    "main_account_enabled_buy_engines": [],
+
     "starting_cash": 10000.0,
 
     "small_position_dollars": 500.0,
