@@ -53,16 +53,26 @@ def build_new_records(
         if key in seen_keys:
             continue
         seen_keys.add(key)
+        engine_id = str(row.get("engine_id") or "unknown_engine").strip()
+        allowlist = settings.get("main_account_enabled_buy_engines", [])
+        if not isinstance(allowlist, list):
+            allowlist = []
+        allowlisted = engine_id in {str(value).strip() for value in allowlist}
         records.append({
             "signal_key": key,
             "observed_at": observed_at,
             "symbol": symbol,
-            "engine_id": str(row.get("engine_id") or "unknown_engine").strip(),
+            "engine_id": engine_id,
             "decision": decision,
             "score": safe_float(row.get("score"), 0.0),
             "observed_price": candidate_price(row),
             "prediction_horizon_minutes": safe_float(row.get("prediction_horizon_minutes"), 0.0),
             "prediction_horizon_days": safe_float(row.get("prediction_horizon_days"), 0.0),
+            "scheduled_exit_time": str(row.get("scheduled_exit_time") or ""),
+            "exit_rule": str(row.get("exit_rule") or ""),
+            "spread_percent": safe_float(row.get("spread_percent") or row.get("spread_pct"), 0.0),
+            "main_account_allowlisted": allowlisted,
+            "paper_trading_enabled_at_signal": bool(settings.get("paper_trading_enabled", False)),
             "reason": str(row.get("reason") or ""),
             "status": "OPEN_RESEARCH_SIGNAL",
         })

@@ -34,6 +34,26 @@ class ShadowSignalTests(unittest.TestCase):
         settings = {"shadow_signal_decisions": ["WATCH"]}
         self.assertEqual(1, len(build_new_records([row], settings, "2026-07-17T08:00:00", set())))
 
+    def test_preserves_scheduled_exit_and_execution_eligibility(self):
+        row = {
+            "symbol": "CACI",
+            "engine_id": "prediction_friday",
+            "decision": "BUY_CANDIDATE",
+            "scheduled_exit_time": "2026-07-17T12:00:00-07:00",
+            "exit_rule": "friday_noon_pacific",
+            "spread_percent": 0.47,
+        }
+        settings = {
+            "paper_trading_enabled": False,
+            "main_account_enabled_buy_engines": [],
+        }
+        record = build_new_records([row], settings, "2026-07-17T08:00:00", set())[0]
+        self.assertEqual("2026-07-17T12:00:00-07:00", record["scheduled_exit_time"])
+        self.assertEqual("friday_noon_pacific", record["exit_rule"])
+        self.assertEqual(0.47, record["spread_percent"])
+        self.assertFalse(record["main_account_allowlisted"])
+        self.assertFalse(record["paper_trading_enabled_at_signal"])
+
 
 if __name__ == "__main__":
     unittest.main()
