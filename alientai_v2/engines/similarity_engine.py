@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import csv
 
@@ -251,6 +251,16 @@ def decision_from_score(score: float, settings: Dict[str, Any]) -> str:
     return "AVOID"
 
 
+def apply_main_buying_gate(decision: str, settings: Dict[str, Any]) -> str:
+    """Keep similarity output research-only unless main-account buying is explicit."""
+    if (
+        decision == "BUY_CANDIDATE"
+        and not bool(settings.get("similarity_engine_main_v2_buying_enabled", False))
+    ):
+        return "WATCH"
+    return decision
+
+
 def build_current_pseudo_candle_history(quote: Dict[str, Any], historical: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     V1 does not yet have live recent 5-minute candle streaming.
@@ -483,6 +493,8 @@ def run(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[str
         if force_similarity_buy:
             decision = "BUY_CANDIDATE"
 
+        decision = apply_main_buying_gate(decision, settings)
+
         reason = (
             f"{cases} similar 5m patterns. "
             f"Win rate {summary.get('win_rate_pct', 0.0):.1f}%. "
@@ -502,7 +514,10 @@ def run(quotes: List[Dict[str, Any]], settings: Dict[str, Any]) -> List[Dict[str
             "volume": quote_volume(quote),
             "source": "similarity_engine",
             "history_source": history_source,
-            "reason": reason + f" Policy={symbol_policy}. Original={original_decision}.",
+            "reason": reason + (
+                f" Policy={symbol_policy}. Original={original_decision}."
+                f" MainBuyingEnabled={bool(settings.get('similarity_engine_main_v2_buying_enabled', False))}."
+            ),
             "similarity_policy": symbol_policy,
             "original_decision": original_decision,
             "similar_cases": cases,
