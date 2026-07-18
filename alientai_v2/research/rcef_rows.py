@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Sequence
 from zoneinfo import ZoneInfo
 
 from alientai_v2.features.insider_purchase_features import build_insider_purchase_features, safe_float
+from alientai_v2.features.technical_snapshot import build_technical_snapshot
 
 
 EASTERN = ZoneInfo("America/New_York")
@@ -88,5 +89,6 @@ def build_research_rows(
             "label_up_2pct": future_return >= 2.0,
         }
         row.update(insider)
+        row.update(build_technical_snapshot(stock[index - 59:index + 1]))
         output.append(row)
     return output

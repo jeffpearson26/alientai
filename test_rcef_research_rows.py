@@ -41,6 +41,16 @@ class RCEFResearchRowTests(unittest.TestCase):
         rows = build_research_rows(symbol="XYZ", candles=candles(), benchmark_candles=candles())
         self.assertEqual(len(rows), 75 - 60 - 5 + 1)
 
+    def test_future_candles_do_not_change_technical_snapshot(self):
+        original = candles(count=75)
+        changed_future = candles(count=75)
+        changed_future[64]["close"] = 9999
+        first = build_research_rows(symbol="XYZ", candles=original, benchmark_candles=original)[0]
+        changed = build_research_rows(symbol="XYZ", candles=changed_future, benchmark_candles=original)[0]
+        technical_keys = [key for key in first if key.startswith("technical_")]
+        self.assertTrue(technical_keys)
+        self.assertEqual({key: first[key] for key in technical_keys}, {key: changed[key] for key in technical_keys})
+
 
 if __name__ == "__main__":
     unittest.main()

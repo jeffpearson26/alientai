@@ -17,6 +17,15 @@ DEFAULT_ANALYSIS_FEATURES = (
     "insider_purchase_count_7d", "insider_purchase_count_30d",
     "insider_unique_buyers_30d", "insider_total_value_30d",
     "insider_max_purchase_value_30d", "insider_max_ownership_increase_ratio_30d",
+    "technical_rsi_2", "technical_rsi_14",
+    "technical_ema9_distance_pct", "technical_ema21_distance_pct", "technical_ema50_distance_pct",
+    "technical_macd_pct", "technical_macd_signal_pct", "technical_macd_histogram_pct",
+    "technical_atr14_pct", "technical_adx14", "technical_plus_di14", "technical_minus_di14",
+    "technical_bollinger_width_pct", "technical_bollinger_position",
+    "technical_relative_volume_10_vs_20", "technical_latest_relative_volume_20",
+    "technical_obv_change_10d_normalized", "technical_positive_days_10d",
+    "technical_max_daily_return_10d_pct", "technical_min_daily_return_10d_pct",
+    "technical_volatility_compression_ratio",
 )
 
 
