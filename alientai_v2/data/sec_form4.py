@@ -36,6 +36,20 @@ def flag(row: Mapping[str, Any], *names: str) -> bool:
     return text(row, *names).upper() in {"1", "Y", "YES", "TRUE"}
 
 
+def relationship_flag(row: Mapping[str, Any], relationship: str, *boolean_names: str) -> bool:
+    if flag(row, *boolean_names):
+        return True
+    value = text(row, "RPTOWNER_RELATIONSHIP", "REPORTING_OWNER_RELATIONSHIP").upper()
+    aliases = {
+        "DIRECTOR": ("DIRECTOR",),
+        "OFFICER": ("OFFICER",),
+        "TEN_PERCENT_OWNER": (
+            "10% OWNER", "10 PERCENT OWNER", "TEN PERCENT OWNER", "TENPERCENTOWNER",
+        ),
+    }
+    return any(alias in value for alias in aliases[relationship])
+
+
 def accession(row: Mapping[str, Any]) -> str:
     return text(row, "ACCESSION_NUMBER", "ACCESSIONNO", "ACCESSION")
 
@@ -73,7 +87,14 @@ def _read_table(archive: zipfile.ZipFile, tokens: Iterable[str]) -> List[Dict[st
     candidates = [name for name in archive.namelist() if any(token in Path(name).name.lower() for token in wanted)]
     if not candidates:
         return []
-    with archive.open(sorted(candidates, key=len)[0]) as raw:
+    normalized_wanted = {"".join(ch for ch in token if ch.isalnum()) for token in wanted}
+
+    def rank(name: str) -> tuple[int, int]:
+        stem = Path(name).stem.lower()
+        normalized_stem = "".join(ch for ch in stem if ch.isalnum())
+        return (0 if normalized_stem in normalized_wanted else 1, len(name))
+
+    with archive.open(sorted(candidates, key=rank)[0]) as raw:
         wrapper = io.TextIOWrapper(raw, encoding="utf-8-sig", errors="replace", newline="")
         return list(csv.DictReader(wrapper, delimiter="\t"))
 
@@ -135,10 +156,12 @@ def normalize_quarterly_zip(path: str | Path) -> List[Dict[str, Any]]:
                 "available_at_utc": available_at,
                 "transaction_date": _parse_sec_date(text(transaction, "TRANS_DATE", "TRANSACTION_DATE")),
                 "insider_name": text(owner, "RPTOWNERNAME", "REPORTING_OWNER_NAME"),
-                "officer_title": text(owner, "OFFICERTITLE", "OFFICER_TITLE"),
-                "is_director": flag(owner, "ISDIRECTOR", "IS_DIRECTOR"),
-                "is_officer": flag(owner, "ISOFFICER", "IS_OFFICER"),
-                "is_ten_percent_owner": flag(owner, "ISTENPERCENTOWNER", "IS_TEN_PERCENT_OWNER"),
+                "officer_title": text(owner, "OFFICERTITLE", "OFFICER_TITLE", "RPTOWNER_TITLE"),
+                "is_director": relationship_flag(owner, "DIRECTOR", "ISDIRECTOR", "IS_DIRECTOR"),
+                "is_officer": relationship_flag(owner, "OFFICER", "ISOFFICER", "IS_OFFICER"),
+                "is_ten_percent_owner": relationship_flag(
+                    owner, "TEN_PERCENT_OWNER", "ISTENPERCENTOWNER", "IS_TEN_PERCENT_OWNER"
+                ),
                 "transaction_code": code,
                 "shares": shares,
                 "price": price,

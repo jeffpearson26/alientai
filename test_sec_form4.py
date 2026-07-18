@@ -62,6 +62,45 @@ class SECForm4Tests(unittest.TestCase):
             path.unlink(missing_ok=True)
         self.assertEqual(first[0]["transaction_id"], second[0]["transaction_id"])
 
+    def test_real_sec_owner_layout_wins_over_owner_signature(self):
+        temp = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+        temp.close()
+        with zipfile.ZipFile(temp.name, "w") as archive:
+            add_tsv(archive, "OWNER_SIGNATURE.tsv", ["ACCESSION_NUMBER", "OWNERSIGNATURENAME"], [
+                {"ACCESSION_NUMBER": "0002-26-000001", "OWNERSIGNATURENAME": "Attorney"},
+            ])
+            add_tsv(archive, "SUBMISSION.tsv", [
+                "ACCESSION_NUMBER", "DOCUMENT_TYPE", "ISSUERCIK", "ISSUERTRADINGSYMBOL", "FILING_DATE",
+            ], [{
+                "ACCESSION_NUMBER": "0002-26-000001", "DOCUMENT_TYPE": "4", "ISSUERCIK": "789",
+                "ISSUERTRADINGSYMBOL": "ABC", "FILING_DATE": "18-JUL-2026",
+            }])
+            add_tsv(archive, "REPORTINGOWNER.tsv", [
+                "ACCESSION_NUMBER", "RPTOWNERCIK", "RPTOWNERNAME", "RPTOWNER_RELATIONSHIP", "RPTOWNER_TITLE",
+            ], [{
+                "ACCESSION_NUMBER": "0002-26-000001", "RPTOWNERCIK": "999", "RPTOWNERNAME": "JOHN SMITH",
+                "RPTOWNER_RELATIONSHIP": "Director,Officer,TenPercentOwner", "RPTOWNER_TITLE": "Chief Executive Officer",
+            }])
+            add_tsv(archive, "NONDERIV_TRANS.tsv", [
+                "ACCESSION_NUMBER", "NONDERIV_TRANS_SK", "TRANS_DATE", "TRANS_CODE",
+                "TRANS_ACQUIRED_DISP_CD", "TRANS_SHARES", "TRANS_PRICEPERSHARE",
+                "SHRS_OWND_FOLWNG_TRANS", "DIRECT_INDIRECT_OWNERSHIP",
+            ], [{
+                "ACCESSION_NUMBER": "0002-26-000001", "NONDERIV_TRANS_SK": "1",
+                "TRANS_DATE": "17-JUL-2026", "TRANS_CODE": "P", "TRANS_ACQUIRED_DISP_CD": "A",
+                "TRANS_SHARES": "100", "TRANS_PRICEPERSHARE": "10", "SHRS_OWND_FOLWNG_TRANS": "200",
+                "DIRECT_INDIRECT_OWNERSHIP": "D",
+            }])
+        try:
+            row = normalize_quarterly_zip(temp.name)[0]
+        finally:
+            Path(temp.name).unlink(missing_ok=True)
+        self.assertEqual(row["insider_name"], "JOHN SMITH")
+        self.assertEqual(row["officer_title"], "Chief Executive Officer")
+        self.assertTrue(row["is_director"])
+        self.assertTrue(row["is_officer"])
+        self.assertTrue(row["is_ten_percent_owner"])
+
     def test_sec_quarterly_date_format_uses_conservative_availability(self):
         from alientai_v2.data.sec_form4 import _parse_acceptance
         self.assertEqual(_parse_acceptance("", "17-JUL-2026"), "2026-07-18T12:00:00Z")
