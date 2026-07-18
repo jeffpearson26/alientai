@@ -62,6 +62,10 @@ class SECForm4Tests(unittest.TestCase):
             path.unlink(missing_ok=True)
         self.assertEqual(first[0]["transaction_id"], second[0]["transaction_id"])
 
+    def test_sec_quarterly_date_format_uses_conservative_availability(self):
+        from alientai_v2.data.sec_form4 import _parse_acceptance
+        self.assertEqual(_parse_acceptance("", "17-JUL-2026"), "2026-07-18T12:00:00Z")
+
 
 if __name__ == "__main__":
     unittest.main()

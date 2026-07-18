@@ -7,7 +7,7 @@ import hashlib
 import io
 import zipfile
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 from zoneinfo import ZoneInfo
@@ -48,13 +48,23 @@ def _parse_acceptance(value: str, filing_date: str) -> str:
             tzinfo=ZoneInfo("America/New_York")
         )
         return eastern.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-    # Conservative fallback: do not make date-only filings visible intraday.
-    date_digits = "".join(ch for ch in filing_date if ch.isdigit())
-    if len(date_digits) >= 8:
-        dt = datetime.strptime(date_digits[:8], "%Y%m%d").replace(
-            hour=23, minute=59, second=59, tzinfo=timezone.utc
-        )
+    # Quarterly files expose filing date but not acceptance time.  Make such
+    # rows visible at noon UTC on the next calendar day, safely after any SEC
+    # acceptance on the reported filing date.
+    filed = _parse_sec_date(filing_date)
+    if filed:
+        dt = datetime.fromisoformat(filed).replace(tzinfo=timezone.utc) + timedelta(days=1, hours=12)
         return dt.isoformat().replace("+00:00", "Z")
+    return ""
+
+
+def _parse_sec_date(value: Any) -> str:
+    raw = str(value or "").strip()
+    for fmt in ("%Y-%m-%d", "%Y%m%d", "%d-%b-%Y", "%d-%B-%Y"):
+        try:
+            return datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
     return ""
 
 
@@ -123,7 +133,7 @@ def normalize_quarterly_zip(path: str | Path) -> List[Dict[str, Any]]:
                 "accession_number": acc,
                 "filing_timestamp_utc": available_at,
                 "available_at_utc": available_at,
-                "transaction_date": text(transaction, "TRANS_DATE", "TRANSACTION_DATE"),
+                "transaction_date": _parse_sec_date(text(transaction, "TRANS_DATE", "TRANSACTION_DATE")),
                 "insider_name": text(owner, "RPTOWNERNAME", "REPORTING_OWNER_NAME"),
                 "officer_title": text(owner, "OFFICERTITLE", "OFFICER_TITLE"),
                 "is_director": flag(owner, "ISDIRECTOR", "IS_DIRECTOR"),
@@ -137,6 +147,7 @@ def normalize_quarterly_zip(path: str | Path) -> List[Dict[str, Any]]:
                 "shares_owned_after": number(transaction, "SHRS_OWND_FOLWNG_TRANS", "SHARES_OWNED_AFTER"),
                 "is_amendment": form == "4/A",
                 "supersedes_accession": "",
+                "availability_precision": "acceptance_datetime" if text(submission, "ACCEPTANCE_DATETIME", "ACCEPTANCE_TIME") else "filing_date_conservative",
                 "source_url": _source_url(issuer_cik, acc),
                 "source": "SEC_QUARTERLY_345",
             }

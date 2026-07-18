@@ -5,6 +5,7 @@ create table if not exists public.v2_sec_form4_purchases (
     accession_number text not null,
     filing_timestamp_utc timestamptz not null,
     available_at_utc timestamptz not null,
+    availability_precision text not null,
     transaction_date date not null,
     insider_name text,
     officer_title text,
