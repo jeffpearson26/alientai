@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -210,6 +211,19 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2), encoding="utf-8")
 
 
+def fetch_symbol_candles(
+    *, supabase_url: str, supabase_key: str, table: str, symbol: str, limit: int
+) -> List[Dict[str, Any]]:
+    """Keep the shared Transformer/Supabase helper interface explicit and tested."""
+    return fetch_daily_candles(
+        supabase_url=supabase_url,
+        supabase_key=supabase_key,
+        table=table,
+        symbol=symbol,
+        limit=limit,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train an isolated five-day LightGBM S&P 500 baseline.")
     parser.add_argument("--symbols-file", default="sp500_expanded_symbols.txt")
@@ -250,7 +264,13 @@ def main() -> None:
     print(f"Symbols: {len(symbols)}; horizon: 5 trading sessions; target: {args.target_return_pct:.2f}%")
     for number, symbol in enumerate(symbols, start=1):
         print(f"[{number}/{len(symbols)}] Fetching/building {symbol}...")
-        candles = fetch_daily_candles(url=url, key=key, table=args.table, symbol=symbol, limit=args.candle_limit, delay=args.delay)
+        candles = fetch_symbol_candles(
+            supabase_url=url,
+            supabase_key=key,
+            table=args.table,
+            symbol=symbol,
+            limit=args.candle_limit,
+        )
         x_rows, labels, future_returns, metadata = make_symbol_examples(
             symbol=symbol,
             candles=candles,
@@ -265,6 +285,8 @@ def main() -> None:
         all_returns.extend(future_returns)
         all_meta.extend(metadata)
         summaries.append({"symbol": symbol, "candles": len(candles), "examples": len(x_rows)})
+        if args.delay > 0:
+            time.sleep(args.delay)
 
     if not all_x:
         raise RuntimeError("No training examples were created")

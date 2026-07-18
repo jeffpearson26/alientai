@@ -1,9 +1,11 @@
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from train_v2_lightgbm_5day_sp500_from_supabase import (
     feature_names,
+    fetch_symbol_candles,
     make_symbol_examples,
     non_overlapping_indices,
     summarize_sequence,
@@ -12,6 +14,25 @@ from train_v2_lightgbm_5day_sp500_from_supabase import (
 
 
 class LightGBMFiveDayBaselineTests(unittest.TestCase):
+    @patch("train_v2_lightgbm_5day_sp500_from_supabase.fetch_daily_candles")
+    def test_supabase_helper_receives_current_keyword_interface(self, mocked_fetch):
+        mocked_fetch.return_value = [{"close": 1.0}]
+        result = fetch_symbol_candles(
+            supabase_url="https://example.supabase.co",
+            supabase_key="secret",
+            table="v2_daily_candles",
+            symbol="AAPL",
+            limit=10000,
+        )
+        self.assertEqual(result, [{"close": 1.0}])
+        mocked_fetch.assert_called_once_with(
+            supabase_url="https://example.supabase.co",
+            supabase_key="secret",
+            table="v2_daily_candles",
+            symbol="AAPL",
+            limit=10000,
+        )
+
     def test_summary_shape_matches_names(self):
         sequence = np.arange(60 * 16, dtype=np.float32).reshape(60, 16)
         result = summarize_sequence(sequence)
