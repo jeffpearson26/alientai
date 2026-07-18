@@ -22,6 +22,8 @@ create table if not exists public.v2_sec_form4_purchases (
     supersedes_accession text,
     source_url text not null,
     source text not null default 'SEC_QUARTERLY_345',
+    quality_flags text[] not null default '{}',
+    is_training_eligible boolean not null default true,
     imported_at_utc timestamptz not null default now(),
     unique (accession_number, transaction_id)
 );
@@ -31,3 +33,12 @@ create index if not exists v2_sec_form4_purchases_ticker_available_idx
 
 create index if not exists v2_sec_form4_purchases_value_idx
     on public.v2_sec_form4_purchases (total_value desc);
+
+alter table public.v2_sec_form4_purchases
+    add column if not exists quality_flags text[] not null default '{}';
+
+alter table public.v2_sec_form4_purchases
+    add column if not exists is_training_eligible boolean not null default true;
+
+create index if not exists v2_sec_form4_training_eligible_idx
+    on public.v2_sec_form4_purchases (is_training_eligible, available_at_utc desc);

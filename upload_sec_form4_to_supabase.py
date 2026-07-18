@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, Sequence
 
@@ -43,6 +43,21 @@ def sanitize_row(row: Mapping[str, Any]) -> Dict[str, Any]:
     missing = [key for key in required if cleaned.get(key) in (None, "")]
     if missing:
         raise ValueError(f"row missing required fields: {', '.join(missing)}")
+    flags: List[str] = []
+    try:
+        transaction_date = date.fromisoformat(str(cleaned["transaction_date"]))
+        availability_date = datetime.fromisoformat(
+            str(cleaned["available_at_utc"]).replace("Z", "+00:00")
+        ).date()
+    except ValueError:
+        flags.append("INVALID_DATE")
+    else:
+        if transaction_date < date(2000, 1, 1):
+            flags.append("TRANSACTION_DATE_BEFORE_2000")
+        if transaction_date > availability_date:
+            flags.append("TRANSACTION_DATE_AFTER_AVAILABILITY")
+    cleaned["quality_flags"] = flags
+    cleaned["is_training_eligible"] = not flags
     return cleaned
 
 

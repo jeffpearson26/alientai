@@ -34,6 +34,15 @@ class SECUploaderTests(unittest.TestCase):
     def test_generated_total_value_is_not_uploaded(self):
         cleaned = sanitize_row(row())
         self.assertNotIn("total_value", cleaned)
+        self.assertTrue(cleaned["is_training_eligible"])
+        self.assertEqual(cleaned["quality_flags"], [])
+
+    def test_future_transaction_date_is_quarantined(self):
+        future = row()
+        future["transaction_date"] = "2026-01-02"
+        cleaned = sanitize_row(future)
+        self.assertFalse(cleaned["is_training_eligible"])
+        self.assertIn("TRANSACTION_DATE_AFTER_AVAILABILITY", cleaned["quality_flags"])
 
     def test_non_purchase_fails_closed(self):
         bad = row(); bad["transaction_code"] = "A"
