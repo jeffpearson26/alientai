@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import math
 import os
@@ -555,6 +556,9 @@ def evaluate_model(
     future_returns: np.ndarray,
     batch_size: int,
     device: torch.device,
+    metadata: Optional[List[Dict[str, Any]]] = None,
+    round_trip_cost_pct: float = 0.25,
+    non_overlapping_calendar_days: int = 28,
 ) -> Dict[str, Any]:
     model.eval()
 
@@ -586,15 +590,53 @@ def evaluate_model(
 
         selected_returns = future_returns[probabilities_np >= threshold]
         if len(selected_returns):
+            selected_net_returns = selected_returns - round_trip_cost_pct
+            gross_profit = float(selected_net_returns[selected_net_returns > 0].sum())
+            gross_loss = abs(float(selected_net_returns[selected_net_returns < 0].sum()))
+            equity_curve = np.concatenate(([0.0], np.cumsum(selected_net_returns)))
+            drawdowns = equity_curve - np.maximum.accumulate(equity_curve)
             threshold_metrics["avg_selected_future_return_pct"] = round(float(selected_returns.mean()), 6)
+            threshold_metrics["avg_selected_net_return_pct"] = round(float(selected_net_returns.mean()), 6)
+            threshold_metrics["avg_excess_return_vs_universe_pct"] = round(float(selected_returns.mean() - future_returns.mean()), 6)
             threshold_metrics["selected_win_rate"] = round(float((selected_returns > 0).mean()), 6)
+            threshold_metrics["cost_adjusted_win_rate"] = round(float((selected_net_returns > 0).mean()), 6)
+            threshold_metrics["cost_adjusted_profit_factor"] = round(gross_profit / gross_loss, 6) if gross_loss > 0 else None
+            threshold_metrics["additive_max_drawdown_pct_points"] = round(abs(float(drawdowns.min())), 6)
+            if metadata and len(metadata) == len(future_returns):
+                last_by_symbol: Dict[str, int] = {}
+                keep: List[int] = []
+                gap_ms = max(0, non_overlapping_calendar_days) * 86400000
+                for selected_index in np.flatnonzero(probabilities_np >= threshold):
+                    row = metadata[int(selected_index)]
+                    symbol = str(row.get("symbol") or "").upper().strip()
+                    timestamp = safe_int(row.get("datetime_ms"), 0)
+                    if symbol not in last_by_symbol or timestamp - last_by_symbol[symbol] >= gap_ms:
+                        keep.append(int(selected_index))
+                        last_by_symbol[symbol] = timestamp
+                non_overlapping = future_returns[keep] - round_trip_cost_pct
+                threshold_metrics["non_overlapping_signal_count"] = len(keep)
+                threshold_metrics["non_overlapping_avg_net_return_pct"] = round(float(non_overlapping.mean()), 6) if len(non_overlapping) else None
+                threshold_metrics["non_overlapping_cost_adjusted_win_rate"] = round(float((non_overlapping > 0).mean()), 6) if len(non_overlapping) else None
         else:
             threshold_metrics["avg_selected_future_return_pct"] = None
+            threshold_metrics["avg_selected_net_return_pct"] = None
+            threshold_metrics["avg_excess_return_vs_universe_pct"] = None
             threshold_metrics["selected_win_rate"] = None
+            threshold_metrics["cost_adjusted_win_rate"] = None
+            threshold_metrics["cost_adjusted_profit_factor"] = None
+            threshold_metrics["additive_max_drawdown_pct_points"] = None
 
         metrics["thresholds"].append(threshold_metrics)
 
     return metrics
+
+
+def validation_checkpoint_score(metrics: Dict[str, Any], threshold: float, minimum_signals: int) -> Optional[float]:
+    row = next((item for item in metrics.get("thresholds", []) if abs(float(item.get("threshold", -1.0)) - threshold) < 1e-9), None)
+    if not row or safe_int(row.get("predicted_positive_count"), 0) < minimum_signals:
+        return None
+    value = row.get("avg_selected_net_return_pct")
+    return float(value) if value is not None else None
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -624,6 +666,10 @@ def main() -> None:
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--split-embargo-calendar-days", type=int, default=32)
+    parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
+    parser.add_argument("--checkpoint-threshold", type=float, default=0.60)
+    parser.add_argument("--checkpoint-minimum-signals", type=int, default=500)
+    parser.add_argument("--non-overlapping-calendar-days", type=int, default=28)
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -755,6 +801,9 @@ def main() -> None:
     x_test = x[test_indices]
     y_test = y[test_indices]
     returns_test = future_returns[test_indices]
+    meta_train = [all_meta[int(i)] for i in train_indices]
+    meta_val = [all_meta[int(i)] for i in validation_indices]
+    meta_test = [all_meta[int(i)] for i in test_indices]
 
     x_train, x_val, scaler = standardize_train_val(x_train, x_val)
     x_test = apply_standardizer(x_test, scaler)
@@ -791,6 +840,9 @@ def main() -> None:
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=0.001)
 
     train_history: List[Dict[str, Any]] = []
+    best_state: Optional[Dict[str, Any]] = None
+    best_epoch = 0
+    best_checkpoint_score: Optional[float] = None
 
     print("")
     print("Training...")
@@ -822,7 +874,19 @@ def main() -> None:
             future_returns=returns_val,
             batch_size=args.batch_size,
             device=device,
+            metadata=meta_val,
+            round_trip_cost_pct=args.round_trip_cost_pct,
+            non_overlapping_calendar_days=args.non_overlapping_calendar_days,
         )
+        checkpoint_score = validation_checkpoint_score(
+            val_metrics,
+            args.checkpoint_threshold,
+            args.checkpoint_minimum_signals,
+        )
+        if checkpoint_score is not None and (best_checkpoint_score is None or checkpoint_score > best_checkpoint_score):
+            best_checkpoint_score = checkpoint_score
+            best_epoch = epoch
+            best_state = copy.deepcopy(model.state_dict())
 
         epoch_row = {
             "epoch": epoch,
@@ -836,6 +900,7 @@ def main() -> None:
                 (m for m in val_metrics["thresholds"] if m["threshold"] == 0.60),
                 {},
             ),
+            "checkpoint_score": checkpoint_score,
         }
 
         train_history.append(epoch_row)
@@ -848,6 +913,11 @@ def main() -> None:
             f"t60_win={epoch_row['val_threshold_060'].get('selected_win_rate')}"
         )
 
+    if best_state is None:
+        raise RuntimeError("No epoch met the minimum validation-signal requirement; checkpoint selection failed closed.")
+    model.load_state_dict(best_state)
+    print(f"Restored best validation checkpoint: epoch={best_epoch} score={best_checkpoint_score:.6f}")
+
     final_train_metrics = evaluate_model(
         model=model,
         x=x_train,
@@ -855,6 +925,9 @@ def main() -> None:
         future_returns=returns_train,
         batch_size=args.batch_size,
         device=device,
+        metadata=meta_train,
+        round_trip_cost_pct=args.round_trip_cost_pct,
+        non_overlapping_calendar_days=args.non_overlapping_calendar_days,
     )
 
     final_val_metrics = evaluate_model(
@@ -864,6 +937,9 @@ def main() -> None:
         future_returns=returns_val,
         batch_size=args.batch_size,
         device=device,
+        metadata=meta_val,
+        round_trip_cost_pct=args.round_trip_cost_pct,
+        non_overlapping_calendar_days=args.non_overlapping_calendar_days,
     )
 
     # This is deliberately evaluated only after all training epochs finish.
@@ -874,6 +950,9 @@ def main() -> None:
         future_returns=returns_test,
         batch_size=args.batch_size,
         device=device,
+        metadata=meta_test,
+        round_trip_cost_pct=args.round_trip_cost_pct,
+        non_overlapping_calendar_days=args.non_overlapping_calendar_days,
     )
 
     model_path = OUT_DIR / "transformer_20day_sp500_model.pt"
@@ -919,6 +998,15 @@ def main() -> None:
         "validation_windows": int(len(x_val)),
         "test_windows": int(len(x_test)),
         "split": split_details,
+        "checkpoint_selection": {
+            "best_epoch": best_epoch,
+            "threshold": args.checkpoint_threshold,
+            "minimum_signals": args.checkpoint_minimum_signals,
+            "metric": "validation_avg_selected_net_return_pct",
+            "score": best_checkpoint_score,
+            "round_trip_cost_pct": args.round_trip_cost_pct,
+            "test_evaluated_after_checkpoint_restored": True,
+        },
         "train_base_up_rate": round(float(y_train.mean()), 6),
         "validation_base_up_rate": round(float(y_val.mean()), 6),
         "test_base_up_rate": round(float(y_test.mean()), 6),
