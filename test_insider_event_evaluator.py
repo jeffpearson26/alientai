@@ -23,6 +23,10 @@ class InsiderEventEvaluatorTests(unittest.TestCase):
         events = select_event_rows(rows)
         self.assertEqual([item["market_date"] for item in events], ["2026-01-02"])
 
+    def test_first_row_establishes_baseline_instead_of_creating_event(self):
+        events = select_event_rows([row(1, 3), row(2, 3), row(3, 4)])
+        self.assertEqual([item["market_date"] for item in events], ["2026-01-03"])
+
     def test_new_purchase_inside_horizon_is_suppressed(self):
         rows = [row(day, 0 if day == 1 else (1 if day < 4 else 2)) for day in range(1, 9)]
         self.assertEqual(len(select_event_rows(rows, horizon_trading_days=5)), 1)

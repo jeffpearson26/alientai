@@ -25,9 +25,14 @@ def select_event_rows(
             continue
         ordered = sorted(symbol_rows, key=lambda row: str(row.get("market_date") or ""))
         previous_visible = 0
+        baseline_established = False
         next_eligible_index = 0
         for index, row in enumerate(ordered):
             visible = int(safe_float(row.get("insider_purchase_total_visible")))
+            if not baseline_established:
+                previous_visible = visible
+                baseline_established = True
+                continue
             newly_visible = max(0, visible - previous_visible)
             previous_visible = max(previous_visible, visible)
             if newly_visible <= 0 or index < next_eligible_index:
