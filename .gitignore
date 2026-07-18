@@ -87,3 +87,4 @@ build/
 dist/
 *.egg-info/
 data_v2/sec_form4_purchases/
+data_v2/rcef_research/
