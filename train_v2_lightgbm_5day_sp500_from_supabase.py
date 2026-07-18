@@ -191,13 +191,13 @@ def weekly_top_k_metrics(
     returns: np.ndarray,
     metadata: Sequence[Dict[str, Any]],
     *,
-    top_k: int,
+    top_k: Optional[int],
     minimum_probability: float,
     round_trip_cost_pct: float,
 ) -> Dict[str, Any]:
     """Evaluate fixed weekly decision dates with permission to abstain."""
-    if top_k <= 0:
-        raise ValueError("top_k must be positive")
+    if top_k is not None and top_k <= 0:
+        raise ValueError("top_k must be positive or None")
     if not (0.0 <= minimum_probability <= 1.0):
         raise ValueError("minimum_probability must be between zero and one")
     if len(metadata) != len(probabilities) or len(returns) != len(probabilities):
@@ -237,7 +237,7 @@ def weekly_top_k_metrics(
             candidates_by_week.get(week, {}).values(),
             key=lambda index: float(probabilities[index]), reverse=True,
         )
-        chosen = ranked[:top_k]
+        chosen = ranked if top_k is None else ranked[:top_k]
         selected_indices.extend(chosen)
         if chosen:
             weekly_net_returns.append(float(np.mean(returns[chosen] - round_trip_cost_pct)))
@@ -262,7 +262,8 @@ def weekly_top_k_metrics(
         maximum_drawdown = max(maximum_drawdown, peak - cumulative)
 
     result: Dict[str, Any] = {
-        "top_k": int(top_k),
+        "selection_mode": "all_qualified" if top_k is None else f"top_{top_k}",
+        "top_k": int(top_k) if top_k is not None else None,
         "minimum_probability": float(minimum_probability),
         "total_weeks": total_weeks,
         "weeks_with_picks": weeks_with_picks,
@@ -308,7 +309,7 @@ def evaluate_partition(
                 top_k=top_k, minimum_probability=minimum_probability,
                 round_trip_cost_pct=round_trip_cost_pct,
             )
-            for top_k in (1, 2)
+            for top_k in (None, 1, 2)
             for minimum_probability in (0.50, 0.55, 0.60)
         ],
     }

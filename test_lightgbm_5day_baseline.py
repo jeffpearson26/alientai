@@ -50,6 +50,23 @@ class LightGBMFiveDayBaselineTests(unittest.TestCase):
         self.assertEqual(result["abstention_rate"], 0.5)
         self.assertEqual(result["pick_count"], 1)
 
+    def test_weekly_all_qualified_keeps_every_outstanding_candidate(self):
+        timestamp = int(datetime(2026, 1, 9, tzinfo=timezone.utc).timestamp() * 1000)
+        result = weekly_top_k_metrics(
+            np.array([1, 1, 0]), np.array([0.91, 0.91, 0.89]),
+            np.array([3.0, 4.0, -2.0]),
+            [
+                {"symbol": "A", "datetime_ms": timestamp},
+                {"symbol": "B", "datetime_ms": timestamp},
+                {"symbol": "C", "datetime_ms": timestamp},
+            ],
+            top_k=None, minimum_probability=0.90, round_trip_cost_pct=0.25,
+        )
+        self.assertEqual(result["selection_mode"], "all_qualified")
+        self.assertIsNone(result["top_k"])
+        self.assertEqual(result["pick_count"], 2)
+        self.assertEqual(result["weeks_with_picks"], 1)
+
     def test_weekly_metric_rejects_invalid_top_k(self):
         with self.assertRaises(ValueError):
             weekly_top_k_metrics(
