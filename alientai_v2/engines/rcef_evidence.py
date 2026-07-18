@@ -7,6 +7,11 @@ from math import sqrt
 from statistics import pstdev
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
+from alientai_v2.features.insider_purchase_features import (
+    build_insider_purchase_features,
+    visible_purchases,
+)
+
 
 def safe_float(value: Any, default: float = 0.0) -> float:
     try:
@@ -213,9 +218,22 @@ def build_rcef_evidence(inputs: Mapping[str, Any]) -> Dict[str, Any]:
     if timestamp_ms(as_of) <= 0:
         raise ValueError("RCEF inputs require as_of")
     context = inputs.get("market_context") if isinstance(inputs.get("market_context"), Mapping) else {}
+    symbol = str(inputs.get("symbol") or "").upper().strip()
+    sec_rows = inputs.get("sec_purchases", [])
+    visible_sec = visible_purchases(sec_rows, symbol, as_of) if symbol else []
+    insider_features = build_insider_purchase_features(sec_rows, symbol, as_of) if symbol else {}
+    events = list(inputs.get("events", []))
+    for row in visible_sec:
+        events.append({
+            "event_type": "open_market_purchase",
+            "filed_at": row.get("available_at_utc"),
+            "transaction_value": safe_float(row.get("total_value"))
+                or safe_float(row.get("shares")) * safe_float(row.get("price")),
+            "insider_name": row.get("insider_name"),
+        })
     specialists = {
         "price": build_price_specialist(inputs.get("candles", []), inputs.get("benchmark_candles", []), as_of, inputs.get("premarket")),
-        "events": build_event_specialist(inputs.get("events", []), as_of),
+        "events": build_event_specialist(events, as_of),
         "news": build_news_specialist(inputs.get("news", []), as_of),
         "market": build_market_specialist(context),
     }
@@ -229,4 +247,5 @@ def build_rcef_evidence(inputs: Mapping[str, Any]) -> Dict[str, Any]:
         "data_quality": clamp(available / 4.0, 0.0, 1.0),
         "liquidity_score": clamp(safe_float(inputs.get("liquidity_score")), 0.0, 1.0),
         "round_trip_cost_pct": max(0.0, safe_float(inputs.get("round_trip_cost_pct"), 0.25)),
+        "insider_purchase_features": insider_features,
     }

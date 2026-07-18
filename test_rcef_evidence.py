@@ -72,6 +72,21 @@ class RCEFEvidenceTests(unittest.TestCase):
         self.assertFalse(result["specialists"]["events"]["available"])
         self.assertFalse(result["specialists"]["news"]["available"])
 
+    def test_visible_sec_purchase_feeds_event_specialist(self):
+        purchase = {
+            "ticker": "XYZ", "insider_name": "Officer A", "transaction_code": "P",
+            "transaction_date": "2026-07-15", "available_at_utc": "2026-07-16T12:00:00Z",
+            "shares": 1000, "price": 100, "total_value": 100_000,
+            "is_officer": True, "is_training_eligible": True,
+        }
+        result = build_rcef_evidence({
+            "symbol": "XYZ", "as_of": NOW, "candles": candles(),
+            "benchmark_candles": candles(), "sec_purchases": [purchase],
+            "market_context": {}, "liquidity_score": 0.9,
+        })
+        self.assertTrue(result["specialists"]["events"]["available"])
+        self.assertEqual(result["insider_purchase_features"]["insider_purchase_count_7d"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
