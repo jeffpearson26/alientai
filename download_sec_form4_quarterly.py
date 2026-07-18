@@ -23,12 +23,22 @@ SEC_QUARTER_URL = (
     "https://www.sec.gov/files/datastandardsinnovation/data/"
     "insider-transactions-data-sets/{year}q{quarter}_form345.zip"
 )
+SEC_LEGACY_QUARTER_URL = (
+    "https://www.sec.gov/files/structureddata/data/"
+    "insider-transactions-data-sets/{year}q{quarter}_form345.zip"
+)
 
 
 def quarter_url(year: int, quarter: int) -> str:
     if year < 2006 or quarter not in {1, 2, 3, 4}:
         raise ValueError("SEC ownership quarters begin in 2006 and quarter must be 1-4")
     return SEC_QUARTER_URL.format(year=year, quarter=quarter)
+
+
+def quarter_urls(year: int, quarter: int) -> List[str]:
+    primary = quarter_url(year, quarter)
+    legacy = SEC_LEGACY_QUARTER_URL.format(year=year, quarter=quarter)
+    return [primary, legacy]
 
 
 def quarter_range(start_year: int, start_quarter: int, end_year: int, end_quarter: int) -> List[Tuple[int, int]]:
@@ -64,21 +74,25 @@ def download_quarter(
     temporary = destination.with_suffix(destination.suffix + ".part")
     headers = {"User-Agent": user_agent, "Accept-Encoding": "gzip, deflate", "Host": "www.sec.gov"}
     error = ""
-    for attempt in range(1, retries + 1):
-        try:
-            response = requests.get(quarter_url(year, quarter), headers=headers, timeout=timeout)
-            response.raise_for_status()
-            temporary.write_bytes(response.content)
-            if not zipfile.is_zipfile(temporary):
-                raise RuntimeError("SEC response was not a valid ZIP archive")
-            temporary.replace(destination)
-            return destination
-        except Exception as exc:
-            error = str(exc)
-            if temporary.exists():
-                temporary.unlink()
-            if attempt < retries:
-                time.sleep(min(2 ** attempt, 8))
+    for url in quarter_urls(year, quarter):
+        for attempt in range(1, retries + 1):
+            try:
+                response = requests.get(url, headers=headers, timeout=timeout)
+                if response.status_code == 404:
+                    error = f"404 not found: {url}"
+                    break
+                response.raise_for_status()
+                temporary.write_bytes(response.content)
+                if not zipfile.is_zipfile(temporary):
+                    raise RuntimeError("SEC response was not a valid ZIP archive")
+                temporary.replace(destination)
+                return destination
+            except Exception as exc:
+                error = str(exc)
+                if temporary.exists():
+                    temporary.unlink()
+                if attempt < retries:
+                    time.sleep(min(2 ** attempt, 8))
     raise RuntimeError(f"failed SEC quarter {year}Q{quarter}: {error}")
 
 

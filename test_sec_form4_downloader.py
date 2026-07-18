@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from download_sec_form4_quarterly import merge_records, quarter_range, quarter_url
+from download_sec_form4_quarterly import merge_records, quarter_range, quarter_url, quarter_urls
 
 
 class SECDownloaderTests(unittest.TestCase):
@@ -17,6 +17,10 @@ class SECDownloaderTests(unittest.TestCase):
 
     def test_quarter_range_crosses_year(self):
         self.assertEqual(quarter_range(2025, 4, 2026, 2), [(2025, 4), (2026, 1), (2026, 2)])
+
+    def test_legacy_sec_location_is_a_fallback(self):
+        urls = quarter_urls(2025, 1)
+        self.assertIn("/structureddata/data/", urls[1])
 
     def test_merge_is_resumable_and_deduplicated(self):
         with tempfile.TemporaryDirectory() as directory:
