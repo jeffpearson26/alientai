@@ -11,6 +11,7 @@ from alientai_v2.engines.prediction_friday import scan as run_prediction_friday
 from alientai_v2.engines.similarity_engine import run as run_similarity_engine
 from alientai_v2.engines.transformer_20day import scan as run_transformer_20day
 from alientai_v2.engines.options_research import scan as run_options_research
+from alientai_v2.engines.rcef_engine import scan as run_rcef_research
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -29,6 +30,7 @@ ENGINE_RUNNERS: Dict[str, Callable[[List[Dict[str, Any]], Dict[str, Any]], List[
     "similarity_engine": run_similarity_engine,
     "transformer_20day": run_transformer_20day,
     "options_research": run_options_research,
+    "rcef_research": run_rcef_research,
 }
 
 
