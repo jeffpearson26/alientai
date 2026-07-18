@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Sequence
 from zoneinfo import ZoneInfo
 
 from alientai_v2.features.insider_purchase_features import build_insider_purchase_features, safe_float
+from alientai_v2.features.short_interest_features import build_short_interest_features
 from alientai_v2.features.technical_snapshot import build_technical_snapshot
 
 
@@ -50,6 +51,7 @@ def canonical_candles(rows: Iterable[Mapping[str, Any]]) -> List[Mapping[str, An
 def build_research_rows(
     *, symbol: str, candles: Sequence[Mapping[str, Any]],
     benchmark_candles: Sequence[Mapping[str, Any]], sec_purchases: Sequence[Mapping[str, Any]] = (),
+    short_interest: Sequence[Mapping[str, Any]] = (),
     horizon_days: int = 5, minimum_history: int = 60,
 ) -> List[Dict[str, Any]]:
     if horizon_days <= 0 or minimum_history < 21:
@@ -89,6 +91,7 @@ def build_research_rows(
             "label_up_2pct": future_return >= 2.0,
         }
         row.update(insider)
+        row.update(build_short_interest_features(short_interest, symbol, as_of))
         row.update(build_technical_snapshot(stock[index - 59:index + 1]))
         output.append(row)
     return output

@@ -26,6 +26,9 @@ DEFAULT_ANALYSIS_FEATURES = (
     "technical_obv_change_10d_normalized", "technical_positive_days_10d",
     "technical_max_daily_return_10d_pct", "technical_min_daily_return_10d_pct",
     "technical_volatility_compression_ratio",
+    "short_interest_pct_float", "short_interest_pct_outstanding",
+    "short_interest_days_to_cover", "short_interest_change_from_prior_pct",
+    "short_interest_report_age_days",
 )
 
 

@@ -37,6 +37,22 @@ class RCEFResearchRowTests(unittest.TestCase):
         self.assertFalse(before["insider_purchase_available"])
         self.assertTrue(after["insider_purchase_available"])
 
+    def test_future_short_interest_publication_does_not_leak(self):
+        short_row = {
+            "ticker": "XYZ", "settlement_date": "2026-02-27",
+            "available_at_utc": "2026-03-04T22:00:00Z",
+            "short_interest_shares": 1000, "float_shares": 5000,
+            "average_daily_volume": 100, "is_training_eligible": True,
+        }
+        rows = build_research_rows(
+            symbol="XYZ", candles=candles(), benchmark_candles=candles(),
+            short_interest=[short_row],
+        )
+        before = next(row for row in rows if row["market_date"] == "2026-03-04")
+        after = next(row for row in rows if row["market_date"] == "2026-03-05")
+        self.assertFalse(before["short_interest_available"])
+        self.assertTrue(after["short_interest_available"])
+
     def test_rows_without_full_future_horizon_are_omitted(self):
         rows = build_research_rows(symbol="XYZ", candles=candles(), benchmark_candles=candles())
         self.assertEqual(len(rows), 75 - 60 - 5 + 1)
