@@ -211,6 +211,69 @@ def write_json(path: Path, value: Any) -> None:
     path.write_text(json.dumps(value, indent=2), encoding="utf-8")
 
 
+def train_native_models(
+    *,
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    returns_train: np.ndarray,
+    x_validation: np.ndarray,
+    y_validation: np.ndarray,
+    returns_validation: np.ndarray,
+    names: Sequence[str],
+    num_boost_round: int,
+    early_stopping_rounds: int,
+) -> Tuple[lgb.Booster, lgb.Booster]:
+    """Train without LightGBM's optional scikit-learn compatibility layer."""
+    classifier_train = lgb.Dataset(x_train, label=y_train, feature_name=list(names))
+    classifier_validation = lgb.Dataset(
+        x_validation,
+        label=y_validation,
+        reference=classifier_train,
+        feature_name=list(names),
+    )
+    regressor_train = lgb.Dataset(x_train, label=returns_train, feature_name=list(names))
+    regressor_validation = lgb.Dataset(
+        x_validation,
+        label=returns_validation,
+        reference=regressor_train,
+        feature_name=list(names),
+    )
+    callbacks = [
+        lgb.early_stopping(max(1, int(early_stopping_rounds))),
+        lgb.log_evaluation(50),
+    ]
+    common = {
+        "learning_rate": 0.025,
+        "num_leaves": 31,
+        "min_data_in_leaf": 100,
+        "bagging_fraction": 0.80,
+        "bagging_freq": 5,
+        "feature_fraction": 0.80,
+        "lambda_l1": 2.0,
+        "lambda_l2": 6.0,
+        "verbosity": -1,
+        "num_threads": 0,
+        "force_col_wise": True,
+    }
+    classifier = lgb.train(
+        {**common, "objective": "binary", "metric": "binary_logloss", "seed": 42},
+        classifier_train,
+        num_boost_round=max(1, int(num_boost_round)),
+        valid_sets=[classifier_validation],
+        valid_names=["validation"],
+        callbacks=callbacks,
+    )
+    regressor = lgb.train(
+        {**common, "objective": "huber", "metric": "l1", "seed": 43},
+        regressor_train,
+        num_boost_round=max(1, int(num_boost_round)),
+        valid_sets=[regressor_validation],
+        valid_names=["validation"],
+        callbacks=callbacks,
+    )
+    return classifier, regressor
+
+
 def fetch_symbol_candles(
     *, supabase_url: str, supabase_key: str, table: str, symbol: str, limit: int
 ) -> List[Dict[str, Any]]:
@@ -302,35 +365,31 @@ def main() -> None:
     )
 
     names = feature_names()
-    classifier = lgb.LGBMClassifier(
-        objective="binary", n_estimators=args.num_boost_round, learning_rate=0.025,
-        num_leaves=31, max_depth=-1, min_child_samples=100, subsample=0.80,
-        subsample_freq=5, colsample_bytree=0.80, reg_alpha=2.0, reg_lambda=6.0,
-        random_state=42, n_jobs=-1, verbosity=-1,
+    classifier, regressor = train_native_models(
+        x_train=x[train_idx],
+        y_train=y[train_idx],
+        returns_train=returns[train_idx],
+        x_validation=x[val_idx],
+        y_validation=y[val_idx],
+        returns_validation=returns[val_idx],
+        names=names,
+        num_boost_round=args.num_boost_round,
+        early_stopping_rounds=args.early_stopping_rounds,
     )
-    regressor = lgb.LGBMRegressor(
-        objective="huber", n_estimators=args.num_boost_round, learning_rate=0.025,
-        num_leaves=31, max_depth=-1, min_child_samples=100, subsample=0.80,
-        subsample_freq=5, colsample_bytree=0.80, reg_alpha=2.0, reg_lambda=6.0,
-        random_state=43, n_jobs=-1, verbosity=-1,
-    )
-    callbacks = [lgb.early_stopping(args.early_stopping_rounds), lgb.log_evaluation(50)]
-    classifier.fit(x[train_idx], y[train_idx], feature_name=names, eval_set=[(x[val_idx], y[val_idx])], eval_metric="binary_logloss", callbacks=callbacks)
-    regressor.fit(x[train_idx], returns[train_idx], feature_name=names, eval_set=[(x[val_idx], returns[val_idx])], eval_metric="l1", callbacks=callbacks)
 
     thresholds = (0.50, 0.55, 0.60, 0.65, 0.70)
     def partition(indices: np.ndarray) -> Dict[str, Any]:
-        probs = classifier.predict_proba(x[indices])[:, 1]
-        predicted = regressor.predict(x[indices])
+        probs = classifier.predict(x[indices], num_iteration=classifier.best_iteration)
+        predicted = regressor.predict(x[indices], num_iteration=regressor.best_iteration)
         meta = [all_meta[int(i)] for i in indices]
         return evaluate_partition(y[indices], probs, predicted, returns[indices], meta, thresholds, args.round_trip_cost_pct, args.non_overlapping_calendar_days)
 
     output = (PROJECT_ROOT / args.output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
-    classifier.booster_.save_model(str(output / "lightgbm_5day_classifier.txt"))
-    regressor.booster_.save_model(str(output / "lightgbm_5day_return_regressor.txt"))
+    classifier.save_model(str(output / "lightgbm_5day_classifier.txt"), num_iteration=classifier.best_iteration)
+    regressor.save_model(str(output / "lightgbm_5day_return_regressor.txt"), num_iteration=regressor.best_iteration)
     importance = sorted(
-        ({"feature": n, "classifier_gain": float(g)} for n, g in zip(names, classifier.booster_.feature_importance(importance_type="gain"))),
+        ({"feature": n, "classifier_gain": float(g)} for n, g in zip(names, classifier.feature_importance(importance_type="gain"))),
         key=lambda row: row["classifier_gain"], reverse=True,
     )
     report = {
@@ -339,7 +398,7 @@ def main() -> None:
         "symbols_seen": len(symbols), "total_examples": int(x.shape[0]), "feature_count": int(x.shape[1]),
         "horizon_trading_sessions": 5, "target_return_pct": args.target_return_pct,
         "round_trip_cost_pct": args.round_trip_cost_pct, "split": split,
-        "classifier_best_iteration": int(classifier.best_iteration_), "regressor_best_iteration": int(regressor.best_iteration_),
+        "classifier_best_iteration": int(classifier.best_iteration), "regressor_best_iteration": int(regressor.best_iteration),
         "train_metrics": partition(train_idx), "validation_metrics": partition(val_idx), "test_metrics": partition(test_idx),
         "top_40_classifier_features": importance[:40], "symbol_summary": summaries,
         "classifier_path": str(output / "lightgbm_5day_classifier.txt"),

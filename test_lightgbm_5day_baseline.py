@@ -10,10 +10,28 @@ from train_v2_lightgbm_5day_sp500_from_supabase import (
     non_overlapping_indices,
     summarize_sequence,
     threshold_metrics,
+    train_native_models,
 )
 
 
 class LightGBMFiveDayBaselineTests(unittest.TestCase):
+    def test_native_lightgbm_training_does_not_require_sklearn_wrapper(self):
+        rng = np.random.default_rng(42)
+        x = rng.normal(size=(240, 4)).astype(np.float32)
+        y = (x[:, 0] + x[:, 1] > 0).astype(np.int32)
+        returns = (x[:, 0] * 0.8 + x[:, 1] * 0.4).astype(np.float32)
+        classifier, regressor = train_native_models(
+            x_train=x[:180], y_train=y[:180], returns_train=returns[:180],
+            x_validation=x[180:], y_validation=y[180:], returns_validation=returns[180:],
+            names=["a", "b", "c", "d"], num_boost_round=15, early_stopping_rounds=5,
+        )
+        class_predictions = classifier.predict(x[180:])
+        return_predictions = regressor.predict(x[180:])
+        self.assertEqual(class_predictions.shape, (60,))
+        self.assertEqual(return_predictions.shape, (60,))
+        self.assertGreater(classifier.best_iteration, 0)
+        self.assertGreater(regressor.best_iteration, 0)
+
     @patch("train_v2_lightgbm_5day_sp500_from_supabase.fetch_daily_candles")
     def test_supabase_helper_receives_current_keyword_interface(self, mocked_fetch):
         mocked_fetch.return_value = [{"close": 1.0}]
