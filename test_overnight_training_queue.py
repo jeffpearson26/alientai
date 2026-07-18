@@ -39,6 +39,15 @@ class OvernightTrainingQueueTests(unittest.TestCase):
         self.assertIn("without creating its expected report", SCRIPT)
         self.assertIn('status = "failed_closed"', SCRIPT)
 
+    def test_native_stderr_is_captured_without_truncating_traceback(self):
+        self.assertIn('$ErrorActionPreference = "Continue"', SCRIPT)
+        self.assertIn("$previousErrorActionPreference", SCRIPT)
+        self.assertIn("$exitCode = $LASTEXITCODE", SCRIPT)
+
+    def test_jobs_request_resilient_symbol_fetches(self):
+        self.assertIn('"--fetch-attempts", "4"', SCRIPT)
+        self.assertIn('"--fetch-retry-delay", "2.0"', SCRIPT)
+
 
 if __name__ == "__main__":
     unittest.main()

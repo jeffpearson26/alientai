@@ -287,6 +287,35 @@ def fetch_symbol_candles(
     )
 
 
+def fetch_symbol_candles_with_retry(
+    *, supabase_url: str, supabase_key: str, table: str, symbol: str, limit: int,
+    attempts: int = 4, base_delay_seconds: float = 2.0,
+) -> List[Dict[str, Any]]:
+    """Retry complete symbol reads so a partial paginated response is never used."""
+    last_error: Optional[Exception] = None
+    for attempt in range(1, max(1, int(attempts)) + 1):
+        try:
+            return fetch_symbol_candles(
+                supabase_url=supabase_url, supabase_key=supabase_key, table=table,
+                symbol=symbol, limit=limit,
+            )
+        except Exception as exc:
+            last_error = exc
+            if attempt >= max(1, int(attempts)):
+                break
+            delay = max(0.0, float(base_delay_seconds)) * (2 ** (attempt - 1))
+            print(
+                f"  transient fetch failure for {symbol} "
+                f"(attempt {attempt}/{attempts}): {type(exc).__name__}: {exc}",
+                file=sys.stderr, flush=True,
+            )
+            if delay:
+                time.sleep(delay)
+    raise RuntimeError(
+        f"Failed to fetch complete candle history for {symbol} after {attempts} attempts"
+    ) from last_error
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train an isolated five-day LightGBM S&P 500 baseline.")
     parser.add_argument("--symbols-file", default="sp500_expanded_symbols.txt")
@@ -305,6 +334,8 @@ def main() -> None:
     parser.add_argument("--num-boost-round", type=int, default=1500)
     parser.add_argument("--early-stopping-rounds", type=int, default=100)
     parser.add_argument("--delay", type=float, default=0.05)
+    parser.add_argument("--fetch-attempts", type=int, default=4)
+    parser.add_argument("--fetch-retry-delay", type=float, default=2.0)
     parser.add_argument("--output-dir", default="data_v2/lightgbm_5day_sp500_supabase_training")
     args = parser.parse_args()
 
@@ -327,12 +358,14 @@ def main() -> None:
     print(f"Symbols: {len(symbols)}; horizon: 5 trading sessions; target: {args.target_return_pct:.2f}%")
     for number, symbol in enumerate(symbols, start=1):
         print(f"[{number}/{len(symbols)}] Fetching/building {symbol}...")
-        candles = fetch_symbol_candles(
+        candles = fetch_symbol_candles_with_retry(
             supabase_url=url,
             supabase_key=key,
             table=args.table,
             symbol=symbol,
             limit=args.candle_limit,
+            attempts=args.fetch_attempts,
+            base_delay_seconds=args.fetch_retry_delay,
         )
         x_rows, labels, future_returns, metadata = make_symbol_examples(
             symbol=symbol,

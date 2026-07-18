@@ -44,8 +44,18 @@ function Invoke-TrainingJob {
     }
 
     Write-QueueMessage "START: $Name"
-    & $Python -u $LightGbmTrainer @Arguments 2>&1 | Tee-Object -FilePath $LogFile
-    $exitCode = $LASTEXITCODE
+    # Native programs legitimately write progress and tracebacks to stderr.
+    # Capture the entire stream and inspect the exit code instead of allowing
+    # ErrorActionPreference=Stop to truncate the diagnostic at its first line.
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $Python -u $LightGbmTrainer @Arguments 2>&1 | Tee-Object -FilePath $LogFile
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
 
     if ($exitCode -ne 0) {
         throw "$Name exited with code $exitCode. See $LogFile"
@@ -104,7 +114,9 @@ $commonSp500 = @(
     "--non-overlapping-calendar-days", "9",
     "--num-boost-round", "1500",
     "--early-stopping-rounds", "100",
-    "--delay", "0.05"
+    "--delay", "0.05",
+    "--fetch-attempts", "4",
+    "--fetch-retry-delay", "2.0"
 )
 
 $jobs = @(

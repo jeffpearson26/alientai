@@ -6,6 +6,7 @@ import numpy as np
 from train_v2_lightgbm_5day_sp500_from_supabase import (
     feature_names,
     fetch_symbol_candles,
+    fetch_symbol_candles_with_retry,
     make_symbol_examples,
     non_overlapping_indices,
     summarize_sequence,
@@ -15,6 +16,30 @@ from train_v2_lightgbm_5day_sp500_from_supabase import (
 
 
 class LightGBMFiveDayBaselineTests(unittest.TestCase):
+    @patch("train_v2_lightgbm_5day_sp500_from_supabase.time.sleep")
+    @patch("train_v2_lightgbm_5day_sp500_from_supabase.fetch_symbol_candles")
+    def test_transient_fetch_failure_retries_complete_symbol(self, mocked_fetch, mocked_sleep):
+        mocked_fetch.side_effect = [RuntimeError("temporary"), [{"close": 2.0}]]
+        result = fetch_symbol_candles_with_retry(
+            supabase_url="https://example.supabase.co", supabase_key="secret",
+            table="v2_daily_candles", symbol="AAPL", limit=10000,
+            attempts=3, base_delay_seconds=0.01,
+        )
+        self.assertEqual(result, [{"close": 2.0}])
+        self.assertEqual(mocked_fetch.call_count, 2)
+        mocked_sleep.assert_called_once_with(0.01)
+
+    @patch("train_v2_lightgbm_5day_sp500_from_supabase.time.sleep")
+    @patch("train_v2_lightgbm_5day_sp500_from_supabase.fetch_symbol_candles")
+    def test_fetch_retry_fails_closed_after_limit(self, mocked_fetch, mocked_sleep):
+        mocked_fetch.side_effect = RuntimeError("still unavailable")
+        with self.assertRaisesRegex(RuntimeError, "MSFT after 2 attempts"):
+            fetch_symbol_candles_with_retry(
+                supabase_url="https://example.supabase.co", supabase_key="secret",
+                table="v2_daily_candles", symbol="MSFT", limit=10000,
+                attempts=2, base_delay_seconds=0.0,
+            )
+
     def test_native_lightgbm_training_does_not_require_sklearn_wrapper(self):
         rng = np.random.default_rng(42)
         x = rng.normal(size=(240, 4)).astype(np.float32)
