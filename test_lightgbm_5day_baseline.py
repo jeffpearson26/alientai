@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 import numpy as np
@@ -12,10 +13,50 @@ from train_v2_lightgbm_5day_sp500_from_supabase import (
     summarize_sequence,
     threshold_metrics,
     train_native_models,
+    weekly_top_k_metrics,
 )
 
 
 class LightGBMFiveDayBaselineTests(unittest.TestCase):
+    def test_weekly_top_pick_uses_only_latest_decision_date(self):
+        def stamp(day):
+            return int(datetime(2026, 1, day, tzinfo=timezone.utc).timestamp() * 1000)
+        labels = np.array([1, 0, 1, 0])
+        probabilities = np.array([0.99, 0.70, 0.90, 0.80])
+        returns = np.array([20.0, -1.0, 2.0, 4.0])
+        metadata = [
+            {"symbol": "A", "datetime_ms": stamp(5)},
+            {"symbol": "A", "datetime_ms": stamp(9)},
+            {"symbol": "B", "datetime_ms": stamp(9)},
+            {"symbol": "C", "datetime_ms": stamp(9)},
+        ]
+        result = weekly_top_k_metrics(
+            labels, probabilities, returns, metadata, top_k=1,
+            minimum_probability=0.50, round_trip_cost_pct=0.25,
+        )
+        self.assertEqual(result["pick_count"], 1)
+        self.assertAlmostEqual(result["average_net_return_pct"], 1.75)
+
+    def test_weekly_metric_can_abstain(self):
+        def stamp(day):
+            return int(datetime(2026, 1, day, tzinfo=timezone.utc).timestamp() * 1000)
+        result = weekly_top_k_metrics(
+            np.array([1, 0]), np.array([0.9, 0.4]), np.array([1.0, -1.0]),
+            [{"symbol": "A", "datetime_ms": stamp(9)}, {"symbol": "B", "datetime_ms": stamp(16)}],
+            top_k=1, minimum_probability=0.80, round_trip_cost_pct=0.25,
+        )
+        self.assertEqual(result["total_weeks"], 2)
+        self.assertEqual(result["weeks_with_picks"], 1)
+        self.assertEqual(result["abstention_rate"], 0.5)
+        self.assertEqual(result["pick_count"], 1)
+
+    def test_weekly_metric_rejects_invalid_top_k(self):
+        with self.assertRaises(ValueError):
+            weekly_top_k_metrics(
+                np.array([]), np.array([]), np.array([]), [], top_k=0,
+                minimum_probability=0.5, round_trip_cost_pct=0.25,
+            )
+
     @patch("train_v2_lightgbm_5day_sp500_from_supabase.time.sleep")
     @patch("train_v2_lightgbm_5day_sp500_from_supabase.fetch_symbol_candles")
     def test_transient_fetch_failure_retries_complete_symbol(self, mocked_fetch, mocked_sleep):

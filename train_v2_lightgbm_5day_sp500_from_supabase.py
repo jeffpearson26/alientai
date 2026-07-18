@@ -4,6 +4,8 @@ import argparse
 import json
 import sys
 import time
+from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -183,6 +185,103 @@ def threshold_metrics(
     return result
 
 
+def weekly_top_k_metrics(
+    labels: np.ndarray,
+    probabilities: np.ndarray,
+    returns: np.ndarray,
+    metadata: Sequence[Dict[str, Any]],
+    *,
+    top_k: int,
+    minimum_probability: float,
+    round_trip_cost_pct: float,
+) -> Dict[str, Any]:
+    """Evaluate fixed weekly decision dates with permission to abstain."""
+    if top_k <= 0:
+        raise ValueError("top_k must be positive")
+    if not (0.0 <= minimum_probability <= 1.0):
+        raise ValueError("minimum_probability must be between zero and one")
+    if len(metadata) != len(probabilities) or len(returns) != len(probabilities):
+        raise ValueError("weekly metric inputs must have equal lengths")
+
+    week_by_index: Dict[int, Tuple[int, int]] = {}
+    latest_timestamp_by_week: Dict[Tuple[int, int], int] = {}
+    for index, row in enumerate(metadata):
+        timestamp_ms = int(row.get("datetime_ms") or 0)
+        if timestamp_ms <= 0:
+            continue
+        moment = datetime.fromtimestamp(timestamp_ms / 1000.0, tz=timezone.utc)
+        iso = moment.isocalendar()
+        week = (int(iso.year), int(iso.week))
+        week_by_index[index] = week
+        latest_timestamp_by_week[week] = max(latest_timestamp_by_week.get(week, 0), timestamp_ms)
+
+    selected_indices: List[int] = []
+    weekly_net_returns: List[float] = []
+    candidates_by_week: Dict[Tuple[int, int], Dict[str, int]] = defaultdict(dict)
+    for index, row in enumerate(metadata):
+        week = week_by_index.get(index)
+        if week is None:
+            continue
+        if int(row.get("datetime_ms") or 0) != latest_timestamp_by_week[week]:
+            continue
+        if float(probabilities[index]) < minimum_probability:
+            continue
+        symbol = str(row.get("symbol") or "").upper().strip()
+        if not symbol:
+            continue
+        previous = candidates_by_week[week].get(symbol)
+        if previous is None or probabilities[index] > probabilities[previous]:
+            candidates_by_week[week][symbol] = index
+    for week in sorted(latest_timestamp_by_week):
+        ranked = sorted(
+            candidates_by_week.get(week, {}).values(),
+            key=lambda index: float(probabilities[index]), reverse=True,
+        )
+        chosen = ranked[:top_k]
+        selected_indices.extend(chosen)
+        if chosen:
+            weekly_net_returns.append(float(np.mean(returns[chosen] - round_trip_cost_pct)))
+
+    total_weeks = len(latest_timestamp_by_week)
+    weeks_with_picks = len(weekly_net_returns)
+    selected = np.asarray(selected_indices, dtype=np.int64)
+    if selected.size:
+        net = returns[selected] - round_trip_cost_pct
+        gains = float(np.sum(net[net > 0]))
+        losses = abs(float(np.sum(net[net < 0])))
+    else:
+        net = np.asarray([], dtype=np.float32)
+        gains = losses = 0.0
+
+    cumulative = 0.0
+    peak = 0.0
+    maximum_drawdown = 0.0
+    for weekly_return in weekly_net_returns:
+        cumulative += weekly_return
+        peak = max(peak, cumulative)
+        maximum_drawdown = max(maximum_drawdown, peak - cumulative)
+
+    result: Dict[str, Any] = {
+        "top_k": int(top_k),
+        "minimum_probability": float(minimum_probability),
+        "total_weeks": total_weeks,
+        "weeks_with_picks": weeks_with_picks,
+        "abstention_rate": round(1.0 - (weeks_with_picks / total_weeks), 6) if total_weeks else None,
+        "pick_count": int(selected.size),
+    }
+    if selected.size:
+        result.update({
+            "target_precision": round(float(np.mean(labels[selected])), 6),
+            "average_net_return_pct": round(float(np.mean(net)), 6),
+            "median_net_return_pct": round(float(np.median(net)), 6),
+            "cost_adjusted_win_rate": round(float(np.mean(net > 0)), 6),
+            "cost_adjusted_profit_factor": round(gains / losses, 6) if losses > 0 else None,
+            "worst_pick_net_return_pct": round(float(np.min(net)), 6),
+            "additive_weekly_max_drawdown_pct_points": round(maximum_drawdown, 6),
+        })
+    return result
+
+
 def evaluate_partition(
     labels: np.ndarray,
     probabilities: np.ndarray,
@@ -202,6 +301,15 @@ def evaluate_partition(
         "thresholds": [
             threshold_metrics(labels, probabilities, returns, metadata, t, round_trip_cost_pct, non_overlap_days)
             for t in thresholds
+        ],
+        "weekly_selective": [
+            weekly_top_k_metrics(
+                labels, probabilities, returns, metadata,
+                top_k=top_k, minimum_probability=minimum_probability,
+                round_trip_cost_pct=round_trip_cost_pct,
+            )
+            for top_k in (1, 2)
+            for minimum_probability in (0.50, 0.55, 0.60)
         ],
     }
 
