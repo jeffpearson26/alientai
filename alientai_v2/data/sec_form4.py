@@ -10,6 +10,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
+from zoneinfo import ZoneInfo
 
 
 PURCHASE_CODE = "P"
@@ -42,8 +43,11 @@ def accession(row: Mapping[str, Any]) -> str:
 def _parse_acceptance(value: str, filing_date: str) -> str:
     digits = "".join(ch for ch in value if ch.isdigit())
     if len(digits) >= 14:
-        dt = datetime.strptime(digits[:14], "%Y%m%d%H%M%S").replace(tzinfo=timezone.utc)
-        return dt.isoformat().replace("+00:00", "Z")
+        # EDGAR acceptance timestamps use U.S. Eastern wall-clock time.
+        eastern = datetime.strptime(digits[:14], "%Y%m%d%H%M%S").replace(
+            tzinfo=ZoneInfo("America/New_York")
+        )
+        return eastern.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     # Conservative fallback: do not make date-only filings visible intraday.
     date_digits = "".join(ch for ch in filing_date if ch.isdigit())
     if len(date_digits) >= 8:

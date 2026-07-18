@@ -50,6 +50,7 @@ class SECForm4Tests(unittest.TestCase):
         self.assertEqual(row["insider_name"], "JANE DOE")
         self.assertTrue(row["is_officer"])
         self.assertEqual(row["officer_title"], "CFO")
+        self.assertEqual(row["filing_timestamp_utc"], "2026-07-17T22:30:00Z")
         self.assertTrue(row["source_url"].startswith("https://www.sec.gov/Archives/edgar/data/123/"))
 
     def test_transaction_id_is_stable(self):
