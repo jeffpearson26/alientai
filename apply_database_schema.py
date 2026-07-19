@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-ALLOWED_SCHEMAS = {"sec_form4_schema.sql", "analyst_rating_schema.sql"}
+ALLOWED_SCHEMAS = {
+    "sec_form4_schema.sql", "analyst_rating_schema.sql", "earnings_event_schema.sql",
+}
 
 
 def main() -> None:
