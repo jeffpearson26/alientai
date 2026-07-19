@@ -11,6 +11,7 @@ from supabase import create_client
 
 from alientai_v2.history.supabase_candle_reader import fetch_symbol_candles
 from alientai_v2.research.rcef_rows import build_research_rows
+from alientai_v2.features.earnings_features import fetch_symbol_earnings
 
 
 ROOT = Path(__file__).resolve().parent
@@ -51,11 +52,13 @@ def main() -> None:
         print(f"[{index}] {symbol}")
         candles = fetch_symbol_candles(symbol, table="v2_daily_candles", limit=args.candle_limit)
         purchases = fetch_purchases(client, symbol)
+        earnings = fetch_symbol_earnings(client, symbol)
         rows = build_research_rows(
             symbol=symbol, candles=candles, benchmark_candles=benchmark,
             sec_purchases=purchases,
+            earnings_events=earnings,
         )
-        print(f"  candles={len(candles)} purchases={len(purchases)} rows={len(rows)}")
+        print(f"  candles={len(candles)} purchases={len(purchases)} earnings={len(earnings)} rows={len(rows)}")
         output.extend(rows)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8", newline="\n") as handle:

@@ -65,6 +65,16 @@ def fetch_symbol(symbol: str, api_key: str, timeout: float = 60.0) -> List[Dict[
     return normalize_response(symbol, response.json())
 
 
+def safe_error(message: Any, api_key: str) -> str:
+    """Prevent providers from echoing credentials into logs or state files."""
+    cleaned = str(message or "API request failed")
+    if api_key:
+        cleaned = cleaned.replace(api_key, "[REDACTED]")
+    if "rate limit" in cleaned.lower() or "requests per day" in cleaned.lower():
+        return "Alpha Vantage daily API rate limit reached; resume on the next allowance window."
+    return cleaned[:1000]
+
+
 def run(
     symbols: Iterable[str], api_key: str, output: Path, state_path: Path,
     delay_seconds: float = 12.5, continue_on_limit: bool = False,
@@ -94,13 +104,13 @@ def run(
                 time.sleep(delay_seconds)
         except RuntimeError as exc:
             state["status"] = "rate_limited"
-            state["failed"].append({"symbol": symbol, "error": str(exc)})
+            state["failed"].append({"symbol": symbol, "error": safe_error(exc, api_key)})
             state["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
             atomic_json(state_path, state)
             if not continue_on_limit:
                 break
         except Exception as exc:
-            state["failed"].append({"symbol": symbol, "error": str(exc)})
+            state["failed"].append({"symbol": symbol, "error": safe_error(exc, api_key)})
             state["status"] = "failed_closed"
             state["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
             atomic_json(state_path, state)

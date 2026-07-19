@@ -6,6 +6,7 @@ from datetime import datetime
 from alientai_v2.data.earnings_history import (
     conservative_available_at, merge_events, normalize_response,
 )
+from download_alpha_vantage_earnings import safe_error
 
 
 class EarningsHistoryTests(unittest.TestCase):
@@ -39,6 +40,12 @@ class EarningsHistoryTests(unittest.TestCase):
         row = {"event_id": "a", "available_at_utc": "2026-01-01", "x": 1}
         changed = {**row, "x": 2}
         self.assertEqual(merge_events([row], [changed]), [changed])
+
+    def test_provider_error_never_exposes_api_key(self):
+        secret = "TOPSECRET123"
+        cleaned = safe_error(f"API key {secret} exceeded 25 requests per day rate limit", secret)
+        self.assertNotIn(secret, cleaned)
+        self.assertIn("rate limit", cleaned.lower())
 
 
 if __name__ == "__main__":
