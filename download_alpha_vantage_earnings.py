@@ -43,7 +43,7 @@ def atomic_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True), encoding="utf-8")
-    temporary.replace(path)
+    replace_with_retry(temporary, path)
 
 
 def atomic_jsonl(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
@@ -52,7 +52,19 @@ def atomic_jsonl(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
             handle.write(json.dumps(row, sort_keys=True) + "\n")
-    temporary.replace(path)
+    replace_with_retry(temporary, path)
+
+
+def replace_with_retry(source: Path, destination: Path, attempts: int = 8) -> None:
+    """Tolerate brief Windows antivirus/sync locks without losing progress."""
+    for attempt in range(attempts):
+        try:
+            source.replace(destination)
+            return
+        except PermissionError:
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(0.25 * (attempt + 1))
 
 
 def fetch_symbol(symbol: str, api_key: str, timeout: float = 60.0) -> List[Dict[str, Any]]:
