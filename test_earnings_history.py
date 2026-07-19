@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import unittest
 from datetime import datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from alientai_v2.data.earnings_history import (
     conservative_available_at, merge_events, normalize_response,
 )
-from download_alpha_vantage_earnings import safe_error
+from download_alpha_vantage_earnings import run, safe_error
 
 
 class EarningsHistoryTests(unittest.TestCase):
@@ -46,6 +49,24 @@ class EarningsHistoryTests(unittest.TestCase):
         cleaned = safe_error(f"API key {secret} exceeded 25 requests per day rate limit", secret)
         self.assertNotIn(secret, cleaned)
         self.assertIn("rate limit", cleaned.lower())
+
+    def test_missing_provider_payload_is_recorded_and_skipped(self):
+        valid = {
+            "event_id": "ibm-2026-q1",
+            "ticker": "IBM",
+            "available_at_utc": "2026-04-22T20:00:00Z",
+        }
+        with TemporaryDirectory() as directory:
+            output = Path(directory) / "events.jsonl"
+            state = Path(directory) / "state.json"
+            with patch(
+                "download_alpha_vantage_earnings.fetch_symbol",
+                side_effect=[ValueError("Alpha Vantage response lacks quarterlyEarnings"), [valid]],
+            ):
+                result = run(["AAC", "IBM"], "secret", output, state, delay_seconds=0)
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["unavailable_symbols"], ["AAC"])
+        self.assertEqual(result["completed_symbols"], ["AAC", "IBM"])
 
 
 if __name__ == "__main__":

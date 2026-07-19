@@ -79,10 +79,18 @@ def run(
     symbols: Iterable[str], api_key: str, output: Path, state_path: Path,
     delay_seconds: float = 12.5, continue_on_limit: bool = False,
 ) -> Dict[str, Any]:
-    state: Dict[str, Any] = {"status": "running", "completed_symbols": [], "failed": []}
+    state: Dict[str, Any] = {
+        "status": "running",
+        "completed_symbols": [],
+        "unavailable_symbols": [],
+        "failed": [],
+    }
     if state_path.exists():
         previous = json.loads(state_path.read_text(encoding="utf-8"))
         state["completed_symbols"] = list(dict.fromkeys(previous.get("completed_symbols", [])))
+        state["unavailable_symbols"] = list(
+            dict.fromkeys(previous.get("unavailable_symbols", []))
+        )
     completed = set(state["completed_symbols"])
     events = read_jsonl(output)
     for symbol in symbols:
@@ -109,6 +117,17 @@ def run(
             atomic_json(state_path, state)
             if not continue_on_limit:
                 break
+        except ValueError as exc:
+            if "lacks quarterlyEarnings" not in str(exc):
+                raise
+            print(f"UNAVAILABLE {symbol}: no quarterly earnings payload")
+            state["unavailable_symbols"].append(symbol)
+            state["completed_symbols"].append(symbol)
+            completed.add(symbol)
+            state["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
+            atomic_json(state_path, state)
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
         except Exception as exc:
             state["failed"].append({"symbol": symbol, "error": safe_error(exc, api_key)})
             state["status"] = "failed_closed"
