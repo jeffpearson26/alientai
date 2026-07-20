@@ -44,4 +44,15 @@ Write-Output "START natural_universe_premarket_labels $((Get-Date).ToUniversalTi
     "--exceptional-threshold-pct" "10.0"
 if ($LASTEXITCODE -ne 0) { throw "natural_universe_premarket_labels failed with exit code $LASTEXITCODE" }
 
+Write-Output "START natural_universe_premarket_evaluation $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\evaluate_premarket_ablation_natural_universe.py" `
+    "--base-rows" $UniverseRows `
+    "--premarket-features" ".\data_v2\rcef_research\natural_universe_premarket_features.jsonl" `
+    "--premarket-labels" ".\data_v2\rcef_research\natural_universe_premarket_open_entry_labels.jsonl" `
+    "--ablation-report" $Report `
+    "--output" ".\data_v2\rcef_research\premarket_natural_universe_evaluation.json" `
+    "--embargo-calendar-days" "12" `
+    "--round-trip-cost-pct" "0.25"
+if ($LASTEXITCODE -ne 0) { throw "natural_universe_premarket_evaluation failed with exit code $LASTEXITCODE" }
+
 Write-Output "ALPHA VANTAGE PHASE 6 COMPLETE $((Get-Date).ToUniversalTime().ToString('o'))"

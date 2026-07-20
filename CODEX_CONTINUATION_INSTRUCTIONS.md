@@ -111,6 +111,7 @@ If a collector reports a rate limit, do not classify it as unavailable. Stop, in
    - Reads the premarket promotion gate
    - Makes no additional API calls when status is `RESEARCH_HOLD`
    - On `RESEARCH_PASS` only, downloads natural-universe extended-hours history and builds compact features and tradable labels
+   - Calibrates all three ablation models on natural-universe rows and evaluates untouched cost-adjusted test slices
 
 The extended-hours collector will deduplicate 18,326 matched rows into approximately 13,473 symbol-month requests. It stores compressed CSV files in OneDrive under `matched_premarket_5min`.
 
