@@ -22,4 +22,13 @@ function Invoke-Stage {
 Set-Location $Root
 Invoke-Stage "russell_statements" ".\russell_2000_symbols.txt"
 Invoke-Stage "sp500_statements" ".\sp500_expanded_symbols.txt"
+
+Write-Output "START market_regime_archive $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\download_alpha_vantage_market_regimes.py" `
+    "--output" (Join-Path $Archive "market_regimes")
+if ($LASTEXITCODE -ne 0) {
+    throw "market_regime_archive failed with exit code $LASTEXITCODE"
+}
+Write-Output "DONE market_regime_archive $((Get-Date).ToUniversalTime().ToString('o'))"
+
 Write-Output "ALPHA VANTAGE PHASE 2 COMPLETE"
