@@ -6,7 +6,9 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from download_alpha_vantage_matched_premarket import archive_path, ensure_free_space, event_requests, run
+from download_alpha_vantage_matched_premarket import (
+    archive_path, ensure_free_space, event_requests, run, unavailable_response,
+)
 
 
 CSV = b"timestamp,open,high,low,close,volume\n2024-01-02 09:25:00,10,11,9,10.5,1000\n"
@@ -46,6 +48,21 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
             with patch("download_alpha_vantage_matched_premarket.shutil.disk_usage", return_value=usage):
                 with self.assertRaisesRegex(RuntimeError, "low disk space"):
                     ensure_free_space(Path(directory), 6.0)
+
+    def test_invalid_symbol_response_is_unavailable_and_resumable(self):
+        message = "Invalid API call. Please retry or visit the documentation for TIME_SERIES_INTRADAY."
+        with TemporaryDirectory() as directory:
+            output = Path(directory)
+            with patch("download_alpha_vantage_matched_premarket.fetch_month", side_effect=RuntimeError(message)) as fetch:
+                first = run([("BRK.B", "2022-10")], "secret", output, delay=0)
+                second = run([("BRK.B", "2022-10")], "secret", output, delay=0)
+        self.assertTrue(unavailable_response(message))
+        self.assertEqual(fetch.call_count, 1)
+        self.assertEqual(first["unavailable"], ["BRK.B|2022-10"])
+        self.assertEqual(second["status"], "complete")
+
+    def test_rate_limit_is_not_unavailable(self):
+        self.assertFalse(unavailable_response("Minute-level rate limit exceed."))
 
 
 if __name__ == "__main__":
