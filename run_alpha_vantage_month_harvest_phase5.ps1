@@ -27,7 +27,8 @@ Write-Output "START premarket_ablation_training $((Get-Date).ToUniversalTime().T
     "--premarket-features" ".\data_v2\rcef_research\matched_premarket_features.jsonl" `
     "--premarket-labels" ".\data_v2\rcef_research\matched_premarket_open_entry_labels.jsonl" `
     "--output-dir" ".\data_v2\rcef_research\matched_premarket_ablation" `
-    "--embargo-calendar-days" "12"
+    "--embargo-calendar-days" "12" `
+    "--round-trip-cost-pct" "0.25"
 if ($LASTEXITCODE -ne 0) { throw "premarket_ablation_training failed with exit code $LASTEXITCODE" }
 
 Write-Output "START final_fundamental_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"

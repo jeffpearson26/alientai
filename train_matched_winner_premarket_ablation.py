@@ -113,10 +113,40 @@ def varying_features(rows: Sequence[Mapping[str, Any]], requested: Sequence[str]
     return output
 
 
+def ranked_return_slices(
+    rows: Sequence[Mapping[str, Any]], indices: np.ndarray, scores: np.ndarray,
+    round_trip_cost_pct: float,
+) -> List[Dict[str, Any]]:
+    if len(indices) != len(scores):
+        raise ValueError("indices and scores must be aligned")
+    order = np.argsort(-scores)
+    output = []
+    for fraction in (0.01, 0.05, 0.10):
+        count = max(1, int(len(order) * fraction))
+        selected = [rows[int(indices[position])] for position in order[:count]]
+        net = np.asarray([
+            float(row["label_forward_return_5d_pct"]) - round_trip_cost_pct for row in selected
+        ], dtype=float)
+        output.append({
+            "fraction": fraction, "signals": len(selected),
+            "symbols": len({str(row.get("symbol") or "") for row in selected}),
+            "exceptional_winner_rate": round(float(np.mean([
+                int(row.get("study_label") or 0) for row in selected
+            ])), 6),
+            "mean_net_return_pct": round(float(np.mean(net)), 6),
+            "median_net_return_pct": round(float(np.median(net)), 6),
+            "win_rate_after_cost": round(float(np.mean(net > 0)), 6),
+            "fifth_percentile_net_return_pct": round(float(np.percentile(net, 5)), 6),
+            "worst_net_return_pct": round(float(np.min(net)), 6),
+        })
+    return output
+
+
 def fit_experiment(
     name: str, rows: Sequence[Mapping[str, Any]], requested_features: Sequence[str],
     weights: np.ndarray, train_idx: np.ndarray, validation_idx: np.ndarray, test_idx: np.ndarray,
     output_dir: Path, num_boost_round: int, early_stopping_rounds: int,
+    round_trip_cost_pct: float,
 ) -> Dict[str, Any]:
     features = varying_features(rows, requested_features)
     if not features:
@@ -140,6 +170,12 @@ def fit_experiment(
         "train_metrics": score_metrics(y[train_idx], predict(train_idx)),
         "validation_metrics": score_metrics(y[validation_idx], predict(validation_idx)),
         "test_metrics": score_metrics(y[test_idx], predict(test_idx)),
+        "validation_return_slices": ranked_return_slices(
+            rows, validation_idx, predict(validation_idx), round_trip_cost_pct,
+        ),
+        "test_return_slices": ranked_return_slices(
+            rows, test_idx, predict(test_idx), round_trip_cost_pct,
+        ),
         "top_features": importance[:30], "model_path": str(destination),
     }
 
@@ -155,6 +191,7 @@ def main() -> None:
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
     parser.add_argument("--num-boost-round", type=int, default=1000)
     parser.add_argument("--early-stopping-rounds", type=int, default=75)
+    parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
     args = parser.parse_args()
 
     labeled_rows, label_coverage = join_open_entry_labels(
@@ -178,6 +215,7 @@ def main() -> None:
         fit_experiment(
             name, rows, features, weights, train_idx, validation_idx, test_idx,
             args.output_dir, args.num_boost_round, args.early_stopping_rounds,
+            args.round_trip_cost_pct,
         )
         for name, features in groups.items()
     ]
@@ -185,6 +223,7 @@ def main() -> None:
         "status": "complete", "finished_at": now_iso(), "research_only": True,
         "execution_enabled": False, "score_is_real_world_probability": False,
         "warning": "Matched case-control scores are for feature-family comparison only; natural-universe calibration is required.",
+        "round_trip_cost_pct": args.round_trip_cost_pct,
         "base_rows": str(args.base_rows), "premarket_features": str(args.premarket_features),
         "premarket_labels": str(args.premarket_labels),
         "label_coverage": label_coverage, "feature_coverage": coverage,

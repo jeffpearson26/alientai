@@ -154,7 +154,7 @@ Run the Phase 5 premarket builder after Phase 3 completes. Audit:
 
 Premarket features already include gap, session return, 30/60-minute momentum, range, volume, dollar volume, relative volume, VWAP, and last-price-versus-VWAP.
 
-Phase 5 also runs `train_matched_winner_premarket_ablation.py`. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
+Phase 5 also runs `train_matched_winner_premarket_ablation.py`. It compares precision and cost-adjusted return slices (mean, median, win rate, fifth-percentile loss, and worst trade) at identical top-score fractions. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
 
 ### 2. Audit the re-anchored prediction labels for premarket decisions
 

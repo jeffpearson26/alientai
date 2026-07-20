@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import unittest
 
+import numpy as np
+
 from train_matched_winner_premarket_ablation import (
     PREMARKET_FEATURES,
     join_feature_rows,
     join_open_entry_labels,
+    ranked_return_slices,
     technical_features,
     varying_features,
 )
@@ -61,6 +64,21 @@ class MatchedWinnerPremarketAblationTests(unittest.TestCase):
     def test_constant_and_missing_features_are_removed(self):
         rows = [{"a": 1, "b": None}, {"a": 1, "b": None}, {"a": 2, "b": None}]
         self.assertEqual(varying_features(rows, ["a", "b"]), ["a"])
+
+    def test_return_slices_subtract_cost_and_rank_by_score(self):
+        rows = [
+            {"symbol": "A", "study_label": 1, "label_forward_return_5d_pct": 10.0},
+            {"symbol": "B", "study_label": 0, "label_forward_return_5d_pct": -2.0},
+            {"symbol": "C", "study_label": 0, "label_forward_return_5d_pct": 1.0},
+        ]
+        result = ranked_return_slices(rows, np.asarray([0, 1, 2]), np.asarray([0.9, 0.1, 0.2]), 0.25)
+        self.assertEqual(result[0]["signals"], 1)
+        self.assertEqual(result[0]["mean_net_return_pct"], 9.75)
+        self.assertEqual(result[0]["exceptional_winner_rate"], 1.0)
+
+    def test_return_slices_require_aligned_scores(self):
+        with self.assertRaises(ValueError):
+            ranked_return_slices([], np.asarray([0]), np.asarray([]), 0.25)
 
 
 if __name__ == "__main__":
