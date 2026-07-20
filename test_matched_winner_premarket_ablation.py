@@ -8,6 +8,7 @@ from train_matched_winner_premarket_ablation import (
     PREMARKET_FEATURES,
     join_feature_rows,
     join_open_entry_labels,
+    promotion_gate,
     ranked_return_slices,
     technical_features,
     varying_features,
@@ -79,6 +80,30 @@ class MatchedWinnerPremarketAblationTests(unittest.TestCase):
     def test_return_slices_require_aligned_scores(self):
         with self.assertRaises(ValueError):
             ranked_return_slices([], np.asarray([0]), np.asarray([]), 0.25)
+
+    def test_promotion_gate_requires_validation_and_test_improvement(self):
+        baseline_slice = {
+            "fraction": 0.01, "signals": 40, "exceptional_winner_rate": 0.10,
+            "mean_net_return_pct": 0.2, "median_net_return_pct": -0.1,
+            "fifth_percentile_net_return_pct": -5.0,
+        }
+        combined_slice = {
+            "fraction": 0.01, "signals": 40, "exceptional_winner_rate": 0.15,
+            "mean_net_return_pct": 0.5, "median_net_return_pct": 0.1,
+            "fifth_percentile_net_return_pct": -4.0,
+        }
+        experiments = [
+            {"name": "technical_only", "validation_return_slices": [baseline_slice], "test_return_slices": [baseline_slice]},
+            {"name": "technical_plus_premarket", "validation_return_slices": [combined_slice], "test_return_slices": [combined_slice]},
+        ]
+        self.assertEqual(promotion_gate(experiments)["status"], "RESEARCH_PASS")
+        experiments[1]["test_return_slices"][0] = {**combined_slice, "median_net_return_pct": -0.01}
+        self.assertEqual(promotion_gate(experiments)["status"], "RESEARCH_HOLD")
+
+    def test_promotion_gate_fails_closed_when_slice_missing(self):
+        result = promotion_gate([])
+        self.assertEqual(result["status"], "RESEARCH_HOLD")
+        self.assertFalse(result["execution_enabled"])
 
 
 if __name__ == "__main__":

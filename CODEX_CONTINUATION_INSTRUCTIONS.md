@@ -156,6 +156,8 @@ Premarket features already include gap, session return, 30/60-minute momentum, r
 
 Phase 5 also runs `train_matched_winner_premarket_ablation.py`. It compares precision and cost-adjusted return slices (mean, median, win rate, fifth-percentile loss, and worst trade) at identical top-score fractions. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
 
+The ablation report contains a fail-closed `premarket_promotion_gate`. It permits deeper natural-universe evaluation only when the combined model independently beats the technical baseline on validation and test exceptional-winner rate and mean net return, has a positive median net return, at least 30 top-1% signals, and no worse fifth-percentile loss. A pass never enables trading.
+
 ### 2. Audit the re-anchored prediction labels for premarket decisions
 
 `build_matched_premarket_labels.py` now creates a separate leakage-safe target using the close of the first regular-session five-minute bar as entry and the final regular-session bar on `future_market_date` as exit. Missing entry/exit history is excluded, not labeled negative. Audit coverage and timestamps, then include slippage and round-trip costs in natural-universe evaluation. Do not allow the model to receive credit for a move that occurred before its entry.

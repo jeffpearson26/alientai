@@ -142,6 +142,54 @@ def ranked_return_slices(
     return output
 
 
+def promotion_gate(
+    experiments: Sequence[Mapping[str, Any]], fraction: float = 0.01,
+    minimum_signals: int = 30,
+) -> Dict[str, Any]:
+    by_name = {str(item.get("name")): item for item in experiments}
+    baseline = by_name.get("technical_only")
+    combined = by_name.get("technical_plus_premarket")
+    checks = []
+    for partition in ("validation", "test"):
+        key = f"{partition}_return_slices"
+        baseline_slice = next(
+            (row for row in (baseline or {}).get(key, []) if float(row.get("fraction", -1)) == fraction), None,
+        )
+        combined_slice = next(
+            (row for row in (combined or {}).get(key, []) if float(row.get("fraction", -1)) == fraction), None,
+        )
+        if baseline_slice is None or combined_slice is None:
+            checks.append({"partition": partition, "passed": False, "reason": "required slice missing"})
+            continue
+        conditions = {
+            "minimum_signals": int(combined_slice["signals"]) >= minimum_signals,
+            "exceptional_rate_improved": (
+                float(combined_slice["exceptional_winner_rate"])
+                > float(baseline_slice["exceptional_winner_rate"])
+            ),
+            "mean_net_return_improved": (
+                float(combined_slice["mean_net_return_pct"])
+                > float(baseline_slice["mean_net_return_pct"])
+            ),
+            "median_net_return_positive": float(combined_slice["median_net_return_pct"]) > 0.0,
+            "fifth_percentile_not_worse": (
+                float(combined_slice["fifth_percentile_net_return_pct"])
+                >= float(baseline_slice["fifth_percentile_net_return_pct"])
+            ),
+        }
+        checks.append({
+            "partition": partition, "passed": all(conditions.values()),
+            "conditions": conditions, "baseline": baseline_slice, "combined": combined_slice,
+        })
+    passed = len(checks) == 2 and all(bool(item.get("passed")) for item in checks)
+    return {
+        "status": "RESEARCH_PASS" if passed else "RESEARCH_HOLD",
+        "execution_enabled": False, "fraction": fraction,
+        "minimum_signals": minimum_signals, "checks": checks,
+        "note": "Passing permits deeper natural-universe evaluation only; it never enables trading.",
+    }
+
+
 def fit_experiment(
     name: str, rows: Sequence[Mapping[str, Any]], requested_features: Sequence[str],
     weights: np.ndarray, train_idx: np.ndarray, validation_idx: np.ndarray, test_idx: np.ndarray,
@@ -228,6 +276,7 @@ def main() -> None:
         "premarket_labels": str(args.premarket_labels),
         "label_coverage": label_coverage, "feature_coverage": coverage,
         "split": split, "experiments": experiments,
+        "premarket_promotion_gate": promotion_gate(experiments),
     }
     path = args.output_dir / "premarket_ablation_report.json"
     path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
