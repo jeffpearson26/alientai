@@ -114,6 +114,8 @@ If a collector reports a rate limit, do not classify it as unavailable. Stop, in
 
 The extended-hours collector will deduplicate 18,326 matched rows into approximately 13,473 symbol-month requests. It stores compressed CSV files in OneDrive under `matched_premarket_5min`.
 
+Large premarket collectors enforce free-space floors on the archive drive: 6 GB for the matched study and 8 GB for conditional natural-universe expansion. A low-space stop is an intentional fail-closed event; preserve the manifest, move or free storage safely, and resume.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline

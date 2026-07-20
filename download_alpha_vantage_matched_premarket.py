@@ -6,6 +6,7 @@ import argparse
 import gzip
 import json
 import os
+import shutil
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -102,7 +103,23 @@ def write_gzip(path: Path, content: bytes) -> None:
     replace_with_retry(temporary, path)
 
 
-def run(items: Iterable[Tuple[str, str]], api_key: str, output: Path, delay: float = 0.75) -> Dict[str, Any]:
+def ensure_free_space(path: Path, minimum_free_gb: float) -> None:
+    if minimum_free_gb <= 0:
+        return
+    path.mkdir(parents=True, exist_ok=True)
+    free_bytes = shutil.disk_usage(path).free
+    required_bytes = minimum_free_gb * 1024 ** 3
+    if free_bytes < required_bytes:
+        raise RuntimeError(
+            f"low disk space: {free_bytes / 1024 ** 3:.2f} GB free; "
+            f"requires at least {minimum_free_gb:.2f} GB"
+        )
+
+
+def run(
+    items: Iterable[Tuple[str, str]], api_key: str, output: Path, delay: float = 0.75,
+    minimum_free_gb: float = 0.0,
+) -> Dict[str, Any]:
     manifest_path = output / "manifest.json"
     manifest = {"status": "running", "completed": [], "unavailable": [], "failed": []}
     if manifest_path.exists():
@@ -116,6 +133,7 @@ def run(items: Iterable[Tuple[str, str]], api_key: str, output: Path, delay: flo
         if request_id in completed or request_id in unavailable or destination.exists():
             continue
         try:
+            ensure_free_space(output, minimum_free_gb)
             content = fetch_month(symbol, month, api_key)
             write_gzip(destination, content)
             manifest["completed"].append(request_id)
@@ -150,6 +168,7 @@ def main() -> None:
     parser.add_argument("--role", choices=("winner", "control", "all"), default="all")
     parser.add_argument("--limit-requests", type=int, default=0)
     parser.add_argument("--delay-seconds", type=float, default=0.75)
+    parser.add_argument("--minimum-free-gb", type=float, default=6.0)
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
     api_key = str(os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
@@ -158,7 +177,7 @@ def main() -> None:
     items = event_requests(read_jsonl(args.events), args.role)
     if args.limit_requests:
         items = items[: args.limit_requests]
-    result = run(items, api_key, args.output, args.delay_seconds)
+    result = run(items, api_key, args.output, args.delay_seconds, args.minimum_free_gb)
     print(json.dumps({
         "status": result["status"], "requests": len(items),
         "completed": len(result["completed"]), "unavailable": len(result["unavailable"]),

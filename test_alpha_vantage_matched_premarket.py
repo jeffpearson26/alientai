@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from download_alpha_vantage_matched_premarket import archive_path, event_requests, run
+from download_alpha_vantage_matched_premarket import archive_path, ensure_free_space, event_requests, run
 
 
 CSV = b"timestamp,open,high,low,close,volume\n2024-01-02 09:25:00,10,11,9,10.5,1000\n"
@@ -39,6 +39,13 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
     def test_all_role_accepts_natural_universe_rows_without_study_role(self):
         rows = [{"symbol": "IBM", "market_date": "2024-01-02", "future_market_date": "2024-01-09"}]
         self.assertEqual(event_requests(rows, "all"), [("IBM", "2024-01")])
+
+    def test_low_disk_space_fails_closed(self):
+        usage = type("Usage", (), {"free": 1 * 1024 ** 3})()
+        with TemporaryDirectory() as directory:
+            with patch("download_alpha_vantage_matched_premarket.shutil.disk_usage", return_value=usage):
+                with self.assertRaisesRegex(RuntimeError, "low disk space"):
+                    ensure_free_space(Path(directory), 6.0)
 
 
 if __name__ == "__main__":

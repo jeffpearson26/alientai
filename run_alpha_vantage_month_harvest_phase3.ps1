@@ -13,7 +13,8 @@ Write-Output "START matched_premarket_history $((Get-Date).ToUniversalTime().ToS
     "--events" $FullEvents `
     "--output" (Join-Path $Archive "matched_premarket_5min") `
     "--role" "all" `
-    "--delay-seconds" "0.75"
+    "--delay-seconds" "0.75" `
+    "--minimum-free-gb" "6.0"
 if ($LASTEXITCODE -ne 0) { throw "matched_premarket_history failed with exit code $LASTEXITCODE" }
 
 Write-Output "START matched_options $((Get-Date).ToUniversalTime().ToString('o'))"

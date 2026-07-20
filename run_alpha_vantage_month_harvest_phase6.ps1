@@ -25,7 +25,8 @@ Write-Output "START natural_universe_premarket_history $((Get-Date).ToUniversalT
     "--events" $UniverseRows `
     "--output" $NaturalArchive `
     "--role" "all" `
-    "--delay-seconds" "0.75"
+    "--delay-seconds" "0.75" `
+    "--minimum-free-gb" "8.0"
 if ($LASTEXITCODE -ne 0) { throw "natural_universe_premarket_history failed with exit code $LASTEXITCODE" }
 
 Write-Output "START natural_universe_premarket_features $((Get-Date).ToUniversalTime().ToString('o'))"
