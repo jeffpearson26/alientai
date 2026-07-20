@@ -36,6 +36,12 @@ def safe_error(value: Any, api_key: str) -> str:
     return message.replace(api_key, "[REDACTED]")[:1000] if api_key else message[:1000]
 
 
+def unavailable_response(value: Any) -> bool:
+    """Return true only for symbol/endpoint combinations the provider does not cover."""
+    message = str(value or "").casefold()
+    return "invalid api call" in message and "please retry or visit the documentation" in message
+
+
 def replace_with_retry(source: Path, destination: Path, attempts: int = 8) -> None:
     for attempt in range(attempts):
         try:
@@ -104,8 +110,8 @@ def run(symbols: Iterable[str], endpoints: Iterable[str], api_key: str, output: 
                 manifest["completed"].append(request_id)
                 completed.add(request_id)
                 print(f"DONE {request_id}")
-            except ValueError as exc:
-                if "lacks snapshot data" not in str(exc):
+            except (ValueError, RuntimeError) as exc:
+                if "lacks snapshot data" not in str(exc) and not unavailable_response(exc):
                     raise
                 manifest["unavailable"].append(request_id)
                 unavailable.add(request_id)
