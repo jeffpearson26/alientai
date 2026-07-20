@@ -55,4 +55,11 @@ Write-Output "START natural_universe_premarket_evaluation $((Get-Date).ToUnivers
     "--round-trip-cost-pct" "0.25"
 if ($LASTEXITCODE -ne 0) { throw "natural_universe_premarket_evaluation failed with exit code $LASTEXITCODE" }
 
+Write-Output "START premarket_shadow_policy $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\build_premarket_shadow_policy.py" `
+    "--natural-report" ".\data_v2\rcef_research\premarket_natural_universe_evaluation.json" `
+    "--ablation-report" $Report `
+    "--output" ".\data_v2\rcef_research\premarket_shadow_policy.json"
+if ($LASTEXITCODE -ne 0) { throw "premarket_shadow_policy failed with exit code $LASTEXITCODE" }
+
 Write-Output "ALPHA VANTAGE PHASE 6 COMPLETE $((Get-Date).ToUniversalTime().ToString('o'))"

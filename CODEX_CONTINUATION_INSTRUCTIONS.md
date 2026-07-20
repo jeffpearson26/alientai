@@ -112,6 +112,7 @@ If a collector reports a rate limit, do not classify it as unavailable. Stop, in
    - Makes no additional API calls when status is `RESEARCH_HOLD`
    - On `RESEARCH_PASS` only, downloads natural-universe extended-hours history and builds compact features and tradable labels
    - Calibrates all three ablation models on natural-universe rows and evaluates untouched cost-adjusted test slices
+   - Builds a fail-closed prospective shadow policy; even a pass permits ranking/journaling only and cannot enable paper or live orders
 
 The extended-hours collector will deduplicate 18,326 matched rows into approximately 13,473 symbol-month requests. It stores compressed CSV files in OneDrive under `matched_premarket_5min`.
 
