@@ -66,6 +66,35 @@ def join_feature_rows(
     }
 
 
+def join_open_entry_labels(
+    base_rows: Sequence[Mapping[str, Any]], label_rows: Iterable[Mapping[str, Any]],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    index: Dict[Tuple[str, str, str, str], Mapping[str, Any]] = {}
+    for row in label_rows:
+        key = identity(row)
+        if key in index:
+            raise ValueError(f"duplicate premarket label identity: {key}")
+        index[key] = row
+    output = []
+    for source in base_rows:
+        label = index.get(identity(source))
+        if label is None or not bool(label.get("premarket_label_available")):
+            continue
+        row = dict(source)
+        row["study_label"] = int(bool(label.get("premarket_label_exceptional_winner")))
+        row["label_forward_return_5d_pct"] = label.get("premarket_forward_return_5d_pct")
+        row["premarket_entry_price"] = label.get("premarket_entry_price")
+        row["premarket_exit_price"] = label.get("premarket_exit_price")
+        output.append(row)
+    return output, {
+        "base_rows": len(base_rows), "tradable_label_rows": len(output),
+        "tradable_label_coverage_pct": round(100.0 * len(output) / max(1, len(base_rows)), 6),
+        "exceptional_winner_rate_pct": round(
+            100.0 * sum(int(row["study_label"]) for row in output) / max(1, len(output)), 6,
+        ),
+    }
+
+
 def technical_features() -> List[str]:
     return [
         name for name in DEFAULT_ANALYSIS_FEATURES
@@ -119,6 +148,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-rows", type=Path, required=True)
     parser.add_argument("--premarket-features", type=Path, required=True)
+    parser.add_argument("--premarket-labels", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
@@ -127,7 +157,10 @@ def main() -> None:
     parser.add_argument("--early-stopping-rounds", type=int, default=75)
     args = parser.parse_args()
 
-    rows, coverage = join_feature_rows(read_jsonl(args.base_rows), read_jsonl(args.premarket_features))
+    labeled_rows, label_coverage = join_open_entry_labels(
+        read_jsonl(args.base_rows), read_jsonl(args.premarket_labels),
+    )
+    rows, coverage = join_feature_rows(labeled_rows, read_jsonl(args.premarket_features))
     _, _, timestamps, _ = prepare_matrix(rows, [])
     train_idx, validation_idx, test_idx, split = chronological_three_way_indices(
         timestamps, train_fraction=args.train_fraction,
@@ -153,7 +186,9 @@ def main() -> None:
         "execution_enabled": False, "score_is_real_world_probability": False,
         "warning": "Matched case-control scores are for feature-family comparison only; natural-universe calibration is required.",
         "base_rows": str(args.base_rows), "premarket_features": str(args.premarket_features),
-        "coverage": coverage, "split": split, "experiments": experiments,
+        "premarket_labels": str(args.premarket_labels),
+        "label_coverage": label_coverage, "feature_coverage": coverage,
+        "split": split, "experiments": experiments,
     }
     path = args.output_dir / "premarket_ablation_report.json"
     path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

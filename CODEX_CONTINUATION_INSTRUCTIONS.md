@@ -125,6 +125,7 @@ The extended-hours collector will deduplicate 18,326 matched rows into approxima
 - Premarket extended-hours collector
 - Leakage-safe premarket feature builder with a strict 9:25 a.m. Eastern cutoff
 - Matched-case premarket ablation trainer comparing technical-only, premarket-only, and combined models on identical chronological splits
+- Tradable premarket target builder using the first regular five-minute bar close as entry and the five-day exit-session close as exit
 - Shadow signals, cost-adjusted outcome evaluation, and engine scorecards
 - Fail-closed engine and main-account buying gates
 
@@ -155,9 +156,9 @@ Premarket features already include gap, session return, 30/60-minute momentum, r
 
 Phase 5 also runs `train_matched_winner_premarket_ablation.py`. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
 
-### 2. Re-anchor prediction labels for premarket decisions
+### 2. Audit the re-anchored prediction labels for premarket decisions
 
-The existing matched study uses a daily-close-based five-day label. For a premarket model, build a separate leakage-safe target whose simulated entry begins at the 09:30 open or first reasonably tradable regular-session five-minute candle. Do not allow the model to receive credit for a move that occurred before its entry. Include slippage and round-trip costs.
+`build_matched_premarket_labels.py` now creates a separate leakage-safe target using the close of the first regular-session five-minute bar as entry and the final regular-session bar on `future_market_date` as exit. Missing entry/exit history is excluded, not labeled negative. Audit coverage and timestamps, then include slippage and round-trip costs in natural-universe evaluation. Do not allow the model to receive credit for a move that occurred before its entry.
 
 ### 3. Join feature families without creating giant duplicate files
 

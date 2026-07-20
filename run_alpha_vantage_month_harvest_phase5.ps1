@@ -13,10 +13,19 @@ Write-Output "START final_premarket_feature_build $((Get-Date).ToUniversalTime()
     "--output" ".\data_v2\rcef_research\matched_premarket_features.jsonl"
 if ($LASTEXITCODE -ne 0) { throw "final_premarket_feature_build failed with exit code $LASTEXITCODE" }
 
+Write-Output "START final_premarket_label_build $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\build_matched_premarket_labels.py" `
+    "--events" ".\data_v2\rcef_research\sp500_matched_winners_10pct.jsonl" `
+    "--archive" "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\matched_premarket_5min" `
+    "--output" ".\data_v2\rcef_research\matched_premarket_open_entry_labels.jsonl" `
+    "--exceptional-threshold-pct" "10.0"
+if ($LASTEXITCODE -ne 0) { throw "final_premarket_label_build failed with exit code $LASTEXITCODE" }
+
 Write-Output "START premarket_ablation_training $((Get-Date).ToUniversalTime().ToString('o'))"
 & $Python ".\train_matched_winner_premarket_ablation.py" `
     "--base-rows" ".\data_v2\rcef_research\sp500_matched_winners_10pct.jsonl" `
     "--premarket-features" ".\data_v2\rcef_research\matched_premarket_features.jsonl" `
+    "--premarket-labels" ".\data_v2\rcef_research\matched_premarket_open_entry_labels.jsonl" `
     "--output-dir" ".\data_v2\rcef_research\matched_premarket_ablation" `
     "--embargo-calendar-days" "12"
 if ($LASTEXITCODE -ne 0) { throw "premarket_ablation_training failed with exit code $LASTEXITCODE" }

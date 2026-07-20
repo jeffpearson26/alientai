@@ -30,13 +30,14 @@ def event_requests(rows: Iterable[Dict[str, Any]], role: str = "all") -> List[Tu
         if role != "all" and str(row.get("study_role") or "") != role:
             continue
         symbol = str(row.get("symbol") or "").strip().upper()
-        day = str(row.get("market_date") or "").strip()
-        if symbol and len(day) >= 7:
-            try:
-                month = datetime.strptime(day[:10], "%Y-%m-%d").strftime("%Y-%m")
-            except ValueError:
-                continue
-            output.add((symbol, month))
+        for field in ("market_date", "future_market_date"):
+            day = str(row.get(field) or "").strip()
+            if symbol and len(day) >= 7:
+                try:
+                    month = datetime.strptime(day[:10], "%Y-%m-%d").strftime("%Y-%m")
+                except ValueError:
+                    continue
+                output.add((symbol, month))
     return sorted(output, key=lambda item: (item[1], item[0]))
 
 
