@@ -1,0 +1,164 @@
+from __future__ import annotations
+
+"""Compare technical, premarket, and combined matched-case discovery models."""
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
+
+import numpy as np
+
+from alientai_v2.research.matched_winner_study import DEFAULT_ANALYSIS_FEATURES
+from train_matched_winner_lightgbm import (
+    event_balancing_weights,
+    prepare_matrix,
+    read_jsonl,
+    score_metrics,
+    train_model,
+)
+from train_v2_transformer_20day_sp500_from_supabase import chronological_three_way_indices, now_iso
+
+
+PREMARKET_FEATURES = [
+    "premarket_bar_count", "premarket_gap_pct", "premarket_session_return_pct",
+    "premarket_high_vs_previous_close_pct", "premarket_low_vs_previous_close_pct",
+    "premarket_range_pct", "premarket_return_30m_pct", "premarket_return_60m_pct",
+    "premarket_volume", "premarket_typical_prior_volume", "premarket_relative_volume",
+    "premarket_dollar_volume", "premarket_vwap", "premarket_last_vs_vwap_pct",
+]
+
+
+def identity(row: Mapping[str, Any]) -> Tuple[str, str, str, str]:
+    return (
+        str(row.get("study_event_id") or ""), str(row.get("study_role") or ""),
+        str(row.get("symbol") or ""), str(row.get("market_date") or ""),
+    )
+
+
+def join_feature_rows(
+    base_rows: Sequence[Mapping[str, Any]], feature_rows: Iterable[Mapping[str, Any]],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    index: Dict[Tuple[str, str, str, str], Mapping[str, Any]] = {}
+    for row in feature_rows:
+        key = identity(row)
+        if key in index:
+            raise ValueError(f"duplicate premarket feature identity: {key}")
+        index[key] = row
+    joined: List[Dict[str, Any]] = []
+    matched = available = 0
+    for source in base_rows:
+        row = dict(source)
+        feature = index.get(identity(source))
+        if feature is not None:
+            matched += 1
+            available += int(bool(feature.get("premarket_available")))
+            for name in PREMARKET_FEATURES:
+                row[name] = feature.get(name)
+        else:
+            for name in PREMARKET_FEATURES:
+                row[name] = None
+        joined.append(row)
+    return joined, {
+        "base_rows": len(base_rows), "matched_feature_rows": matched,
+        "premarket_available_rows": available,
+        "premarket_coverage_pct": round(100.0 * available / max(1, len(base_rows)), 6),
+    }
+
+
+def technical_features() -> List[str]:
+    return [
+        name for name in DEFAULT_ANALYSIS_FEATURES
+        if name.startswith("technical_") or name.startswith("return_") or name == "realized_volatility_20d_pct"
+    ]
+
+
+def varying_features(rows: Sequence[Mapping[str, Any]], requested: Sequence[str]) -> List[str]:
+    output = []
+    for name in requested:
+        if name.startswith("label_"):
+            raise ValueError("future outcome labels cannot be model features")
+        values = {str(row.get(name)) for row in rows if row.get(name) is not None}
+        if len(values) > 1:
+            output.append(name)
+    return output
+
+
+def fit_experiment(
+    name: str, rows: Sequence[Mapping[str, Any]], requested_features: Sequence[str],
+    weights: np.ndarray, train_idx: np.ndarray, validation_idx: np.ndarray, test_idx: np.ndarray,
+    output_dir: Path, num_boost_round: int, early_stopping_rounds: int,
+) -> Dict[str, Any]:
+    features = varying_features(rows, requested_features)
+    if not features:
+        raise ValueError(f"{name} has no varying features")
+    x, y, _, names = prepare_matrix(rows, features)
+    model = train_model(
+        x, y, weights, train_idx, validation_idx, names,
+        num_boost_round, early_stopping_rounds,
+    )
+    predict = lambda indices: model.predict(x[indices], num_iteration=model.best_iteration)
+    destination = output_dir / f"{name}.txt"
+    model.save_model(str(destination), num_iteration=model.best_iteration)
+    importance = sorted(
+        ({"feature": feature, "gain": float(gain)} for feature, gain in zip(
+            names, model.feature_importance(importance_type="gain"),
+        )), key=lambda row: row["gain"], reverse=True,
+    )
+    return {
+        "name": name, "requested_features": list(requested_features),
+        "model_features": names, "best_iteration": int(model.best_iteration),
+        "train_metrics": score_metrics(y[train_idx], predict(train_idx)),
+        "validation_metrics": score_metrics(y[validation_idx], predict(validation_idx)),
+        "test_metrics": score_metrics(y[test_idx], predict(test_idx)),
+        "top_features": importance[:30], "model_path": str(destination),
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base-rows", type=Path, required=True)
+    parser.add_argument("--premarket-features", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--train-fraction", type=float, default=0.60)
+    parser.add_argument("--validation-fraction", type=float, default=0.20)
+    parser.add_argument("--embargo-calendar-days", type=int, default=12)
+    parser.add_argument("--num-boost-round", type=int, default=1000)
+    parser.add_argument("--early-stopping-rounds", type=int, default=75)
+    args = parser.parse_args()
+
+    rows, coverage = join_feature_rows(read_jsonl(args.base_rows), read_jsonl(args.premarket_features))
+    _, _, timestamps, _ = prepare_matrix(rows, [])
+    train_idx, validation_idx, test_idx, split = chronological_three_way_indices(
+        timestamps, train_fraction=args.train_fraction,
+        validation_fraction=args.validation_fraction,
+        embargo_calendar_days=args.embargo_calendar_days,
+    )
+    weights = event_balancing_weights(rows)
+    groups = {
+        "technical_only": technical_features(),
+        "premarket_only": PREMARKET_FEATURES,
+        "technical_plus_premarket": technical_features() + PREMARKET_FEATURES,
+    }
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    experiments = [
+        fit_experiment(
+            name, rows, features, weights, train_idx, validation_idx, test_idx,
+            args.output_dir, args.num_boost_round, args.early_stopping_rounds,
+        )
+        for name, features in groups.items()
+    ]
+    report = {
+        "status": "complete", "finished_at": now_iso(), "research_only": True,
+        "execution_enabled": False, "score_is_real_world_probability": False,
+        "warning": "Matched case-control scores are for feature-family comparison only; natural-universe calibration is required.",
+        "base_rows": str(args.base_rows), "premarket_features": str(args.premarket_features),
+        "coverage": coverage, "split": split, "experiments": experiments,
+    }
+    path = args.output_dir / "premarket_ablation_report.json"
+    path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report, indent=2))
+
+
+if __name__ == "__main__":
+    main()

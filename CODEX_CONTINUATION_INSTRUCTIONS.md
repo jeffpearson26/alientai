@@ -124,6 +124,7 @@ The extended-hours collector will deduplicate 18,326 matched rows into approxima
 - Market-regime archive covering rates, GDP, inflation, labor, oil, and commodities
 - Premarket extended-hours collector
 - Leakage-safe premarket feature builder with a strict 9:25 a.m. Eastern cutoff
+- Matched-case premarket ablation trainer comparing technical-only, premarket-only, and combined models on identical chronological splits
 - Shadow signals, cost-adjusted outcome evaluation, and engine scorecards
 - Fail-closed engine and main-account buying gates
 
@@ -151,6 +152,8 @@ Run the Phase 5 premarket builder after Phase 3 completes. Audit:
 - Sparse premarket trading and zero-volume bars
 
 Premarket features already include gap, session return, 30/60-minute momentum, range, volume, dollar volume, relative volume, VWAP, and last-price-versus-VWAP.
+
+Phase 5 also runs `train_matched_winner_premarket_ablation.py`. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
 
 ### 2. Re-anchor prediction labels for premarket decisions
 
