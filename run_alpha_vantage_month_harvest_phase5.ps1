@@ -6,6 +6,13 @@ $Chains = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\historical_op
 $Snapshots = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\fundamental_snapshots_2026-07-19"
 
 Set-Location $Root
+Write-Output "START final_premarket_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\build_matched_premarket_features.py" `
+    "--events" ".\data_v2\rcef_research\sp500_matched_winners_10pct.jsonl" `
+    "--archive" "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\matched_premarket_5min" `
+    "--output" ".\data_v2\rcef_research\matched_premarket_features.jsonl"
+if ($LASTEXITCODE -ne 0) { throw "final_premarket_feature_build failed with exit code $LASTEXITCODE" }
+
 Write-Output "START final_fundamental_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"
 & $Python ".\compile_fundamental_snapshot_features.py" `
     "--snapshots" $Snapshots `
