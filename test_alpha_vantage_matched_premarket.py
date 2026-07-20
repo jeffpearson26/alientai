@@ -36,6 +36,10 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
         self.assertEqual(first["status"], "complete")
         self.assertEqual(second["status"], "complete")
 
+    def test_all_role_accepts_natural_universe_rows_without_study_role(self):
+        rows = [{"symbol": "IBM", "market_date": "2024-01-02", "future_market_date": "2024-01-09"}]
+        self.assertEqual(event_requests(rows, "all"), [("IBM", "2024-01")])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -59,3 +59,7 @@ Write-Output "START earnings_supabase_upload $((Get-Date).ToUniversalTime().ToSt
 if ($LASTEXITCODE -ne 0) { throw "earnings_supabase_upload failed with exit code $LASTEXITCODE" }
 
 Write-Output "ALPHA VANTAGE PHASE 5 COMPLETE $((Get-Date).ToUniversalTime().ToString('o'))"
+
+Write-Output "START conditional_phase6 $((Get-Date).ToUniversalTime().ToString('o'))"
+& (Join-Path $Root "run_alpha_vantage_month_harvest_phase6.ps1")
+if ($LASTEXITCODE -ne 0) { throw "conditional_phase6 failed with exit code $LASTEXITCODE" }
