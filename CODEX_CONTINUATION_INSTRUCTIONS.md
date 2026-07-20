@@ -205,6 +205,8 @@ Jeff prefers a few outstanding opportunities over many mediocre picks, but the s
 
 The provider-neutral schema and Benzinga/FMP normalizers exist in `alientai_v2/data/analyst_ratings.py`. No structured event feed is currently being collected. Alpha Vantage does not expose a dedicated analyst-upgrade history. Do not infer upgrades from headlines if a structured source can be obtained.
 
+`download_benzinga_analyst_ratings.py` is ready but must not be run until Jeff explicitly purchases access and places `BENZINGA_API_KEY` or `BENZINGA_TOKEN` in the active `.env`. It archives resumable 30-day windows as compressed raw-plus-normalized JSONL without exposing the token.
+
 Recommended future source: Benzinga Ratings API, contingent on Jeff reviewing price. Preserve:
 
 - Announcement timestamp UTC
