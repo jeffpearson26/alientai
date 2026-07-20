@@ -3,8 +3,15 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Python = Join-Path $Root ".venv\Scripts\python.exe"
 $Chains = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\historical_options_winners_10pct"
+$Snapshots = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\fundamental_snapshots_2026-07-19"
 
 Set-Location $Root
+Write-Output "START final_fundamental_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\compile_fundamental_snapshot_features.py" `
+    "--snapshots" $Snapshots `
+    "--output" ".\data_v2\rcef_research\current_fundamental_snapshot_features.jsonl"
+if ($LASTEXITCODE -ne 0) { throw "final_fundamental_feature_build failed with exit code $LASTEXITCODE" }
+
 Write-Output "START final_option_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"
 & $Python ".\build_historical_option_features.py" `
     "--events" ".\data_v2\rcef_research\matched_winners_10pct_50.jsonl" `
