@@ -5,6 +5,13 @@ $Python = Join-Path $Root ".venv\Scripts\python.exe"
 $Chains = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\historical_options_winners_10pct"
 
 Set-Location $Root
+Write-Output "START final_option_feature_build $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\build_historical_option_features.py" `
+    "--events" ".\data_v2\rcef_research\matched_winners_10pct_50.jsonl" `
+    "--chains" $Chains `
+    "--output" ".\data_v2\rcef_research\historical_option_features_matched.jsonl"
+if ($LASTEXITCODE -ne 0) { throw "final_option_feature_build failed with exit code $LASTEXITCODE" }
+
 Write-Output "START final_call_evaluation $((Get-Date).ToUniversalTime().ToString('o'))"
 & $Python ".\evaluate_historical_calls.py" `
     "--events" ".\data_v2\rcef_research\matched_winners_10pct_50.jsonl" `
