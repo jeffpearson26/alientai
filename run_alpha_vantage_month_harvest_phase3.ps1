@@ -4,8 +4,17 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Python = Join-Path $Root ".venv\Scripts\python.exe"
 $Archive = "C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026"
 $Events = ".\data_v2\rcef_research\matched_winners_10pct_50.jsonl"
+$FullEvents = ".\data_v2\rcef_research\sp500_matched_winners_10pct.jsonl"
 
 Set-Location $Root
+
+Write-Output "START matched_premarket_history $((Get-Date).ToUniversalTime().ToString('o'))"
+& $Python ".\download_alpha_vantage_matched_premarket.py" `
+    "--events" $FullEvents `
+    "--output" (Join-Path $Archive "matched_premarket_5min") `
+    "--role" "all" `
+    "--delay-seconds" "0.75"
+if ($LASTEXITCODE -ne 0) { throw "matched_premarket_history failed with exit code $LASTEXITCODE" }
 
 Write-Output "START matched_options $((Get-Date).ToUniversalTime().ToString('o'))"
 & $Python ".\download_alpha_vantage_historical_options.py" `
