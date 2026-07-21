@@ -1,6 +1,6 @@
 # AlienTAI Dynamic Master Plan
 
-Last updated: 2026-07-20 Pacific time
+Last updated: 2026-07-21 Pacific time
 
 ## Purpose and authority
 
@@ -79,9 +79,9 @@ Done when: This phase remains continuously enforced; individual continuity or sa
 
 ### Phase 1 - Finish and verify the current research-data harvest
 
-Status: `BLOCKED`
+Status: `ACTIVE`
 
-Current blocker: The latest Phase 3 attempt stopped on a temporary Alpha Vantage HTTP 503 response. Its redirected traceback wrote a request URL containing the active API credential to a local error log that was also present in the external-SSD backup. The credential-safe code correction, regression tests, and sanitization of both known log copies were completed on 2026-07-20. The queue must remain stopped until Alpha Vantage rotates the exposed premium key.
+Current direction: Jeff explicitly authorized continued use of the existing Alpha Vantage premium key on 2026-07-21. A safe check confirmed the active key is present in the ignored `.env`, `.env` is not Git-tracked, and the key is absent from all Git history. The prior local error log and backup copy remain sanitized; the credential-safe HTTP correction remains in force.
 
 Verified review on 2026-07-20:
 
@@ -114,11 +114,11 @@ Planned work, in order:
 5. Resume a collector only when no matching master process exists.
 6. Verify archive integrity, free-space floors, resumability, duplicate handling, and manifest totals.
 7. Record final counts, unavailable reasons, failed items, storage use, and completion evidence.
-8. Before resuming, rotate the exposed Alpha Vantage key and update `.env` without printing or committing the replacement.
+8. Use the existing authorized key already present in `.env`; do not print, move, copy, or commit it.
 9. `COMPLETE 2026-07-20`: Make HTTP and traceback logging credential-safe across every Alpha Vantage collector, then add regression tests proving logs and stored errors cannot contain the key.
 10. After the security fix, resume the master queue once. The collectors must skip completed and unavailable requests and retry the temporary options failure.
 
-Dependencies: Rotated premium API access, OneDrive availability, enough free archive space, and no duplicate collector process. Credential-safe collector error logging and legacy-log sanitization are complete.
+Dependencies: Existing premium API access, OneDrive availability, enough free archive space, and no duplicate collector process. Credential-safe collector error logging and legacy-log sanitization are complete.
 
 Done when: All intended requests are completed, correctly classified as unavailable, or recorded as actionable failures; manifests and logs agree; no duplicate queue is running.
 
@@ -339,17 +339,15 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
-1. Obtain the replacement premium Alpha Vantage key through the official premium-support escalation; never send the existing full key by email or chat.
-2. Replace the key in the active `.env` without displaying or committing it.
-3. Validate the replacement with one bounded request using the protected HTTP path.
-4. Reconfirm no Alpha Vantage master or child collector is running.
-5. Resume the single master queue and verify resumable skipping with the replacement credential.
+1. Reconfirm no Alpha Vantage master or child collector is running.
+2. Validate the existing authorized key with one bounded request using the protected HTTP path.
+3. Resume the single master queue and verify resumable skipping with the existing credential.
 6. Finish the remaining 188 historical-options requests, 1,515 news requests, and 597 transcript requests.
 7. Verify final manifests and then begin the Phase 2 coverage audit.
 
 ## Current blockers and decisions needed
 
-1. Phase 1 collection is blocked only until Alpha Vantage rotates the exposed premium key. Collector logging correction and sanitization of both known legacy-log copies are complete and verified.
+1. Phase 1 collection is active under Jeff's 2026-07-21 authorization to retain the existing Alpha Vantage premium key. Collector logging correction and sanitization of both known legacy-log copies remain complete and verified.
 2. Analyst-rating expansion requires Jeff to review and explicitly approve a structured data source and any purchase.
 3. Paper trading remains blocked pending prospective shadow evidence and a new explicit decision.
 4. Credential-bearing SSD backups require an encryption decision.
@@ -362,8 +360,11 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-20: Reviewed Phase 1 against live processes, master logs, queue scripts, request-generation logic, manifests, archive file counts, and free space. Queue Phases 1 and 2 are complete; premarket collection is complete; options, news, and transcripts remain incomplete. The queue was stopped and, at review time, Phase 1 was blocked pending key rotation and a correction for the credential-bearing redirected traceback.
 - 2026-07-20: Completed the credential-safe Alpha Vantage HTTP correction across all eight collectors. The shared helper sanitizes and suppresses credential-bearing Requests exception chains; centralized stored-error redaction also removes unknown query-string credentials. Verified with 39 targeted tests, all 249 repository tests, Python compilation of every changed collector and helper, and `git diff --check`. The queue was not resumed; premium-key rotation remained required.
 - 2026-07-20: Sanitized the credential-bearing ignored error log in the canonical repository and its copy in the verified external-SSD backup. A scan of every `.log` file in both locations found zero remaining copies of the active key; the sensitive log was not Git-tracked and no copy existed in the OneDrive Alpha Vantage archive. An escalation to Alpha Vantage's official premium-support channel was prepared because premium-key rotation has no documented self-service workflow. The queue remains stopped pending the replacement key.
+- 2026-07-21: Jeff authorized continued use of the existing Alpha Vantage premium key. A non-disclosing check confirmed the key is present in ignored `.env`, `.env` is not tracked, and the key is absent from Git history. No Alpha Vantage queue was running and the external SSD had 943 GB free. Phase 1 was returned to `ACTIVE` for a single resumable queue run.
+- 2026-07-21: The protected bounded request succeeded with the authorized key. One hidden resumable master queue was launched (PID 7708); its new error log was empty and its output showed completed statements were skipped before the market-regime archive resumed. No duplicate queue was started.
 
 ## Direction-change log
 
 - 2026-07-20: Jeff established a single mandatory dynamic roadmap that every future AI task must read and maintain. The initial roadmap consolidates the existing research priorities, safety gates, data-collection phases, evaluation path, storage work, and future decisions.
 - 2026-07-20: Added a limited TradingAgents-inspired qualitative review experiment to Phase 8. It is a shadow-only second-opinion layer for candidates already selected by AlienTAI, not a replacement signal model or execution authority. The plan explicitly avoids a wholesale repository merge, uncontrolled live-data use in historical evaluation, and reuse of unsafe credential-bearing HTTP error paths.
+- 2026-07-21: Jeff determined the existing Alpha Vantage key was not compromised through GitHub and directed AlienTAI to continue using it. The roadmap no longer requires key rotation as a precondition for the resumable research-data harvest.

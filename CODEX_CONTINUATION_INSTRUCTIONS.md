@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-07-20 Pacific time
+Updated: 2026-07-21 Pacific time
 
 ## Mission
 
@@ -31,16 +31,16 @@ Never print, commit, paste, or otherwise expose API keys, tokens, OAuth codes, b
 
 ## Current live state
 
-Verified on 2026-07-20:
+Verified on 2026-07-21:
 
-- No Alpha Vantage master queue or child collector was running.
+- One Alpha Vantage master queue was launched after a successful protected bounded request with the authorized existing key (PID 7708 at launch). Do not start another; inspect the live process before any restart decision.
 - Master queue Phases 1 and 2 completed.
 - Matched premarket archive completed all 10,289 deduplicated requests: 10,245 complete and 44 unavailable.
 - Historical options completed 2,763 of 2,951 requests; 188 remain outstanding, including one temporary HTTP 503 failure to retry.
 - Event news completed 3 pilot requests of 1,518; 1,515 remain.
 - Earnings transcripts completed 3 pilot requests of 600; 597 remain.
 - Master queue Phases 5 and 6 have not started in the latest attempt.
-- The HTTP 503 traceback exposed the active Alpha Vantage key in one local redirected error log and its external-SSD backup copy. All eight Alpha Vantage collectors now use a tested credential-safe HTTP helper, and both known sensitive log copies were replaced with non-secret incident notices. A log scan found zero remaining copies of the active key. The queue remains blocked only until Alpha Vantage rotates the premium key.
+- The HTTP 503 traceback issue was corrected in the collectors and both known local log copies were replaced with non-secret incident notices. The existing Alpha Vantage key is present only in ignored `.env`, is absent from Git history, and Jeff explicitly authorized its continued use on 2026-07-21. The queue may resume once no duplicate process is running.
 
 Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.
 
@@ -68,9 +68,9 @@ $j = Get-Content $p -Raw | ConvertFrom-Json
 
 Do not name a PowerShell helper function `R`; `R` is an alias for `Invoke-History`.
 
-### Restart only after key rotation and only if no master process exists
+### Restart with the authorized existing key only if no master process exists
 
-The collectors are resumable and skip completed/unavailable requests and existing files. Do not run this restart until Alpha Vantage supplies a replacement premium key and it has been placed in `.env` without printing or committing it. The legacy logs have already been sanitized.
+The collectors are resumable and skip completed/unavailable requests and existing files. The existing key in `.env` is authorized by Jeff; never print, copy, or commit it. The legacy logs have already been sanitized.
 
 ```powershell
 cd C:\Users\jeffp\alientai_start_over_8010
