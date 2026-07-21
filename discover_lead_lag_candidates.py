@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Discover stable, market-residualized cross-symbol lead-lag candidates.
+"""Discover stable, market/sector-residualized cross-symbol lead-lag candidates.
 
 This is hypothesis generation only. It ranks relationships that retain direction
 across chronological train/test partitions; it is not a trading signal generator.
@@ -75,17 +75,25 @@ def fisher_two_sided_p_value(value: float, samples: int) -> float:
 
 
 def pair_samples(
-    source: Mapping[str, float], target: Mapping[str, float], market: Mapping[str, float], lag: int
+    source: Mapping[str, float],
+    target: Mapping[str, float],
+    market: Mapping[str, float],
+    lag: int,
+    *,
+    source_sector: Mapping[str, float] | None = None,
+    target_sector: Mapping[str, float] | None = None,
 ) -> list[tuple[str, float, float, float]]:
-    sessions = sorted(set(source) & set(target) & set(market))
+    source_benchmark = source_sector or market
+    target_benchmark = target_sector or market
+    sessions = sorted(set(source) & set(target) & set(source_benchmark) & set(target_benchmark))
     samples = []
     for index in range(len(sessions) - lag):
         source_date, target_date = sessions[index], sessions[index + lag]
         samples.append((
             source_date,
-            source[source_date] - market[source_date],
-            target[target_date] - market[target_date],
-            target[source_date] - market[source_date],
+            source[source_date] - source_benchmark[source_date],
+            target[target_date] - target_benchmark[target_date],
+            target[source_date] - target_benchmark[source_date],
         ))
     return samples
 
@@ -98,6 +106,8 @@ def stable_candidates(
     min_samples: int = 250,
     minimum_abs_correlation: float = 0.06,
     alpha: float = 0.05,
+    sector_returns: Mapping[str, Mapping[str, float]] | None = None,
+    sector_map: Mapping[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     symbols = sorted(returns)
     provisional = []
@@ -106,8 +116,23 @@ def stable_candidates(
         for target_symbol in symbols:
             if source_symbol == target_symbol:
                 continue
+            source_sector = target_sector = None
+            if sector_returns is not None or sector_map is not None:
+                if sector_returns is None or sector_map is None:
+                    raise ValueError("sector_returns and sector_map must be supplied together")
+                source_sector_symbol = str(sector_map.get(source_symbol) or "").upper()
+                target_sector_symbol = str(sector_map.get(target_symbol) or "").upper()
+                source_sector = sector_returns.get(source_sector_symbol)
+                target_sector = sector_returns.get(target_sector_symbol)
+                # Sector-controlled work must fail closed: do not silently
+                # fall back to broad-market residuals for unmapped symbols.
+                if not source_sector or not target_sector:
+                    continue
             for lag in lags:
-                samples = pair_samples(returns[source_symbol], returns[target_symbol], market, lag)
+                samples = pair_samples(
+                    returns[source_symbol], returns[target_symbol], market, lag,
+                    source_sector=source_sector, target_sector=target_sector,
+                )
                 if len(samples) < min_samples:
                     continue
                 first = len(samples) // 3
@@ -159,6 +184,8 @@ def main() -> None:
     parser.add_argument("--returns", type=Path, required=True)
     parser.add_argument("--market-returns", type=Path, required=True)
     parser.add_argument("--market-symbol", default="SPY")
+    parser.add_argument("--sector-returns", type=Path)
+    parser.add_argument("--sector-map", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--minimum-samples", type=int, default=250)
     parser.add_argument("--minimum-abs-correlation", type=float, default=0.06)
@@ -169,16 +196,28 @@ def main() -> None:
     market = market_rows.get(str(args.market_symbol).upper(), {})
     if not market:
         raise SystemExit(f"Missing market symbol {args.market_symbol} in {args.market_returns}")
+    if bool(args.sector_returns) != bool(args.sector_map):
+        raise SystemExit("--sector-returns and --sector-map must be supplied together")
+    sector_returns = read_returns(args.sector_returns) if args.sector_returns else None
+    sector_map = None
+    if args.sector_map:
+        loaded = json.loads(args.sector_map.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise SystemExit("--sector-map must contain a JSON object of symbol-to-sector-ETF mappings")
+        sector_map = {str(symbol).upper(): str(sector).upper() for symbol, sector in loaded.items()}
     candidates = stable_candidates(
         returns, market, min_samples=args.minimum_samples,
         minimum_abs_correlation=args.minimum_abs_correlation, alpha=args.alpha,
+        sector_returns=sector_returns, sector_map=sector_map,
     )
     result = {
         "status": "complete",
         "research_only": True,
-        "note": "Lead-lag partial correlations control for SPY and the target's current return. Candidate selection uses only the first two chronological windows and a conservative Bonferroni filter; the final window is held out and reported without influencing selection. They remain research hypotheses, not trading signals; sector controls and economic-value evaluation remain required.",
+        "note": "Lead-lag partial correlations control for the target's current return and, when supplied, each symbol's mapped sector ETF; otherwise they control for SPY. Candidate selection uses only the first two chronological windows and a conservative Bonferroni filter; the final window is held out and reported without influencing selection. They remain research hypotheses, not trading signals; economic-value evaluation remains required.",
         "symbols_scanned": len(returns),
         "market_symbol": str(args.market_symbol).upper(),
+        "sector_controlled": bool(sector_returns),
+        "sector_symbols_available": len(sector_returns or {}),
         "lags": list(LAGS),
         "minimum_samples": args.minimum_samples,
         "minimum_abs_correlation": args.minimum_abs_correlation,

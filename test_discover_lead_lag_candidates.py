@@ -33,6 +33,45 @@ class LeadLagDiscoveryTests(unittest.TestCase):
         self.assertLess(candidate["held_out_test_p_value"], 1.0)
         self.assertLess(candidate["test_residual_correlation"], 0)
 
+    def test_sector_residualization_removes_shared_sector_motion(self):
+        dates = [f"2024-03-{day:02d}" for day in range(1, 31)]
+        market = {date: 0.0 for date in dates}
+        sector_values = [((-1) ** index) * ((index % 9) + 1) for index in range(len(dates))]
+        sector = dict(zip(dates, sector_values))
+        source = dict(zip(dates, sector_values))
+        target = {dates[index]: (sector_values[index - 1] if index else 0) for index in range(len(dates))}
+        candidates = stable_candidates(
+            {"AAA": source, "BBB": target}, market, lags=(1,), min_samples=15,
+            minimum_abs_correlation=0.1, alpha=1.0,
+            sector_returns={"XLK": sector}, sector_map={"AAA": "XLK", "BBB": "XLK"},
+        )
+        self.assertFalse(candidates)
+
+    def test_sector_residualization_keeps_idiosyncratic_lead(self):
+        dates = [f"2024-04-{day:02d}" for day in range(1, 31)]
+        market = {date: 0.0 for date in dates}
+        sector_values = [0.3 * ((-1) ** index) for index in range(len(dates))]
+        sector = dict(zip(dates, sector_values))
+        idiosyncratic = [((-1) ** index) * ((index % 7) + 2) for index in range(len(dates))]
+        source = {date: sector_values[index] + idiosyncratic[index] for index, date in enumerate(dates)}
+        target = {date: sector_values[index] + (idiosyncratic[index - 1] if index else 0) for index, date in enumerate(dates)}
+        candidates = stable_candidates(
+            {"AAA": source, "BBB": target}, market, lags=(1,), min_samples=15,
+            minimum_abs_correlation=0.1, alpha=1.0,
+            sector_returns={"XLK": sector}, sector_map={"AAA": "XLK", "BBB": "XLK"},
+        )
+        self.assertTrue(candidates)
+
+    def test_missing_sector_mapping_fails_closed_by_skipping_pair(self):
+        dates = [f"2024-05-{day:02d}" for day in range(1, 16)]
+        market = {date: 0.0 for date in dates}
+        values = dict(zip(dates, range(len(dates))))
+        candidates = stable_candidates(
+            {"AAA": values, "BBB": values}, market, lags=(1,), min_samples=6,
+            sector_returns={"XLK": values}, sector_map={"AAA": "XLK"}, alpha=1.0,
+        )
+        self.assertEqual([], candidates)
+
 
 if __name__ == "__main__":
     unittest.main()

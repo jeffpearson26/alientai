@@ -211,7 +211,9 @@ Promote a feature family only when it improves untouched chronological validatio
 
 ### 4a. Lead-lag hypothesis discovery
 
-`discover_lead_lag_candidates.py` is a research-only discovery tool. It uses daily returns, removes the SPY return and the target symbol's current return, then checks source-to-target 1/2/3/5/10-session relationships across three chronological partitions. Candidate selection uses only train/validation and a conservative Bonferroni filter; the final partition is held out and only reported. The strengthened first Dow-30 scan selected 270 candidates from 4,350 tests, and 265 retained direction in the held-out window. Do not use the list as a model feature or trading input. Approximate correlation p-values do not solve serial dependence or sector confounds. Add sector residualization, rolling splits, and economic-value checks before retaining any edge.
+`discover_lead_lag_candidates.py` is a research-only discovery tool. It uses daily returns, removes the target symbol's current return, and then checks source-to-target 1/2/3/5/10-session relationships across three chronological partitions. Candidate selection uses only train/validation and a conservative Bonferroni filter; the final partition is held out and only reported.
+
+The initial SPY-controlled Dow-30 scan selected 270 candidates from 4,350 tests, and 265 retained direction in the held-out window. Sector residualization is now implemented with a 47,355-row 11-ETF GICS reference library and the static `dow30_sector_etf_map.json` research mapping. In its first sector-controlled rerun, 107 candidates remained and 106 retained direction in the held-out window. It fails closed by skipping unmapped/missing-sector pairs. This mapping is a current research classification, not point-in-time GICS history. Do not use the list as a model feature or trading input. Approximate correlation p-values do not solve serial dependence or economic value. Add rolling splits, point-in-time sector classifications if scope expands, and economic-value checks before retaining any edge.
 
 ### 5. Build the rare-signal selector
 
