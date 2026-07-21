@@ -31,15 +31,15 @@ Never print, commit, paste, or otherwise expose API keys, tokens, OAuth codes, b
 
 ## Current live state
 
-Verified on 2026-07-21:
+Verified on 2026-07-21 after the master queue completed:
 
-- One Alpha Vantage master queue was launched after a successful protected bounded request with the authorized existing key (PID 7708 at launch). Do not start another; inspect the live process before any restart decision.
+- No Alpha Vantage master queue or child collector is running. Do not restart it without first inspecting the completed manifests and deciding on a new, separately scoped collection.
 - Master queue Phases 1 and 2 completed.
 - Matched premarket archive completed all 10,289 deduplicated requests: 10,245 complete and 44 unavailable.
-- Historical options completed 2,763 of 2,951 requests; 188 remain outstanding, including one temporary HTTP 503 failure to retry.
-- Event news completed 3 pilot requests of 1,518; 1,515 remain.
-- Earnings transcripts completed 3 pilot requests of 600; 597 remain.
-- Master queue Phases 5 and 6 have not started in the latest attempt.
+- Historical options completed all 2,951 requests with 0 unavailable.
+- Event news completed all 1,518 requests with 0 unavailable.
+- Earnings transcripts completed 597 requests with 3 unavailable.
+- Phase 5 completed its feature/label builds and uploaded 135,925 earnings-event rows to Supabase. Phase 6 did not make additional API calls because the premarket promotion gate returned `RESEARCH_HOLD`.
 - The HTTP 503 traceback issue was corrected in the collectors and both known local log copies were replaced with non-secret incident notices. The existing Alpha Vantage key is present only in ignored `.env`, is absent from Git history, and Jeff explicitly authorized its continued use on 2026-07-21. The queue may resume once no duplicate process is running.
 
 Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.

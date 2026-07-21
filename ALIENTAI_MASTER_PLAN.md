@@ -79,7 +79,7 @@ Done when: This phase remains continuously enforced; individual continuity or sa
 
 ### Phase 1 - Finish and verify the current research-data harvest
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Current direction: Jeff explicitly authorized continued use of the existing Alpha Vantage premium key on 2026-07-21. A safe check confirmed the active key is present in the ignored `.env`, `.env` is not Git-tracked, and the key is absent from all Git history. The prior local error log and backup copy remain sanitized; the credential-safe HTTP correction remains in force.
 
@@ -124,7 +124,7 @@ Done when: All intended requests are completed, correctly classified as unavaila
 
 ### Phase 2 - Validate premarket and supporting data coverage
 
-Status: `PLANNED`
+Status: `ACTIVE`
 
 Planned work:
 
@@ -344,16 +344,15 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
-1. Reconfirm no Alpha Vantage master or child collector is running.
-2. Validate the existing authorized key with one bounded request using the protected HTTP path.
-3. Resume the single master queue and verify resumable skipping with the existing credential.
-6. Finish the remaining 188 historical-options requests, 1,515 news requests, and 597 transcript requests.
-7. Verify final manifests and then begin the Phase 2 coverage audit.
-8. After the data audit, create the two new research feature families: public unusual-options positioning around known catalysts, and point-in-time cross-symbol lead-lag relationships.
+1. Complete the Phase 2 coverage and timestamp audit across premarket, options, news, transcripts, fundamentals, insider, short-interest, and regime data.
+2. Reconcile the four unavailabilities in the completed transcript/premarket manifests and document their handling policy.
+3. Preserve the premarket promotion gate result as `RESEARCH_HOLD`; do not run natural-universe expansion or enable trading from this matched-case result.
+4. Audit labels, feature availability, slippage, and cost assumptions before feature-family joins.
+5. After the data audit, create the two new research feature families: public unusual-options positioning around known catalysts, and point-in-time cross-symbol lead-lag relationships.
 
 ## Current blockers and decisions needed
 
-1. Phase 1 collection is active under Jeff's 2026-07-21 authorization to retain the existing Alpha Vantage premium key. Collector logging correction and sanitization of both known legacy-log copies remain complete and verified.
+1. Phase 1 collection completed on 2026-07-21. The next blocker is data-quality and timestamp validation, not missing Alpha Vantage requests. Collector logging correction and sanitization of both known legacy-log copies remain complete and verified.
 2. Analyst-rating expansion requires Jeff to review and explicitly approve a structured data source and any purchase.
 3. Paper trading remains blocked pending prospective shadow evidence and a new explicit decision.
 4. Credential-bearing SSD backups require an encryption decision.
@@ -368,6 +367,7 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-20: Sanitized the credential-bearing ignored error log in the canonical repository and its copy in the verified external-SSD backup. A scan of every `.log` file in both locations found zero remaining copies of the active key; the sensitive log was not Git-tracked and no copy existed in the OneDrive Alpha Vantage archive. An escalation to Alpha Vantage's official premium-support channel was prepared because premium-key rotation has no documented self-service workflow. The queue remains stopped pending the replacement key.
 - 2026-07-21: Jeff authorized continued use of the existing Alpha Vantage premium key. A non-disclosing check confirmed the key is present in ignored `.env`, `.env` is not tracked, and the key is absent from Git history. No Alpha Vantage queue was running and the external SSD had 943 GB free. Phase 1 was returned to `ACTIVE` for a single resumable queue run.
 - 2026-07-21: The protected bounded request succeeded with the authorized key. One hidden resumable master queue was launched (PID 7708); its new error log was empty and its output showed completed statements were skipped before the market-regime archive resumed. No duplicate queue was started.
+- 2026-07-21: The resumed Alpha Vantage master queue completed with an empty redirected error log. Historical options: 2,951 complete / 0 unavailable; event news: 1,518 / 0; transcripts: 597 / 3; matched premarket: 10,245 / 44; fundamentals: 9,806 / 6,868 / 0 failed; market-regime archive: complete. Phase 5 built 18,326 premarket feature rows (16,970 available) and 18,244 tradable labels. Its premarket promotion gate returned `RESEARCH_HOLD`, so no Phase 6 natural-universe collection occurred and no trading capability changed. Phase 1 is complete; Phase 2 audit is active.
 
 ## Direction-change log
 
