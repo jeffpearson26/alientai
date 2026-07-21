@@ -215,7 +215,9 @@ Promote a feature family only when it improves untouched chronological validatio
 
 The initial SPY-controlled Dow-30 scan selected 270 candidates from 4,350 tests, and 265 retained direction in the held-out window. Sector residualization is now implemented with a 47,355-row 11-ETF GICS reference library and the static `dow30_sector_etf_map.json` research mapping. In its first sector-controlled rerun, 107 candidates remained and 106 retained direction in the held-out window. It fails closed by skipping unmapped/missing-sector pairs. This mapping is a current research classification, not point-in-time GICS history.
 
-A further three-window rolling pre-test gate now requires every pre-test correlation to agree with the selected train direction. It retained 106 sector-controlled Dow candidates, 105 of which retained direction in the final held-out third. Do not use this list as a model feature or trading input. Approximate correlation p-values and direction agreement do not establish economic value. Next, add a cost-adjusted delayed-entry outcome simulation, signal overlap/concentration limits, and regime-stratified results before retaining any edge.
+A further three-window rolling pre-test gate now requires every pre-test correlation to agree with the selected train direction. It retained 106 sector-controlled Dow candidates, 105 of which retained direction in the final held-out third.
+
+The required causal economic-value evaluation is now complete in `evaluate_lead_lag_economic_value.py`: it observes the source at close, enters the target at a later target-session open, exits at that target close, calibrates its signal threshold only on pre-test data, and subtracts a 0.25% round-trip cost. All 106 candidates were negative by held-out mean net return, with a -0.2274% median candidate mean. Do not promote this lead-lag inventory into any model, selector, paper account, or trading logic. Preserve it as a documented negative result; revisit only for a materially different, preregistered research design.
 
 ### 5. Build the rare-signal selector
 
