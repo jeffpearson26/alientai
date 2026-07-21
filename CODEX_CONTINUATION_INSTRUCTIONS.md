@@ -186,6 +186,7 @@ Prefer keyed compact feature tables joined by `study_event_id`, symbol, and time
 - Historical option positioning
 - Market regime
 - Public unusual-options positioning around known catalysts: preserve the public snapshot timestamp, contract structure, volume/open interest, unusualness, and catalyst timing; evaluate fixed-horizon stock and option outcomes with costs. Do not allege or infer insider trading from a pattern.
+- The completed 2,951-request matched-event option archive includes point-in-time volume, open interest, strike, expiration, bid/ask/last/mark where available, implied volatility, and Greeks. It can support initial cross-sectional positioning features, but it cannot establish a contract's normal prior volume from one snapshot. Schedule a separate resumable prior-snapshot option-history collection only after the Phase 2 audit confirms the required public timestamps, storage budget, and event/control universe.
 - Cross-symbol lead-lag relationships: evaluate whether a source symbol's abnormal move adds incremental point-in-time information for a target symbol at 1, 2, 3, 5, or 10 trading-day lags after controlling for the target's own history, broad market, sector, and known catalysts. Use rolling chronological validation and expire unstable edges.
 
 ### 4. Run ablation experiments

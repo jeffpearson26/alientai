@@ -177,7 +177,7 @@ Planned work:
    - historical option positioning;
    - market regime;
    - fundamental interactions.
-4. Add an unusual-options-and-catalyst feature table. For every public option snapshot, preserve the retrieval timestamp, underlying, call/put, strike, expiration, option volume, open interest, premium/price where available, implied volatility, spread where available, unusualness versus contract history, and the timing of known public catalysts (earnings, announcements, contract awards, and comparable events).
+4. Add an unusual-options-and-catalyst feature table. The completed matched-event archive already preserves point-in-time chain fields (volume, open interest, strike, expiration, bid/ask/last/mark where available, implied volatility, and Greeks) for all 2,951 research-event requests. It is sufficient for cross-sectional positioning features, but not for a contract's prior-volume baseline. After Phase 2 data audit, plan a separate resumable, point-in-time historical option-chain collection with prior snapshots per symbol/contract and documented public availability timing before claiming an "unusual versus history" feature.
 5. Define outcome labels before testing: stock returns at 1, 3, 5, and 10 trading days; option outcomes at fixed horizons and expiration; maximum gain and drawdown; and estimated costs. Do not infer that an options pattern proves insider knowledge or unlawful conduct.
 6. Add a point-in-time lead-lag feature table. Test whether an abnormal move in one symbol adds information about another symbol at 1, 2, 3, 5, or 10 trading-day lags beyond the target's own history, broad market, sector, and known catalyst context.
 7. Preserve source provenance, availability timestamps, missingness indicators, and schema versions.
