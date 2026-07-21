@@ -121,9 +121,11 @@ def stable_candidates(
                 if train_corr is None or validation_corr is None or test_corr is None:
                     continue
                 tests_evaluated += 1
-                if train_corr * validation_corr <= 0 or train_corr * test_corr <= 0:
+                # Select only from train/validation. The final partition is held out
+                # and reported, never used to choose a relationship.
+                if train_corr * validation_corr <= 0:
                     continue
-                stability = min(abs(train_corr), abs(validation_corr), abs(test_corr))
+                stability = min(abs(train_corr), abs(validation_corr))
                 if stability < minimum_abs_correlation:
                     continue
                 provisional.append({
@@ -139,13 +141,14 @@ def stable_candidates(
                     "test_residual_correlation": round(test_corr, 8),
                     "stability_score": round(stability, 8),
                     "direction": "same" if train_corr > 0 else "opposite",
-                    "test_p_value": fisher_two_sided_p_value(test_corr, len(test)),
+                    "validation_p_value": fisher_two_sided_p_value(validation_corr, len(validation)),
+                    "held_out_test_p_value": fisher_two_sided_p_value(test_corr, len(test)),
                 })
     output = []
     for row in provisional:
-        corrected = min(1.0, row["test_p_value"] * max(1, tests_evaluated))
+        corrected = min(1.0, row["validation_p_value"] * max(1, tests_evaluated))
         if corrected <= alpha:
-            row["bonferroni_test_p_value"] = corrected
+            row["bonferroni_validation_p_value"] = corrected
             row["tests_evaluated"] = tests_evaluated
             output.append(row)
     return sorted(output, key=lambda row: (-row["stability_score"], -row["samples"], row["source_symbol"], row["target_symbol"]))
@@ -173,7 +176,7 @@ def main() -> None:
     result = {
         "status": "complete",
         "research_only": True,
-        "note": "Lead-lag partial correlations control for SPY and the target's current return, require stable direction over three chronological windows, and apply a conservative Bonferroni filter. They remain research hypotheses, not trading signals; sector controls and economic-value evaluation remain required.",
+        "note": "Lead-lag partial correlations control for SPY and the target's current return. Candidate selection uses only the first two chronological windows and a conservative Bonferroni filter; the final window is held out and reported without influencing selection. They remain research hypotheses, not trading signals; sector controls and economic-value evaluation remain required.",
         "symbols_scanned": len(returns),
         "market_symbol": str(args.market_symbol).upper(),
         "lags": list(LAGS),

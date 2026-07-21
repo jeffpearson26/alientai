@@ -211,7 +211,7 @@ Promote a feature family only when it improves untouched chronological validatio
 
 ### 4a. Lead-lag hypothesis discovery
 
-`discover_lead_lag_candidates.py` is a research-only discovery tool. It uses daily returns, removes the SPY return and the target symbol's current return, then checks source-to-target 1/2/3/5/10-session relationships across three chronological partitions. It applies a conservative Bonferroni filter across all evaluated pairs/lags. The strengthened first Dow-30 scan still produced 274 candidates from 4,350 tests; do not use the list as a model feature or trading input. Approximate correlation p-values do not solve serial dependence. Add sector residualization, rolling splits, economic-value checks, and an untouched period before retaining any edge.
+`discover_lead_lag_candidates.py` is a research-only discovery tool. It uses daily returns, removes the SPY return and the target symbol's current return, then checks source-to-target 1/2/3/5/10-session relationships across three chronological partitions. Candidate selection uses only train/validation and a conservative Bonferroni filter; the final partition is held out and only reported. The strengthened first Dow-30 scan selected 270 candidates from 4,350 tests, and 265 retained direction in the held-out window. Do not use the list as a model feature or trading input. Approximate correlation p-values do not solve serial dependence or sector confounds. Add sector residualization, rolling splits, and economic-value checks before retaining any edge.
 
 ### 5. Build the rare-signal selector
 
