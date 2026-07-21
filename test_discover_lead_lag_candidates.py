@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from discover_lead_lag_candidates import stable_candidates
+from discover_lead_lag_candidates import rolling_pretest_correlations, stable_candidates
 
 
 class LeadLagDiscoveryTests(unittest.TestCase):
@@ -12,7 +12,7 @@ class LeadLagDiscoveryTests(unittest.TestCase):
         source_values = [1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12]
         source = dict(zip(dates, source_values))
         target = {dates[index]: (source_values[index - 1] if index else 0) for index in range(len(dates))}
-        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.5, alpha=1.0)
+        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.5, alpha=1.0, rolling_windows=2)
         self.assertTrue(any(
             row["source_symbol"] == "AAA" and row["target_symbol"] == "BBB" and row["lag_sessions"] == 1
             for row in candidates
@@ -71,6 +71,15 @@ class LeadLagDiscoveryTests(unittest.TestCase):
             sector_returns={"XLK": values}, sector_map={"AAA": "XLK"}, alpha=1.0,
         )
         self.assertEqual([], candidates)
+
+    def test_rolling_pretest_windows_do_not_include_held_out_data(self):
+        samples = [(str(index), float(index), float(index), 0.0) for index in range(18)]
+        # The final six observations are deliberately unrelated; they must not
+        # influence the pre-test rolling correlation calculation.
+        samples[-1] = ("17", 17.0, -17.0, 0.0)
+        values = rolling_pretest_correlations(samples, windows=3)
+        self.assertEqual(3, len(values))
+        self.assertTrue(all(value > 0.99 for value in values))
 
 
 if __name__ == "__main__":

@@ -74,6 +74,28 @@ def fisher_two_sided_p_value(value: float, samples: int) -> float:
     return min(1.0, math.erfc(abs(z) / math.sqrt(2.0)))
 
 
+def rolling_pretest_correlations(
+    samples: list[tuple[str, float, float, float]], windows: int
+) -> list[float] | None:
+    """Measure stability only before the final held-out chronological partition."""
+    if windows < 2:
+        raise ValueError("rolling windows must be at least 2")
+    pretest = samples[: (len(samples) * 2) // 3]
+    width = len(pretest) // windows
+    if width < 3:
+        return None
+    values = []
+    for index in range(windows):
+        start = index * width
+        end = len(pretest) if index == windows - 1 else (index + 1) * width
+        chunk = pretest[start:end]
+        value = partial_correlation([x[1] for x in chunk], [x[2] for x in chunk], [x[3] for x in chunk])
+        if value is None:
+            return None
+        values.append(value)
+    return values
+
+
 def pair_samples(
     source: Mapping[str, float],
     target: Mapping[str, float],
@@ -108,6 +130,7 @@ def stable_candidates(
     alpha: float = 0.05,
     sector_returns: Mapping[str, Mapping[str, float]] | None = None,
     sector_map: Mapping[str, str] | None = None,
+    rolling_windows: int = 3,
 ) -> list[dict[str, Any]]:
     symbols = sorted(returns)
     provisional = []
@@ -153,6 +176,9 @@ def stable_candidates(
                 stability = min(abs(train_corr), abs(validation_corr))
                 if stability < minimum_abs_correlation:
                     continue
+                rolling = rolling_pretest_correlations(samples, rolling_windows)
+                if rolling is None or any(value * train_corr <= 0 for value in rolling):
+                    continue
                 provisional.append({
                     "source_symbol": source_symbol,
                     "target_symbol": target_symbol,
@@ -168,6 +194,7 @@ def stable_candidates(
                     "direction": "same" if train_corr > 0 else "opposite",
                     "validation_p_value": fisher_two_sided_p_value(validation_corr, len(validation)),
                     "held_out_test_p_value": fisher_two_sided_p_value(test_corr, len(test)),
+                    "pretest_rolling_correlations": [round(value, 8) for value in rolling],
                 })
     output = []
     for row in provisional:
@@ -190,6 +217,7 @@ def main() -> None:
     parser.add_argument("--minimum-samples", type=int, default=250)
     parser.add_argument("--minimum-abs-correlation", type=float, default=0.06)
     parser.add_argument("--alpha", type=float, default=0.05)
+    parser.add_argument("--rolling-windows", type=int, default=3)
     args = parser.parse_args()
     returns = read_returns(args.returns)
     market_rows = read_returns(args.market_returns)
@@ -209,11 +237,12 @@ def main() -> None:
         returns, market, min_samples=args.minimum_samples,
         minimum_abs_correlation=args.minimum_abs_correlation, alpha=args.alpha,
         sector_returns=sector_returns, sector_map=sector_map,
+        rolling_windows=args.rolling_windows,
     )
     result = {
         "status": "complete",
         "research_only": True,
-        "note": "Lead-lag partial correlations control for the target's current return and, when supplied, each symbol's mapped sector ETF; otherwise they control for SPY. Candidate selection uses only the first two chronological windows and a conservative Bonferroni filter; the final window is held out and reported without influencing selection. They remain research hypotheses, not trading signals; economic-value evaluation remains required.",
+        "note": "Lead-lag partial correlations control for the target's current return and, when supplied, each symbol's mapped sector ETF; otherwise they control for SPY. Candidate selection uses only pre-test data: the first two chronological partitions, a conservative Bonferroni filter, and direction agreement across rolling pre-test windows. The final window is held out and reported without influencing selection. They remain research hypotheses, not trading signals; economic-value evaluation remains required.",
         "symbols_scanned": len(returns),
         "market_symbol": str(args.market_symbol).upper(),
         "sector_controlled": bool(sector_returns),
@@ -222,6 +251,7 @@ def main() -> None:
         "minimum_samples": args.minimum_samples,
         "minimum_abs_correlation": args.minimum_abs_correlation,
         "alpha": args.alpha,
+        "rolling_windows": args.rolling_windows,
         "candidates": candidates,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
