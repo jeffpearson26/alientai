@@ -40,7 +40,7 @@ Verified on 2026-07-20:
 - Event news completed 3 pilot requests of 1,518; 1,515 remain.
 - Earnings transcripts completed 3 pilot requests of 600; 597 remain.
 - Master queue Phases 5 and 6 have not started in the latest attempt.
-- The HTTP 503 traceback exposed the active Alpha Vantage key in one local redirected error log. All eight Alpha Vantage collectors now use a tested credential-safe HTTP helper, but the queue remains blocked until Jeff rotates the exposed key and the affected legacy log is safely handled.
+- The HTTP 503 traceback exposed the active Alpha Vantage key in one local redirected error log and its external-SSD backup copy. All eight Alpha Vantage collectors now use a tested credential-safe HTTP helper, and both known sensitive log copies were replaced with non-secret incident notices. A log scan found zero remaining copies of the active key. The queue remains blocked only until Alpha Vantage rotates the premium key.
 
 Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.
 
@@ -70,7 +70,7 @@ Do not name a PowerShell helper function `R`; `R` is an alias for `Invoke-Histor
 
 ### Restart only after key rotation and only if no master process exists
 
-The collectors are resumable and skip completed/unavailable requests and existing files. Do not run this restart until the exposed Alpha Vantage key has been replaced in `.env` without printing it and the affected legacy log has been safely handled.
+The collectors are resumable and skip completed/unavailable requests and existing files. Do not run this restart until Alpha Vantage supplies a replacement premium key and it has been placed in `.env` without printing or committing it. The legacy logs have already been sanitized.
 
 ```powershell
 cd C:\Users\jeffp\alientai_start_over_8010

@@ -81,7 +81,7 @@ Done when: This phase remains continuously enforced; individual continuity or sa
 
 Status: `BLOCKED`
 
-Current blocker: The latest Phase 3 attempt stopped on a temporary Alpha Vantage HTTP 503 response. Its redirected traceback wrote a request URL containing the active API credential to one local error log. The credential-safe code correction and regression tests were completed on 2026-07-20, but the queue must remain stopped until the exposed key is rotated and the affected local log is safely handled without reproducing the credential.
+Current blocker: The latest Phase 3 attempt stopped on a temporary Alpha Vantage HTTP 503 response. Its redirected traceback wrote a request URL containing the active API credential to a local error log that was also present in the external-SSD backup. The credential-safe code correction, regression tests, and sanitization of both known log copies were completed on 2026-07-20. The queue must remain stopped until Alpha Vantage rotates the exposed premium key.
 
 Verified review on 2026-07-20:
 
@@ -98,6 +98,7 @@ Verified review on 2026-07-20:
 - The options manifest stored a redacted error, but the redirected Python traceback did not protect the credential.
 - All eight Alpha Vantage collectors now use one credential-safe HTTP helper that converts Requests transport failures into sanitized, non-chained exceptions before they can reach redirected logs.
 - New tests simulate HTTP 503 and connection failures and verify that rendered tracebacks contain neither the key nor a credential-bearing query URL.
+- The ignored local error log and its external-SSD backup copy were replaced with non-secret incident notices. A credential scan of all logs in both locations found zero remaining copies of the active key. The log was not tracked by Git and was not present in the OneDrive Alpha Vantage archive.
 - System drive free space was 11.2 GB; this is above the current collector floors but leaves little margin for later expansion.
 
 Planned work, in order:
@@ -117,7 +118,7 @@ Planned work, in order:
 9. `COMPLETE 2026-07-20`: Make HTTP and traceback logging credential-safe across every Alpha Vantage collector, then add regression tests proving logs and stored errors cannot contain the key.
 10. After the security fix, resume the master queue once. The collectors must skip completed and unavailable requests and retry the temporary options failure.
 
-Dependencies: Rotated API access, safe handling of the affected legacy log, OneDrive availability, enough free archive space, and no duplicate collector process. Credential-safe collector error logging is complete.
+Dependencies: Rotated premium API access, OneDrive availability, enough free archive space, and no duplicate collector process. Credential-safe collector error logging and legacy-log sanitization are complete.
 
 Done when: All intended requests are completed, correctly classified as unavailable, or recorded as actionable failures; manifests and logs agree; no duplicate queue is running.
 
@@ -338,16 +339,17 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
-1. Rotate the exposed Alpha Vantage API key and replace it in the active `.env` without displaying or committing it.
-2. Safely handle the affected local error log after the key has been rotated; do not copy its sensitive line into reports or commits.
-3. Reconfirm no Alpha Vantage master or child collector is running.
-4. Resume the single master queue and verify the protected error path plus resumable skipping with the replacement credential.
-5. Finish the remaining 188 historical-options requests, 1,515 news requests, and 597 transcript requests.
-6. Verify final manifests and then begin the Phase 2 coverage audit.
+1. Obtain the replacement premium Alpha Vantage key through the official premium-support escalation; never send the existing full key by email or chat.
+2. Replace the key in the active `.env` without displaying or committing it.
+3. Validate the replacement with one bounded request using the protected HTTP path.
+4. Reconfirm no Alpha Vantage master or child collector is running.
+5. Resume the single master queue and verify resumable skipping with the replacement credential.
+6. Finish the remaining 188 historical-options requests, 1,515 news requests, and 597 transcript requests.
+7. Verify final manifests and then begin the Phase 2 coverage audit.
 
 ## Current blockers and decisions needed
 
-1. Phase 1 collection is blocked until the exposed Alpha Vantage key is rotated and the affected legacy log is safely handled. The collector logging correction is complete and verified.
+1. Phase 1 collection is blocked only until Alpha Vantage rotates the exposed premium key. Collector logging correction and sanitization of both known legacy-log copies are complete and verified.
 2. Analyst-rating expansion requires Jeff to review and explicitly approve a structured data source and any purchase.
 3. Paper trading remains blocked pending prospective shadow evidence and a new explicit decision.
 4. Credential-bearing SSD backups require an encryption decision.
@@ -358,7 +360,8 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-20: Created this dynamic master plan from the existing continuation instructions, current Git state, running-process inspection, and the verified SSD backup work.
 - 2026-07-20: Verified SSD backup at `D:\AlientAI\Backups\alientai_start_over_8010_2026-07-20`; approximately 10.65 GB synchronized while excluding `.env`, OAuth token files, `.venv`, Git internals, and caches.
 - 2026-07-20: Reviewed Phase 1 against live processes, master logs, queue scripts, request-generation logic, manifests, archive file counts, and free space. Queue Phases 1 and 2 are complete; premarket collection is complete; options, news, and transcripts remain incomplete. The queue was stopped and, at review time, Phase 1 was blocked pending key rotation and a correction for the credential-bearing redirected traceback.
-- 2026-07-20: Completed the credential-safe Alpha Vantage HTTP correction across all eight collectors. The shared helper sanitizes and suppresses credential-bearing Requests exception chains; centralized stored-error redaction also removes unknown query-string credentials. Verified with 39 targeted tests, all 249 repository tests, Python compilation of every changed collector and helper, and `git diff --check`. The queue was not resumed; key rotation and safe handling of the legacy log remain required.
+- 2026-07-20: Completed the credential-safe Alpha Vantage HTTP correction across all eight collectors. The shared helper sanitizes and suppresses credential-bearing Requests exception chains; centralized stored-error redaction also removes unknown query-string credentials. Verified with 39 targeted tests, all 249 repository tests, Python compilation of every changed collector and helper, and `git diff --check`. The queue was not resumed; premium-key rotation remained required.
+- 2026-07-20: Sanitized the credential-bearing ignored error log in the canonical repository and its copy in the verified external-SSD backup. A scan of every `.log` file in both locations found zero remaining copies of the active key; the sensitive log was not Git-tracked and no copy existed in the OneDrive Alpha Vantage archive. An escalation to Alpha Vantage's official premium-support channel was prepared because premium-key rotation has no documented self-service workflow. The queue remains stopped pending the replacement key.
 
 ## Direction-change log
 
