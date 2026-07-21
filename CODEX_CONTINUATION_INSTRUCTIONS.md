@@ -209,6 +209,10 @@ Do not blindly train all 127 combinations first. Use staged ablation:
 
 Promote a feature family only when it improves untouched chronological validation and test periods, not merely training metrics.
 
+### 4a. Lead-lag hypothesis discovery
+
+`discover_lead_lag_candidates.py` is a research-only discovery tool. It uses daily returns, removes the SPY return and the target symbol's current return, then checks source-to-target 1/2/3/5/10-session relationships across chronological train/test partitions. Its initial Dow-30 scan produced a large candidate list; do not use the list as a model feature or trading input. Add sector residualization, rolling splits, multiple-testing adjustment, economic-value checks, and an untouched period before retaining any edge.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
