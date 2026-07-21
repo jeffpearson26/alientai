@@ -164,6 +164,8 @@ Run the Phase 5 premarket builder after Phase 3 completes. Audit:
 
 Premarket features already include gap, session return, 30/60-minute momentum, range, volume, dollar volume, relative volume, VWAP, and last-price-versus-VWAP.
 
+The initial read-only coverage audit is implemented by `audit_matched_research_coverage.py`. On 2026-07-21 it verified 18,326 unique composite matched-study rows with no feature/label row loss and zero recorded timestamps after the 09:25 Eastern cutoff. It found 16,971 available premarket feature rows (92.606%) and 18,244 available open-entry labels (99.553%). Its report is intentionally not sufficient to approve joins: option and fundamental feature files use different scopes and still require point-in-time join design.
+
 Phase 5 also runs `train_matched_winner_premarket_ablation.py`. It compares precision and cost-adjusted return slices (mean, median, win rate, fifth-percentile loss, and worst trade) at identical top-score fractions. Its output is explicitly a matched case-control feature-family comparison and is not a calibrated natural-universe probability.
 
 The ablation report contains a fail-closed `premarket_promotion_gate`. It permits deeper natural-universe evaluation only when the combined model independently beats the technical baseline on validation and test exceptional-winner rate and mean net return, has a positive median net return, at least 30 top-1% signals, and no worse fifth-percentile loss. A pass never enables trading.
