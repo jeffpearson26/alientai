@@ -65,6 +65,15 @@ def partial_correlation(left: list[float], right: list[float], control: list[flo
     return correlation(residual(left), residual(right))
 
 
+def fisher_two_sided_p_value(value: float, samples: int) -> float:
+    """Approximate two-sided p-value for correlation using Fisher's transform."""
+    if samples <= 3 or not math.isfinite(value):
+        return 1.0
+    clipped = max(-0.999999, min(0.999999, value))
+    z = math.atanh(clipped) * math.sqrt(samples - 3)
+    return min(1.0, math.erfc(abs(z) / math.sqrt(2.0)))
+
+
 def pair_samples(
     source: Mapping[str, float], target: Mapping[str, float], market: Mapping[str, float], lag: int
 ) -> list[tuple[str, float, float, float]]:
@@ -88,10 +97,11 @@ def stable_candidates(
     lags: Iterable[int] = LAGS,
     min_samples: int = 250,
     minimum_abs_correlation: float = 0.06,
-    train_fraction: float = 0.7,
+    alpha: float = 0.05,
 ) -> list[dict[str, Any]]:
     symbols = sorted(returns)
-    output = []
+    provisional = []
+    tests_evaluated = 0
     for source_symbol in symbols:
         for target_symbol in symbols:
             if source_symbol == target_symbol:
@@ -100,29 +110,44 @@ def stable_candidates(
                 samples = pair_samples(returns[source_symbol], returns[target_symbol], market, lag)
                 if len(samples) < min_samples:
                     continue
-                split = max(1, min(len(samples) - 1, int(len(samples) * train_fraction)))
-                train, test = samples[:split], samples[split:]
+                first = len(samples) // 3
+                second = first * 2
+                train, validation, test = samples[:first], samples[first:second], samples[second:]
+                if min(len(train), len(validation), len(test)) < 3:
+                    continue
                 train_corr = partial_correlation([x[1] for x in train], [x[2] for x in train], [x[3] for x in train])
+                validation_corr = partial_correlation([x[1] for x in validation], [x[2] for x in validation], [x[3] for x in validation])
                 test_corr = partial_correlation([x[1] for x in test], [x[2] for x in test], [x[3] for x in test])
-                if train_corr is None or test_corr is None:
+                if train_corr is None or validation_corr is None or test_corr is None:
                     continue
-                if train_corr * test_corr <= 0:
+                tests_evaluated += 1
+                if train_corr * validation_corr <= 0 or train_corr * test_corr <= 0:
                     continue
-                stability = min(abs(train_corr), abs(test_corr))
+                stability = min(abs(train_corr), abs(validation_corr), abs(test_corr))
                 if stability < minimum_abs_correlation:
                     continue
-                output.append({
+                provisional.append({
                     "source_symbol": source_symbol,
                     "target_symbol": target_symbol,
                     "lag_sessions": lag,
                     "samples": len(samples),
                     "train_samples": len(train),
+                    "validation_samples": len(validation),
                     "test_samples": len(test),
                     "train_residual_correlation": round(train_corr, 8),
+                    "validation_residual_correlation": round(validation_corr, 8),
                     "test_residual_correlation": round(test_corr, 8),
                     "stability_score": round(stability, 8),
                     "direction": "same" if train_corr > 0 else "opposite",
+                    "test_p_value": fisher_two_sided_p_value(test_corr, len(test)),
                 })
+    output = []
+    for row in provisional:
+        corrected = min(1.0, row["test_p_value"] * max(1, tests_evaluated))
+        if corrected <= alpha:
+            row["bonferroni_test_p_value"] = corrected
+            row["tests_evaluated"] = tests_evaluated
+            output.append(row)
     return sorted(output, key=lambda row: (-row["stability_score"], -row["samples"], row["source_symbol"], row["target_symbol"]))
 
 
@@ -134,6 +159,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--minimum-samples", type=int, default=250)
     parser.add_argument("--minimum-abs-correlation", type=float, default=0.06)
+    parser.add_argument("--alpha", type=float, default=0.05)
     args = parser.parse_args()
     returns = read_returns(args.returns)
     market_rows = read_returns(args.market_returns)
@@ -142,17 +168,18 @@ def main() -> None:
         raise SystemExit(f"Missing market symbol {args.market_symbol} in {args.market_returns}")
     candidates = stable_candidates(
         returns, market, min_samples=args.minimum_samples,
-        minimum_abs_correlation=args.minimum_abs_correlation,
+        minimum_abs_correlation=args.minimum_abs_correlation, alpha=args.alpha,
     )
     result = {
         "status": "complete",
         "research_only": True,
-        "note": "Lead-lag partial correlations control for SPY and the target's current return. They are hypothesis candidates, not trading signals; require further controls, multiple-testing adjustment, and untouched evaluation.",
+        "note": "Lead-lag partial correlations control for SPY and the target's current return, require stable direction over three chronological windows, and apply a conservative Bonferroni filter. They remain research hypotheses, not trading signals; sector controls and economic-value evaluation remain required.",
         "symbols_scanned": len(returns),
         "market_symbol": str(args.market_symbol).upper(),
         "lags": list(LAGS),
         "minimum_samples": args.minimum_samples,
         "minimum_abs_correlation": args.minimum_abs_correlation,
+        "alpha": args.alpha,
         "candidates": candidates,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

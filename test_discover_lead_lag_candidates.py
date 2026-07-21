@@ -12,7 +12,7 @@ class LeadLagDiscoveryTests(unittest.TestCase):
         source_values = [1, -2, 3, -4, 5, -6, 7, -8, 9, -10, 11, -12]
         source = dict(zip(dates, source_values))
         target = {dates[index]: (source_values[index - 1] if index else 0) for index in range(len(dates))}
-        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.5, train_fraction=0.6)
+        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.5)
         self.assertTrue(any(
             row["source_symbol"] == "AAA" and row["target_symbol"] == "BBB" and row["lag_sessions"] == 1
             for row in candidates
@@ -28,7 +28,7 @@ class LeadLagDiscoveryTests(unittest.TestCase):
             sign = 1 if index <= 6 else -1
             target_values.append(sign * source_values[index - 1])
         target = dict(zip(dates, target_values))
-        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.1, train_fraction=0.6)
+        candidates = stable_candidates({"AAA": source, "BBB": target}, market, lags=(1,), min_samples=6, minimum_abs_correlation=0.1)
         self.assertEqual(candidates, [])
 
 
