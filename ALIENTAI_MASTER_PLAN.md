@@ -187,6 +187,8 @@ Dependencies: Phases 2 and 3.
 
 Current join blockers found in the 2026-07-21 schema audit: the premarket feature and label tables align to all 18,326 composite matched-study rows; the current historical-option feature table contains 1,837 rows from a different, smaller matched study; and the current fundamental snapshot table is a July 2026 cross-sectional snapshot rather than event-time history. These outputs must not be joined to the 2022-2026 premarket study as if they were complete historical features. Build exact-scope, point-in-time feature tables first.
 
+Point-in-time news progress: the completed Alpha Vantage archive compiles into 1,518 event-time rows, with 1,438 rows containing at least one usable article. The compiler filters publication times at or before each request's `as_of_utc`; the remaining study rows must remain explicitly missing rather than being silently imputed.
+
 Done when: Reproducible compact joins pass integrity and leakage checks without generating unnecessary giant duplicate datasets.
 
 ### Phase 5 - Run staged feature-family ablation experiments
@@ -372,6 +374,7 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-21: The resumed Alpha Vantage master queue completed with an empty redirected error log. Historical options: 2,951 complete / 0 unavailable; event news: 1,518 / 0; transcripts: 597 / 3; matched premarket: 10,245 / 44; fundamentals: 9,806 / 6,868 / 0 failed; market-regime archive: complete. Phase 5 built 18,326 premarket feature rows (16,970 available) and 18,244 tradable labels. Its premarket promotion gate returned `RESEARCH_HOLD`, so no Phase 6 natural-universe collection occurred and no trading capability changed. Phase 1 is complete; Phase 2 audit is active.
 - 2026-07-21: Added and ran the first read-only matched-study coverage audit. It verified 18,326 unique composite study rows; all feature and label rows matched the base study with no row loss; 16,971 premarket feature rows were available (92.606%); 18,244 open-entry labels were available (99.553%); and no recorded premarket feature timestamp exceeded the 09:25 Eastern cutoff. The audit also confirmed that current option and fundamental feature outputs have different scopes and require controlled point-in-time joins before any combined-model experiment.
 - 2026-07-21: Inspected raw feature-family schemas. The base study already includes point-in-time technical, short-interest, and insider fields. Premarket rows use the same composite identity and passed cutoff validation. The options output is a 1,837-row smaller matched study, while the July-2026 fundamental snapshot has no event-date identity; neither may be merged into the 18,326-row historical study without rebuilding exact-scope, time-valid feature tables. The harvested news archive contains publication timestamps and ticker sentiment; transcript records require a separate availability-time policy before use.
+- 2026-07-21: Built and ran a point-in-time historical-news compiler over the completed archive. It produced 1,518 rows, 1,438 with at least one usable article, and filtered every article at or before the archived request cutoff. No future-dated article was found in this archive. The result remains a partial feature family pending exact-scope coverage and controlled joins.
 
 ## Direction-change log
 
