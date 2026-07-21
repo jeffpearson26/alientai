@@ -47,6 +47,11 @@ def av_time(value: datetime) -> str:
     return value.astimezone(timezone.utc).strftime("%Y%m%dT%H%M")
 
 
+def provider_ticker(symbol: str) -> str:
+    """Translate US share-class notation into Alpha Vantage's accepted form."""
+    return str(symbol or "").strip().upper().replace(".", "-")
+
+
 def safe_error(value: Any, api_key: str) -> str:
     return redact_sensitive_text(value or "Alpha Vantage news request failed", api_key)
 
@@ -72,7 +77,7 @@ def atomic_json(path: Path, value: Any) -> None:
 def fetch_news(symbol: str, as_of: datetime, lookback_days: int, api_key: str, limit: int) -> Dict[str, Any]:
     response = get_alpha_vantage_response(
         {
-            "function": "NEWS_SENTIMENT", "tickers": symbol,
+            "function": "NEWS_SENTIMENT", "tickers": provider_ticker(symbol),
             "time_from": av_time(as_of - timedelta(days=lookback_days)),
             "time_to": av_time(as_of), "sort": "LATEST", "limit": str(limit),
         },
