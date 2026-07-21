@@ -10,10 +10,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-import requests
 from dotenv import load_dotenv
 
 from alientai_v2.data.earnings_history import merge_events, normalize_response
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
@@ -68,23 +68,18 @@ def replace_with_retry(source: Path, destination: Path, attempts: int = 8) -> No
 
 
 def fetch_symbol(symbol: str, api_key: str, timeout: float = 60.0) -> List[Dict[str, Any]]:
-    response = requests.get(
-        "https://www.alphavantage.co/query",
-        params={"function": "EARNINGS", "symbol": symbol, "apikey": api_key},
-        timeout=timeout,
+    response = get_alpha_vantage_response(
+        {"function": "EARNINGS", "symbol": symbol}, api_key, timeout=timeout,
     )
-    response.raise_for_status()
     return normalize_response(symbol, response.json())
 
 
 def safe_error(message: Any, api_key: str) -> str:
     """Prevent providers from echoing credentials into logs or state files."""
-    cleaned = str(message or "API request failed")
-    if api_key:
-        cleaned = cleaned.replace(api_key, "[REDACTED]")
+    cleaned = redact_sensitive_text(message or "API request failed", api_key)
     if "rate limit" in cleaned.lower() or "requests per day" in cleaned.lower():
         return "Alpha Vantage daily API rate limit reached; resume on the next allowance window."
-    return cleaned[:1000]
+    return cleaned
 
 
 def run(

@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-import requests
 from dotenv import load_dotenv
+
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
@@ -32,8 +33,7 @@ def read_symbols(path: Path) -> List[str]:
 
 
 def safe_error(value: Any, api_key: str) -> str:
-    message = str(value or "Alpha Vantage request failed")
-    return message.replace(api_key, "[REDACTED]")[:1000] if api_key else message[:1000]
+    return redact_sensitive_text(value or "Alpha Vantage request failed", api_key)
 
 
 def unavailable_response(value: Any) -> bool:
@@ -73,11 +73,9 @@ def write_snapshot(path: Path, endpoint: str, symbol: str, payload: Dict[str, An
 
 
 def fetch(endpoint: str, symbol: str, api_key: str) -> Dict[str, Any]:
-    response = requests.get(
-        "https://www.alphavantage.co/query",
-        params={"function": endpoint, "symbol": symbol, "apikey": api_key}, timeout=90,
+    response = get_alpha_vantage_response(
+        {"function": endpoint, "symbol": symbol}, api_key, timeout=90,
     )
-    response.raise_for_status()
     payload = response.json()
     message = payload.get("Error Message") or payload.get("Note") or payload.get("Information")
     if message:

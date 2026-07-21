@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-07-19 Pacific time
+Updated: 2026-07-20 Pacific time
 
 ## Mission
 
@@ -31,16 +31,18 @@ Never print, commit, paste, or otherwise expose API keys, tokens, OAuth codes, b
 
 ## Current live state
 
-At the time this file was written, the Alpha Vantage master queue was running Phase 2 under:
+Verified on 2026-07-20:
 
-- Master process: `run_alpha_vantage_all_remaining.ps1`
-- Current work: Russell 2000 income statements, balance sheets, cash flow, and overviews
-- Fundamental manifest: `C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026\fundamental_snapshots_2026-07-19\manifest.json`
-- Counts at handoff: 4,554 completed, 3,291 unavailable, 0 failed
-- Resume log: `alpha_vantage_all_remaining_resume.log`
-- Resume error log: `alpha_vantage_all_remaining_resume.error.log`
+- No Alpha Vantage master queue or child collector was running.
+- Master queue Phases 1 and 2 completed.
+- Matched premarket archive completed all 10,289 deduplicated requests: 10,245 complete and 44 unavailable.
+- Historical options completed 2,763 of 2,951 requests; 188 remain outstanding, including one temporary HTTP 503 failure to retry.
+- Event news completed 3 pilot requests of 1,518; 1,515 remain.
+- Earnings transcripts completed 3 pilot requests of 600; 597 remain.
+- Master queue Phases 5 and 6 have not started in the latest attempt.
+- The HTTP 503 traceback exposed the active Alpha Vantage key in one local redirected error log. All eight Alpha Vantage collectors now use a tested credential-safe HTTP helper, but the queue remains blocked until Jeff rotates the exposed key and the affected legacy log is safely handled.
 
-These counts will change. Inspect live state rather than assuming they are current.
+Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.
 
 ### Check whether the queue is running
 
@@ -66,9 +68,9 @@ $j = Get-Content $p -Raw | ConvertFrom-Json
 
 Do not name a PowerShell helper function `R`; `R` is an alias for `Invoke-History`.
 
-### Restart only if no master process exists
+### Restart only after key rotation and only if no master process exists
 
-The collectors are resumable and skip completed/unavailable requests and existing files.
+The collectors are resumable and skip completed/unavailable requests and existing files. Do not run this restart until the exposed Alpha Vantage key has been replaced in `.env` without printing it and the affected legacy log has been safely handled.
 
 ```powershell
 cd C:\Users\jeffp\alientai_start_over_8010
@@ -241,6 +243,8 @@ git diff --check
 ```
 
 Run broader targeted suites for any modules changed. Do not run live collectors inside unit tests.
+
+The credential-safe Alpha Vantage request layer is covered by `test_alpha_vantage_http.py`. On 2026-07-20, its targeted 39-test downloader suite and the full 249-test repository suite passed; all changed collectors compiled and `git diff --check` passed.
 
 ## Git discipline
 

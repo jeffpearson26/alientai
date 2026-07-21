@@ -11,18 +11,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-import requests
 from dotenv import load_dotenv
+
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
 
 
 def safe_error(value: Any, api_key: str) -> str:
-    message = str(value or "Alpha Vantage request failed")
-    if api_key:
-        message = message.replace(api_key, "[REDACTED]")
-    return message[:1000]
+    return redact_sensitive_text(value or "Alpha Vantage request failed", api_key)
 
 
 def event_requests(rows: Iterable[Dict[str, Any]], role: str = "winner") -> List[Tuple[str, str]]:
@@ -68,12 +66,11 @@ def archive_path(output: Path, symbol: str, day: str) -> Path:
 
 
 def fetch_chain(symbol: str, day: str, api_key: str) -> Dict[str, Any]:
-    response = requests.get(
-        "https://www.alphavantage.co/query",
-        params={"function": "HISTORICAL_OPTIONS", "symbol": symbol, "date": day, "apikey": api_key},
+    response = get_alpha_vantage_response(
+        {"function": "HISTORICAL_OPTIONS", "symbol": symbol, "date": day},
+        api_key,
         timeout=90,
     )
-    response.raise_for_status()
     payload = response.json()
     message = payload.get("Error Message") or payload.get("Note") or payload.get("Information")
     if message:

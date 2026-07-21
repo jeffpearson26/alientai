@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-import requests
 from dotenv import load_dotenv
+
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
@@ -28,15 +29,11 @@ def requests_to_archive() -> List[Tuple[str, Dict[str, str]]]:
 
 
 def safe_message(value: Any, api_key: str) -> str:
-    message = str(value or "request failed")
-    return message.replace(api_key, "[REDACTED]")[:1000] if api_key else message[:1000]
+    return redact_sensitive_text(value or "request failed", api_key)
 
 
 def fetch(params: Dict[str, str], api_key: str) -> bytes:
-    response = requests.get(
-        "https://www.alphavantage.co/query", params={**params, "apikey": api_key}, timeout=90,
-    )
-    response.raise_for_status()
+    response = get_alpha_vantage_response(params, api_key, timeout=90)
     content = response.content
     if not content.strip():
         raise ValueError("empty Alpha Vantage response")

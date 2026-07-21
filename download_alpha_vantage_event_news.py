@@ -11,8 +11,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-import requests
 from dotenv import load_dotenv
+
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
@@ -47,8 +48,7 @@ def av_time(value: datetime) -> str:
 
 
 def safe_error(value: Any, api_key: str) -> str:
-    message = str(value or "Alpha Vantage news request failed")
-    return message.replace(api_key, "[REDACTED]")[:1000] if api_key else message[:1000]
+    return redact_sensitive_text(value or "Alpha Vantage news request failed", api_key)
 
 
 def replace_with_retry(source: Path, destination: Path, attempts: int = 8) -> None:
@@ -70,15 +70,15 @@ def atomic_json(path: Path, value: Any) -> None:
 
 
 def fetch_news(symbol: str, as_of: datetime, lookback_days: int, api_key: str, limit: int) -> Dict[str, Any]:
-    response = requests.get(
-        "https://www.alphavantage.co/query",
-        params={
+    response = get_alpha_vantage_response(
+        {
             "function": "NEWS_SENTIMENT", "tickers": symbol,
             "time_from": av_time(as_of - timedelta(days=lookback_days)),
-            "time_to": av_time(as_of), "sort": "LATEST", "limit": str(limit), "apikey": api_key,
-        }, timeout=90,
+            "time_to": av_time(as_of), "sort": "LATEST", "limit": str(limit),
+        },
+        api_key,
+        timeout=90,
     )
-    response.raise_for_status()
     payload = response.json()
     message = payload.get("Error Message") or payload.get("Note") or payload.get("Information")
     if message:

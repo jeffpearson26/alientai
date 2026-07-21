@@ -2,6 +2,21 @@
 
 This repository is under active development in Jeff Pearson's established primary AlienTAI Codex task.
 
+## Mandatory roadmap read for every task
+
+After reading this file and before proposing, planning, or performing any AlienTAI work, read `ALIENTAI_MASTER_PLAN.md` in full. It is the authoritative dynamic roadmap for work order, current direction, dependencies, blockers, and phase status.
+
+Also read `CODEX_CONTINUATION_INSTRUCTIONS.md` for operational handoff details. If the roadmap and continuation file disagree, remain read-only, inspect current evidence, and ask Jeff to reconcile the direction before proceeding.
+
+For every authorized task that changes scope, priority, direction, dependencies, or phase status:
+
+1. update `ALIENTAI_MASTER_PLAN.md` in the same task;
+2. preserve reordered, deferred, or cancelled work in its direction-change log;
+3. record evidence before marking any phase complete;
+4. update its immediate next actions before ending the work session.
+
+Do not rely on chat memory as the source of truth for the AlienTAI roadmap.
+
 ## Default state for every new AI task or chat
 
 Treat this repository as **read-only**. You may inspect files, Git history, logs, and running processes, but you must not change project state.

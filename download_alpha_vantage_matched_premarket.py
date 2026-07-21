@@ -12,8 +12,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-import requests
 from dotenv import load_dotenv
+
+from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 
 
 ROOT = Path(__file__).resolve().parent
@@ -43,8 +44,7 @@ def event_requests(rows: Iterable[Dict[str, Any]], role: str = "all") -> List[Tu
 
 
 def safe_error(value: Any, api_key: str) -> str:
-    message = str(value or "Alpha Vantage intraday request failed")
-    return message.replace(api_key, "[REDACTED]")[:1000] if api_key else message[:1000]
+    return redact_sensitive_text(value or "Alpha Vantage intraday request failed", api_key)
 
 
 def unavailable_response(value: Any) -> bool:
@@ -76,16 +76,15 @@ def archive_path(output: Path, symbol: str, month: str) -> Path:
 
 
 def fetch_month(symbol: str, month: str, api_key: str) -> bytes:
-    response = requests.get(
-        "https://www.alphavantage.co/query",
-        params={
+    response = get_alpha_vantage_response(
+        {
             "function": "TIME_SERIES_INTRADAY", "symbol": symbol, "interval": "5min",
             "month": month, "outputsize": "full", "adjusted": "false",
-            "extended_hours": "true", "datatype": "csv", "apikey": api_key,
+            "extended_hours": "true", "datatype": "csv",
         },
+        api_key,
         timeout=120,
     )
-    response.raise_for_status()
     content = response.content
     if not content.strip():
         raise ValueError("Alpha Vantage response lacks intraday data")
