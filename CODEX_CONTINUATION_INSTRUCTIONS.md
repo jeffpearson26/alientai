@@ -185,6 +185,8 @@ Prefer keyed compact feature tables joined by `study_event_id`, symbol, and time
 - Short interest
 - Historical option positioning
 - Market regime
+- Public unusual-options positioning around known catalysts: preserve the public snapshot timestamp, contract structure, volume/open interest, unusualness, and catalyst timing; evaluate fixed-horizon stock and option outcomes with costs. Do not allege or infer insider trading from a pattern.
+- Cross-symbol lead-lag relationships: evaluate whether a source symbol's abnormal move adds incremental point-in-time information for a target symbol at 1, 2, 3, 5, or 10 trading-day lags after controlling for the target's own history, broad market, sector, and known catalysts. Use rolling chronological validation and expire unstable edges.
 
 ### 4. Run ablation experiments
 
@@ -196,6 +198,7 @@ Do not blindly train all 127 combinations first. Use staged ablation:
 4. Add catalyst data (news/earnings)
 5. Add options and short interest
 6. Add fundamentals and regime interactions
+7. Add unusual-options/catalyst and lead-lag feature families only through controlled ablations with matched controls and untouched chronological test periods.
 
 Promote a feature family only when it improves untouched chronological validation and test periods, not merely training metrics.
 

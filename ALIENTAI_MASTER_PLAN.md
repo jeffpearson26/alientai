@@ -177,8 +177,11 @@ Planned work:
    - historical option positioning;
    - market regime;
    - fundamental interactions.
-4. Preserve source provenance, availability timestamps, missingness indicators, and schema versions.
-5. Add tests for duplicate keys, row loss, timestamp leakage, and unintended future joins.
+4. Add an unusual-options-and-catalyst feature table. For every public option snapshot, preserve the retrieval timestamp, underlying, call/put, strike, expiration, option volume, open interest, premium/price where available, implied volatility, spread where available, unusualness versus contract history, and the timing of known public catalysts (earnings, announcements, contract awards, and comparable events).
+5. Define outcome labels before testing: stock returns at 1, 3, 5, and 10 trading days; option outcomes at fixed horizons and expiration; maximum gain and drawdown; and estimated costs. Do not infer that an options pattern proves insider knowledge or unlawful conduct.
+6. Add a point-in-time lead-lag feature table. Test whether an abnormal move in one symbol adds information about another symbol at 1, 2, 3, 5, or 10 trading-day lags beyond the target's own history, broad market, sector, and known catalyst context.
+7. Preserve source provenance, availability timestamps, missingness indicators, and schema versions.
+8. Add tests for duplicate keys, row loss, timestamp leakage, unintended future joins, and invalid lead-lag look-ahead.
 
 Dependencies: Phases 2 and 3.
 
@@ -197,9 +200,11 @@ Planned work, in order:
 5. Add options and short-interest features.
 6. Add fundamentals and market-regime interactions.
 7. Retain insider-purchase signals as interaction features unless broader evidence supports more weight.
-8. Compare identical chronological train, validation, and untouched test periods.
-9. Report exceptional-winner rate, calibrated precision, mean and median net return, win rate, fifth-percentile loss, worst trade, drawdown, turnover, concentration, and sample size.
-10. Promote a feature family only when it improves untouched validation and test evidence, not merely training metrics.
+8. Evaluate unusual-options positioning around known catalysts against matched controls. Require the result to survive controls for earnings timing, market/sector movement, the underlying's own momentum, liquidity, and option-expiration structure; treat findings as market-behavior associations, not evidence of insider trading.
+9. Evaluate lead-lag relationships with rolling chronological windows, multiple-testing controls, market/sector residualization, and expiry rules for relationships that stop working.
+10. Compare identical chronological train, validation, and untouched test periods.
+11. Report exceptional-winner rate, calibrated precision, mean and median net return, win rate, fifth-percentile loss, worst trade, drawdown, turnover, concentration, and sample size.
+12. Promote a feature family only when it improves untouched validation and test evidence, not merely training metrics.
 
 Dependencies: Phase 4 feature tables and Phase 3 label audit.
 
@@ -344,6 +349,7 @@ Done when: This remains an ongoing standard for all phases.
 3. Resume the single master queue and verify resumable skipping with the existing credential.
 6. Finish the remaining 188 historical-options requests, 1,515 news requests, and 597 transcript requests.
 7. Verify final manifests and then begin the Phase 2 coverage audit.
+8. After the data audit, create the two new research feature families: public unusual-options positioning around known catalysts, and point-in-time cross-symbol lead-lag relationships.
 
 ## Current blockers and decisions needed
 
@@ -368,3 +374,4 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-20: Jeff established a single mandatory dynamic roadmap that every future AI task must read and maintain. The initial roadmap consolidates the existing research priorities, safety gates, data-collection phases, evaluation path, storage work, and future decisions.
 - 2026-07-20: Added a limited TradingAgents-inspired qualitative review experiment to Phase 8. It is a shadow-only second-opinion layer for candidates already selected by AlienTAI, not a replacement signal model or execution authority. The plan explicitly avoids a wholesale repository merge, uncontrolled live-data use in historical evaluation, and reuse of unsafe credential-bearing HTTP error paths.
 - 2026-07-21: Jeff determined the existing Alpha Vantage key was not compromised through GitHub and directed AlienTAI to continue using it. The roadmap no longer requires key rotation as a precondition for the resumable research-data harvest.
+- 2026-07-21: Jeff added two research hypotheses to the feature roadmap: (1) publicly observable unusual options positioning around known catalysts may have incremental predictive value, and (2) some cross-symbol movements may have stable delayed lead-lag relationships. Both are explicitly framed as leakage-safe, out-of-sample market-behavior research, not as evidence of insider trading or as a basis for unvalidated trading claims.
