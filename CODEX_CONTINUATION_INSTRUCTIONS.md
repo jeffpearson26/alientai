@@ -227,6 +227,10 @@ The full matched-winner study has 13,473 unique `(symbol, market_date)` observat
 
 `run_full_catalyst_archive_queue.ps1` is a running fail-closed monitor. It will start the full historical-options collector only after the news manifest reaches `complete`; it stops if news reaches `failed_closed`. The planned options archive has 26,221 unique symbol/date requests and writes to `D:\AlientAI\Data\AlphaVantage_2026\historical_options_sp500_full`. Do not start a second collector while either job is running. Both are data-collection work only and never enable execution.
 
+### Existing exceptional-winner baseline
+
+`two_stage_exceptional_winner_10pct/two_stage_report.json` is not promotable. Its untouched full-universe test selected 417 signals and had mean net return 0.6124% after the stated 0.25% cost, but median net return was -0.1315%, win rate 48.44%, worst trade -23.47%, and approximate cohort drawdown -37.30%. Do not select this model for paper or real trading. A positive average alone is insufficient; future gates must require positive median results, acceptable tail loss/drawdown, concentration controls, and fresh chronologically held-out evidence.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
