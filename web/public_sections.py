@@ -113,38 +113,30 @@ def sector_intelligence_board_html(
     return html
 
 
-def performance_snapshot_html(
-    win_rate: float = 60.71,
-    graded_trades: int = 28,
-    winners: int = 17,
-    losers: int = 11,
-    closed_trades: int = 30,
-    direction: str = "Improving",
-    credit: str = DEFAULT_CREDIT,
-) -> str:
+def performance_snapshot_html(credit: str = DEFAULT_CREDIT) -> str:
     html = """
     <section class="public-performance-card">
       <div>
-        <p class="public-eyebrow">Research Performance Snapshot</p>
-        <h2>Win Percentage Monitor</h2>
+        <p class="public-eyebrow">Research Status</p>
+        <h2>Under Active Development</h2>
         <p>
-          Public-safe paper-trade grading focused on signal direction and research quality.
-          Dollar balances, paper cash, account equity, and owner controls are intentionally hidden.
+          AlientAI is building and stress-testing market-research models before making
+          performance claims. This public page describes the research process, not live recommendations.
         </p>
       </div>
 
       <div class="public-win-orb">
-        <span>__WIN_RATE__%</span>
-        <small>Normal Win Rate</small>
+        <span>R&amp;D</span>
+        <small>Research in progress</small>
       </div>
 
       <div class="public-metric-grid">
-        <div><label>Graded Trades</label><strong>__GRADED__</strong></div>
-        <div><label>Winners</label><strong>__WINNERS__</strong></div>
-        <div><label>Losers</label><strong>__LOSERS__</strong></div>
-        <div><label>Closed Paper Trades</label><strong>__CLOSED__</strong></div>
-        <div class="wide"><label>Research Direction</label><strong>__DIRECTION__</strong></div>
-        <div class="wide"><label>Visibility Policy</label><strong>Win percentage only</strong></div>
+        <div><label>Horizon</label><strong>5-day research</strong></div>
+        <div><label>Methods</label><strong>ML &amp; neural models</strong></div>
+        <div><label>Inputs</label><strong>Price, volume &amp; public events</strong></div>
+        <div><label>Validation</label><strong>Chronological holdouts</strong></div>
+        <div class="wide"><label>Goal</label><strong>Rare, high-quality research candidates</strong></div>
+        <div class="wide"><label>Safety policy</label><strong>No public trade execution</strong></div>
       </div>
 
       <div class="public-disclaimer">
@@ -153,12 +145,6 @@ def performance_snapshot_html(
     </section>
     """
 
-    html = html.replace("__WIN_RATE__", f"{float(win_rate):.2f}")
-    html = html.replace("__GRADED__", str(graded_trades))
-    html = html.replace("__WINNERS__", str(winners))
-    html = html.replace("__LOSERS__", str(losers))
-    html = html.replace("__CLOSED__", str(closed_trades))
-    html = html.replace("__DIRECTION__", str(direction))
     html = html.replace("__CREDIT__", credit)
     return html
 
@@ -483,12 +469,6 @@ def assemble_public_enhancement_sections(
     healthcare_count: int = 64,
     energy_count: int = 81,
     sequential_count: int = 2209,
-    win_rate: float = 60.71,
-    graded_trades: int = 28,
-    winners: int = 17,
-    losers: int = 11,
-    closed_trades: int = 30,
-    direction: str = "Improving",
     credit: str = DEFAULT_CREDIT,
 ) -> str:
     return (
@@ -502,14 +482,6 @@ def assemble_public_enhancement_sections(
             sequential_count=sequential_count,
             credit=credit,
         )
-        + performance_snapshot_html(
-            win_rate=win_rate,
-            graded_trades=graded_trades,
-            winners=winners,
-            losers=losers,
-            closed_trades=closed_trades,
-            direction=direction,
-            credit=credit,
-        )
+        + performance_snapshot_html(credit=credit)
         + credit_note_html(credit=credit)
     )
