@@ -128,14 +128,20 @@ def selection_metrics(rows: Sequence[Mapping[str, Any]], round_trip_cost_pct: fl
     for row, value in zip(rows, net):
         by_exit[str(row.get("future_market_date") or row["market_date"])].append(float(value))
     cohort_returns = [float(np.mean(by_exit[key])) for key in sorted(by_exit)]
+    symbol_counts: Dict[str, int] = defaultdict(int)
+    for row in rows:
+        symbol_counts[str(row["symbol"])] += 1
+    largest_symbol_share = max(symbol_counts.values()) / len(rows)
     return {
         "signals": len(rows),
         "symbols": len({str(row["symbol"]) for row in rows}),
         "exceptional_winner_rate": round(float(np.mean(labels)), 6),
         "mean_net_return_pct": round(float(np.mean(net)), 6),
         "median_net_return_pct": round(float(np.median(net)), 6),
+        "fifth_percentile_net_return_pct": round(float(np.percentile(net, 5)), 6),
         "win_rate_after_cost": round(float(np.mean(net > 0)), 6),
         "worst_trade_net_return_pct": round(float(np.min(net)), 6),
+        "largest_symbol_signal_share": round(float(largest_symbol_share), 6),
         "cohort_exit_date_count": len(cohort_returns),
         "approximate_cohort_max_drawdown_pct": round(max_drawdown(cohort_returns), 6),
     }

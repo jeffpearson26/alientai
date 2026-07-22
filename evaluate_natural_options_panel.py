@@ -11,6 +11,7 @@ from typing import Any, Iterable, Mapping, Sequence
 import lightgbm as lgb
 
 from evaluate_matched_winner_full_universe import build_matrix, selection_metrics
+from alientai_v2.research.rare_signal_gate import evaluate_rare_signal_gate
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -65,10 +66,14 @@ def main() -> None:
     model = lgb.Booster(model_file=str(args.model))
     scores = model.predict(build_matrix(rows, model.feature_name()))
     scored = [{**row, "raw_score": float(score)} for row, score in zip(rows, scores)]
+    daily_reports = []
+    for count in (1, 3, 5):
+        metrics = selection_metrics(daily_top(scored, count), args.round_trip_cost_pct)
+        daily_reports.append({"per_day": count, **metrics, "rare_signal_gate": evaluate_rare_signal_gate(metrics)})
     report = {"status": "complete", "research_only": True, "execution_enabled": False,
               "warning": "This is historical natural-universe ranking evaluation, not a prospective result.",
               "rows": len(scored), "round_trip_cost_pct": args.round_trip_cost_pct,
-              "daily_top": [{"per_day": count, **selection_metrics(daily_top(scored, count), args.round_trip_cost_pct)} for count in (1, 3, 5)]}
+              "daily_top": daily_reports}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))

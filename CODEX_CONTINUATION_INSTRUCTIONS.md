@@ -248,6 +248,8 @@ Options improved the top-5% matched precision from 31.42% to 41.59%. This is pro
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
 
+`alientai_v2/research/rare_signal_gate.py` is the common fail-closed gate for this work. It evaluates a metrics object and returns `RESEARCH_PASS` or `RESEARCH_HOLD` with every check and failure reason preserved. Its default policy requires: 30 signals, 50% post-cost win rate, non-negative mean and median net return, fifth-percentile loss no worse than -10%, worst trade no worse than -25%, approximate cohort drawdown no worse than -20%, and no single symbol above 20% of signals. These thresholds are research safeguards, not performance claims. Both natural-options-panel and unusual-call reports now include this gate. A pass is still historical research only and never changes execution.
+
 ### 6. Analyst upgrades
 
 The provider-neutral schema and Benzinga/FMP normalizers exist in `alientai_v2/data/analyst_ratings.py`. No structured event feed is currently being collected. Alpha Vantage does not expose a dedicated analyst-upgrade history. Do not infer upgrades from headlines if a structured source can be obtained.

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from alientai_v2.research.unusual_call_activity import unusual_call_features
+from alientai_v2.research.rare_signal_gate import evaluate_rare_signal_gate
 from evaluate_matched_winner_full_universe import selection_metrics
 
 
@@ -39,10 +40,13 @@ def main() -> None:
     args = parser.parse_args()
     rows = join_option_outcomes(read_jsonl(args.base_rows), read_jsonl(args.option_features))
     selected = [row for row in rows if row.get("call_volume_unusual")]
+    unusual_metrics = selection_metrics(selected, args.round_trip_cost_pct)
+    natural_metrics = selection_metrics(rows, args.round_trip_cost_pct)
     report = {"status": "complete", "research_only": True, "execution_enabled": False,
               "warning": "Historical public-data association only; unusual activity does not establish cause or private information.",
-              "rows": len(rows), "unusual_signal_metrics": selection_metrics(selected, args.round_trip_cost_pct),
-              "natural_universe_metrics": selection_metrics(rows, args.round_trip_cost_pct)}
+              "rows": len(rows), "unusual_signal_metrics": unusual_metrics,
+              "unusual_signal_gate": evaluate_rare_signal_gate(unusual_metrics),
+              "natural_universe_metrics": natural_metrics}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
