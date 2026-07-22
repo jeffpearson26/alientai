@@ -23,15 +23,19 @@ def safe_error(value: Any, api_key: str) -> str:
     return redact_sensitive_text(value or "Alpha Vantage request failed", api_key)
 
 
-def event_requests(rows: Iterable[Dict[str, Any]], role: str = "winner") -> List[Tuple[str, str]]:
+def event_requests(
+    rows: Iterable[Dict[str, Any]], role: str = "winner", *, include_future_date: bool = True,
+    start_date: str = "", end_date: str = "",
+) -> List[Tuple[str, str]]:
     requests_to_make = set()
     for row in rows:
         if role != "all" and str(row.get("study_role") or "") != role:
             continue
         symbol = str(row.get("symbol") or "").strip().upper()
-        for field in ("market_date", "future_market_date"):
+        fields = ("market_date", "future_market_date") if include_future_date else ("market_date",)
+        for field in fields:
             day = str(row.get(field) or "").strip()
-            if symbol and len(day) == 10:
+            if symbol and len(day) == 10 and (not start_date or day >= start_date) and (not end_date or day <= end_date):
                 requests_to_make.add((symbol, day))
     return sorted(requests_to_make, key=lambda item: (item[1], item[0]))
 
@@ -137,12 +141,18 @@ def main() -> None:
     parser.add_argument("--role", choices=("winner", "control", "all"), default="winner")
     parser.add_argument("--limit-requests", type=int, default=0)
     parser.add_argument("--delay-seconds", type=float, default=0.5)
+    parser.add_argument("--market-date-only", action="store_true")
+    parser.add_argument("--start-date", default="")
+    parser.add_argument("--end-date", default="")
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
     api_key = str(os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("ALPHA_VANTAGE_API_KEY is required")
-    items = event_requests(read_jsonl(args.events), args.role)
+    items = event_requests(
+        read_jsonl(args.events), args.role, include_future_date=not args.market_date_only,
+        start_date=args.start_date, end_date=args.end_date,
+    )
     if args.limit_requests:
         items = items[: args.limit_requests]
     result = run(items, api_key, args.output, args.delay_seconds)
