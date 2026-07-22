@@ -33,6 +33,11 @@ class MatchedWinnerLightGBMTests(unittest.TestCase):
         self.assertEqual(y.tolist(), [1, 0])
         self.assertLess(timestamps[0], timestamps[1])
 
+    def test_extra_nonconstant_feature_is_eligible(self):
+        rows = [{"x": 1.0}, {"x": 2.0}]
+        from train_matched_winner_lightgbm import eligible_features
+        self.assertIn("x", eligible_features(rows, ["x"]))
+
     def test_score_report_labels_case_control_precision(self):
         result = score_metrics(np.array([1, 0, 1, 0]), np.array([0.9, 0.8, 0.7, 0.1]))
         self.assertIn("matched_base_rate", result)

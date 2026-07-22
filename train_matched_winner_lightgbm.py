@@ -23,9 +23,9 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def eligible_features(rows: Sequence[Mapping[str, Any]]) -> List[str]:
+def eligible_features(rows: Sequence[Mapping[str, Any]], extra_features: Sequence[str] = ()) -> List[str]:
     features: List[str] = []
-    for name in DEFAULT_ANALYSIS_FEATURES:
+    for name in list(DEFAULT_ANALYSIS_FEATURES) + list(extra_features):
         if name.startswith("label_"):
             raise ValueError("future outcome labels cannot be model features")
         values = [safe_float(row.get(name)) for row in rows if row.get(name) is not None]
@@ -132,10 +132,11 @@ def main() -> None:
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
     parser.add_argument("--num-boost-round", type=int, default=1000)
     parser.add_argument("--early-stopping-rounds", type=int, default=75)
+    parser.add_argument("--extra-feature", action="append", default=[])
     args = parser.parse_args()
 
     rows = read_jsonl(args.input)
-    features = eligible_features(rows)
+    features = eligible_features(rows, args.extra_feature)
     x, y, timestamps, names = prepare_matrix(rows, features)
     weights = event_balancing_weights(rows)
     train_idx, validation_idx, test_idx, split = chronological_three_way_indices(
@@ -160,7 +161,7 @@ def main() -> None:
         "research_only": True, "execution_enabled": False,
         "score_is_real_world_probability": False,
         "warning": "Case-control sampling changes class prevalence; scores require calibration on the full universe.",
-        "input": str(args.input), "rows": len(rows), "feature_count": len(names),
+        "input": str(args.input), "rows": len(rows), "feature_count": len(names), "extra_features": args.extra_feature,
         "best_iteration": int(model.best_iteration), "split": split,
         "train_metrics": score_metrics(y[train_idx], predict(train_idx)),
         "validation_metrics": score_metrics(y[validation_idx], predict(validation_idx)),
