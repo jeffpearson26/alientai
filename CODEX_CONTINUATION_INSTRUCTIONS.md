@@ -231,6 +231,19 @@ The full matched-winner study has 13,473 unique `(symbol, market_date)` observat
 
 `two_stage_exceptional_winner_10pct/two_stage_report.json` is not promotable. Its untouched full-universe test selected 417 signals and had mean net return 0.6124% after the stated 0.25% cost, but median net return was -0.1315%, win rate 48.44%, worst trade -23.47%, and approximate cohort drawdown -37.30%. Do not select this model for paper or real trading. A positive average alone is insufficient; future gates must require positive median results, acceptable tail loss/drawdown, concentration controls, and fresh chronologically held-out evidence.
 
+### Completed catalyst ablation; natural-universe gate remains
+
+`matched_winners_catalyst_full.jsonl` now joins all 18,326 matched study rows to full-coverage point-in-time news and historical option features. Its unique underlying symbol/date feature coverage is 13,473 for base, news, and options, with no duplicate catalyst keys. `compile_historical_option_features.py` deliberately emits one option row per symbol/date so matched-study duplication cannot multiply features during a join.
+
+The chronological held-out matched discovery ablation reports are under `data_v2\rcef_research\catalyst_ablation`:
+
+- Technical top-1% precision: 37.78%.
+- Technical + news: 40.00%.
+- Technical + options: 48.89%.
+- Technical + news + options: 46.67%.
+
+Options improved the top-5% matched precision from 31.42% to 41.59%. This is promising hypothesis-generation evidence only. It cannot be treated as a probability, expected return, or trade criterion because the input is matched case-control sampling. Do not promote it. The next research requirement is an independently time-valid natural-universe panel with matching option features, followed by calibrated, cost-adjusted, tail- and drawdown-constrained evaluation.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
