@@ -84,6 +84,22 @@ def fetch_chain(symbol: str, day: str, api_key: str) -> Dict[str, Any]:
     return payload
 
 
+def is_transient_error(error: Exception) -> bool:
+    text = str(error).lower()
+    return any(token in text for token in ("http 429", "http 500", "http 502", "http 503", "http 504", "timed out", "connection reset"))
+
+
+def fetch_chain_with_retry(symbol: str, day: str, api_key: str, attempts: int = 4) -> Dict[str, Any]:
+    for attempt in range(max(1, attempts)):
+        try:
+            return fetch_chain(symbol, day, api_key)
+        except Exception as exc:
+            if not is_transient_error(exc) or attempt + 1 >= max(1, attempts):
+                raise
+            time.sleep(10 * (attempt + 1))
+    raise RuntimeError("unreachable retry state")
+
+
 def write_gzip_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -107,7 +123,7 @@ def run(items: Iterable[Tuple[str, str]], api_key: str, output: Path, delay: flo
         if key in completed or key in unavailable or destination.exists():
             continue
         try:
-            payload = fetch_chain(symbol, day, api_key)
+            payload = fetch_chain_with_retry(symbol, day, api_key)
             write_gzip_json(destination, payload)
             manifest["completed"].append(key)
             completed.add(key)
