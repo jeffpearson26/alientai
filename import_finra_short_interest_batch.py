@@ -4,7 +4,7 @@ import argparse,csv,json,re
 from datetime import datetime,timezone
 from pathlib import Path
 from finra_short_interest_calendar import publication_date
-from import_finra_short_interest import normalize
+from import_finra_short_interest import normalize,number
 PATTERN=re.compile(r"^shrt(\d{8})\.csv$",re.I)
 def main()->None:
  p=argparse.ArgumentParser();p.add_argument("--input-dir",type=Path,required=True);p.add_argument("--output",type=Path,required=True);a=p.parse_args()
@@ -17,7 +17,9 @@ def main()->None:
   with path.open(newline="",encoding="utf-8-sig") as h:
    for raw in csv.DictReader(h,delimiter="|"):
     row=normalize(raw,symbol_column="symbolCode",shares_column="currentShortPositionQuantity",settlement_date=settlement.isoformat(),publication_timestamp_utc=available)
-    if row: out.append(row)
+    if row:
+     row.update({'short_interest_previous_shares':number(raw.get('previousShortPositionQuantity')),'short_interest_average_daily_volume':number(raw.get('averageDailyVolumeQuantity')),'short_interest_days_to_cover':number(raw.get('daysToCoverQuantity')),'short_interest_change_percent':number(raw.get('changePercent'))})
+     out.append(row)
   files.append({"file":path.name,"settlement_date":settlement.isoformat(),"available_at_utc":available})
  if not files: raise ValueError("no FINRA short-interest files found")
  a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text("".join(json.dumps(x,sort_keys=True)+"\n" for x in out),encoding="utf-8")

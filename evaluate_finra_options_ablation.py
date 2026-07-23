@@ -6,7 +6,7 @@ from pathlib import Path
 import lightgbm as lgb
 import numpy as np
 BASE=["technical_rsi_2","technical_rsi_14","technical_atr14_pct","technical_adx14","technical_bollinger_width_pct","technical_relative_volume_10_vs_20","technical_macd_histogram_pct","option_call_volume","option_put_call_volume_ratio","option_call_open_interest","option_put_call_open_interest_ratio","option_volume_open_interest_ratio","option_near_money_call_iv"]
-FINRA=["short_interest_shares","short_interest_age_calendar_days","short_interest_available"]
+FINRA=["short_interest_days_to_cover","short_interest_shares_to_average_volume_ratio","short_interest_change_percent","short_interest_age_calendar_days","short_interest_available"]
 def read(p): return [json.loads(x) for x in Path(p).read_text(encoding='utf8').splitlines() if x]
 def matrix(rows,names): return np.array([[float(r.get(n) or 0) for n in names] for r in rows],dtype=np.float32)
 def score(rows,pred):

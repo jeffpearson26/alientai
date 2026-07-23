@@ -18,7 +18,7 @@ def build(panel, short):
   symbol=str(r['symbol']).upper(); d=str(r['market_date']); v=by.get(symbol,[]); i=bisect_right([x[0] for x in v],d)-1
   item={'symbol':symbol,'market_date':d,'short_interest_available':i>=0,'research_only':True}
   if i>=0:
-   available,row=v[i]; item.update({'short_interest_shares':row['short_interest_shares'],'short_interest_settlement_date':row['settlement_date'],'short_interest_available_at_utc':row['available_at_utc'],'short_interest_age_calendar_days':( __import__('datetime').date.fromisoformat(d)-__import__('datetime').date.fromisoformat(available)).days})
+   available,row=v[i]; item.update({'short_interest_shares':row['short_interest_shares'],'short_interest_settlement_date':row['settlement_date'],'short_interest_available_at_utc':row['available_at_utc'],'short_interest_age_calendar_days':( __import__('datetime').date.fromisoformat(d)-__import__('datetime').date.fromisoformat(available)).days,**{n:row.get(n) for n in ('short_interest_previous_shares','short_interest_average_daily_volume','short_interest_days_to_cover','short_interest_change_percent')},'short_interest_shares_to_average_volume_ratio':(row['short_interest_shares']/row['short_interest_average_daily_volume'] if row.get('short_interest_average_daily_volume') else None)})
   out.append(item)
  return out
 def main():
