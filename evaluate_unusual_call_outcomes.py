@@ -23,8 +23,16 @@ def key(row: Mapping[str, Any]) -> tuple[str, str]:
 
 def join_option_outcomes(base_rows: Iterable[Mapping[str, Any]], option_rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
     base = {key(row): row for row in base_rows}
+    option_rows = list(option_rows)
+    # Historical call-history panels already contain features computed from
+    # strictly earlier snapshots.  Recomputing them after dropping raw volume
+    # would silently turn every signal into False.
+    if option_rows and all("call_volume_unusual" in row and "call_activity_history_count" in row for row in option_rows):
+        features = option_rows
+    else:
+        features = unusual_call_features(option_rows)
     output = []
-    for feature in unusual_call_features(option_rows):
+    for feature in features:
         row = base.get(key(feature))
         if row is not None:
             output.append({**row, **feature})
