@@ -350,7 +350,8 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
-1. Treat the existing five-day LightGBM target-2% result as `RESEARCH_HOLD`: its validation-locked 0.60 threshold yielded only two historical-test signals and -0.895205% average net return after the stated 0.25% cost. The target-3% S&P and Russell target-2% artifacts have encouraging locked-threshold historical results, but their historical test periods are already observed and must not be promoted. Require a separately pre-registered fresh period and realistic portfolio/tail evaluation before any shadow consideration.
+1. Use `PAPER_TRADING_PROMOTION_PROTOCOL.md` as the frozen promotion contract for every future candidate; do not relax it based on observed shadow outcomes.
+2. Treat the existing five-day LightGBM target-2% result as `RESEARCH_HOLD`: its validation-locked 0.60 threshold yielded only two historical-test signals and -0.895205% average net return after the stated 0.25% cost. The target-3% S&P and Russell target-2% artifacts have encouraging locked-threshold historical results, but their historical test periods are already observed and must not be promoted. Require a separately pre-registered fresh period and realistic portfolio/tail evaluation before any shadow consideration.
 2. Complete the Phase 2 coverage and timestamp audit across premarket, options, news, transcripts, fundamentals, insider, short-interest, and regime data.
 2. Reconcile the four unavailabilities in the completed transcript/premarket manifests and document their handling policy.
 3. Preserve the premarket promotion gate result as `RESEARCH_HOLD`; do not run natural-universe expansion or enable trading from this matched-case result.
