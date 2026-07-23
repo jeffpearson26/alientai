@@ -142,6 +142,7 @@ Large premarket collectors enforce free-space floors on the archive drive: 6 GB 
 ## Important current findings
 
 - The existing five-day S&P LightGBM target-2% artifact is `RESEARCH_HOLD`. The new report-only locked-threshold audit selects 0.60 from validation (44 signals), then finds only two matching historical test signals with -0.895205% average net return after the stated 0.25% cost. Do not promote or integrate it; require a separately pre-registered fresh period before reconsidering it.
+- The locked-threshold S&P target-3% and Russell target-2% five-day LightGBM reports are research hypotheses only. They show encouraging historical test metrics, but the historical test period is already observed and their portfolio tail/concentration behavior has not been audited. Do not treat either as a model selection or shadow-ranking decision.
 - Natural frequency of a 10% five-day S&P winner in the evaluation universe: approximately 3.30%.
 - Highest-ranked reverse-lookup slices reached approximately 8.7% to 12.5% exceptional-winner frequency, roughly 2.6 to 3.8 times enrichment.
 - This is not yet a deployable strategy: median returns were often negative and approximate drawdowns were excessive.
