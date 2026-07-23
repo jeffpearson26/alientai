@@ -15,7 +15,7 @@ from download_alpha_vantage_historical_options import ROOT, run
 def read_symbols(path: Path) -> list[str]:
     symbols = []
     for line in path.read_text(encoding="utf-8").splitlines():
-        symbol = line.strip().upper()
+        symbol = line.lstrip("\ufeff").strip().upper()
         if symbol and not symbol.startswith("#"):
             symbols.append(symbol)
     return list(dict.fromkeys(symbols))

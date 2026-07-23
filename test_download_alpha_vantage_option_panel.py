@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from download_alpha_vantage_option_panel import market_weekdays, panel_requests
+from download_alpha_vantage_option_panel import market_weekdays, panel_requests, read_symbols
 
 
 class OptionPanelDownloaderTests(unittest.TestCase):
@@ -18,6 +20,12 @@ class OptionPanelDownloaderTests(unittest.TestCase):
     def test_rejects_reversed_dates(self):
         with self.assertRaises(ValueError):
             market_weekdays("2026-07-22", "2026-07-20")
+
+    def test_strips_utf8_bom_from_first_symbol(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "symbols.txt"
+            path.write_text("\ufeffAAA\nBBB\n", encoding="utf-8")
+            self.assertEqual(["AAA", "BBB"], read_symbols(path))
 
 
 if __name__ == "__main__":
