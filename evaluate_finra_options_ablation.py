@@ -5,6 +5,7 @@ from datetime import date,timedelta
 from pathlib import Path
 import lightgbm as lgb
 import numpy as np
+from alientai_v2.research.rare_signal_gate import evaluate_rare_signal_gate
 BASE=["technical_rsi_2","technical_rsi_14","technical_atr14_pct","technical_adx14","technical_bollinger_width_pct","technical_relative_volume_10_vs_20","technical_macd_histogram_pct","option_call_volume","option_put_call_volume_ratio","option_call_open_interest","option_put_call_open_interest_ratio","option_volume_open_interest_ratio","option_near_money_call_iv"]
 FINRA=["short_interest_days_to_cover","short_interest_shares_to_average_volume_ratio","short_interest_change_percent","short_interest_age_calendar_days","short_interest_available"]
 def read(p): return [json.loads(x) for x in Path(p).read_text(encoding='utf8').splitlines() if x]
@@ -13,7 +14,7 @@ def score(rows,pred):
  by={}
  for r,s in zip(rows,pred): by.setdefault(r['market_date'],[]).append((float(s),r))
  picked=[max(v,key=lambda x:x[0])[1] for v in by.values()]
- net=np.array([float(x['label_forward_return_5d_pct'])-.25 for x in picked]);return {"signals":len(picked),"mean_net_return_pct":round(float(net.mean()),6),"median_net_return_pct":round(float(np.median(net)),6),"win_rate_after_cost":round(float((net>0).mean()),6)}
+ net=np.array([float(x['label_forward_return_5d_pct'])-.25 for x in picked]); curve=np.cumsum(net); metrics={"signals":len(picked),"mean_net_return_pct":round(float(net.mean()),6),"median_net_return_pct":round(float(np.median(net)),6),"win_rate_after_cost":round(float((net>0).mean()),6),"fifth_percentile_net_return_pct":round(float(np.percentile(net,5)),6),"worst_trade_net_return_pct":round(float(net.min()),6),"approximate_cohort_max_drawdown_pct":round(float((curve-np.maximum.accumulate(curve)).min()),6),"largest_symbol_signal_share":round(max(sum(x['symbol']==s for x in picked) for s in {x['symbol'] for x in picked})/len(picked),6)};metrics['rare_signal_gate']=evaluate_rare_signal_gate(metrics);return metrics
 def main():
  p=argparse.ArgumentParser();p.add_argument('--input',required=True);p.add_argument('--output',required=True);a=p.parse_args(); rows=read(a.input);dates=sorted({r['market_date'] for r in rows});a1=dates[int(len(dates)*.6)];a2=dates[int(len(dates)*.8)]; e1=(date.fromisoformat(a1)+timedelta(days=7)).isoformat();e2=(date.fromisoformat(a2)+timedelta(days=7)).isoformat();train=[r for r in rows if r['market_date']<a1];val=[r for r in rows if e1<=r['market_date']<a2];test=[r for r in rows if r['market_date']>=e2]
  y=lambda x:np.array([float(r['label_forward_return_5d_pct'])>=10 for r in x],dtype=np.int32)
