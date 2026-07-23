@@ -86,7 +86,19 @@ def fetch_chain(symbol: str, day: str, api_key: str) -> Dict[str, Any]:
 
 def is_transient_error(error: Exception) -> bool:
     text = str(error).lower()
-    return any(token in text for token in ("http 429", "http 500", "http 502", "http 503", "http 504", "timed out", "connection reset"))
+    return any(
+        token in text
+        for token in (
+            "http 429",
+            "http 500",
+            "http 502",
+            "http 503",
+            "http 504",
+            "timed out",
+            "connection reset",
+            "chunkedencodingerror",
+        )
+    )
 
 
 def fetch_chain_with_retry(symbol: str, day: str, api_key: str, attempts: int = 4) -> Dict[str, Any]:

@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from download_alpha_vantage_historical_options import archive_path, event_requests, run, safe_error
+from download_alpha_vantage_historical_options import archive_path, event_requests, is_transient_error, run, safe_error
 
 
 class HistoricalOptionsDownloaderTests(unittest.TestCase):
@@ -35,6 +35,9 @@ class HistoricalOptionsDownloaderTests(unittest.TestCase):
 
     def test_error_redacts_key(self):
         self.assertNotIn("SECRET", safe_error("bad SECRET", "SECRET"))
+
+    def test_chunked_encoding_errors_are_retryable(self):
+        self.assertTrue(is_transient_error(RuntimeError("ChunkedEncodingError")))
 
 
 if __name__ == "__main__":
