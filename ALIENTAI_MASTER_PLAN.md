@@ -350,7 +350,8 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
-1. Complete the Phase 2 coverage and timestamp audit across premarket, options, news, transcripts, fundamentals, insider, short-interest, and regime data.
+1. Treat the existing five-day LightGBM target-2% result as `RESEARCH_HOLD`: its validation-locked 0.60 threshold yielded only two historical-test signals and -0.895205% average net return after the stated 0.25% cost. Do not promote, score, retrain, or integrate it until a separately pre-registered fresh period is available.
+2. Complete the Phase 2 coverage and timestamp audit across premarket, options, news, transcripts, fundamentals, insider, short-interest, and regime data.
 2. Reconcile the four unavailabilities in the completed transcript/premarket manifests and document their handling policy.
 3. Preserve the premarket promotion gate result as `RESEARCH_HOLD`; do not run natural-universe expansion or enable trading from this matched-case result.
 4. Audit labels, feature availability, slippage, and cost assumptions before feature-family joins.
@@ -394,6 +395,7 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-23: Added the pure, fail-closed `contextual_options_shadow_policy.py` component. It has no network, broker, order, or settings-write dependency; it requires a complete single-day input universe, selects at most five unusual-call candidates within the daily top technical-score quartile, sets the execution decision to `AVOID`, and supplies only a separate `shadow_research_decision` for a future journal integration. This freezes the research hypothesis without activating it. Live shadow journaling remains blocked until point-in-time current option snapshots and daily technical scores are supplied by a dedicated, tested adapter.
 - 2026-07-23: Added `contextual_options_shadow_adapter.py`, a validation-only adapter boundary for future prospective data. It requires at least 400 unique symbols for exactly one market date and at least 90% of rows with ten prior call-volume observations; otherwise it fails closed. It produces a reviewable research payload only and cannot contact a provider, start the engine, journal a signal, write settings, or execute an order. This completes the safe policy/adapter boundary; the remaining blocker is a separately reviewed collector that can supply a complete current same-day panel.
 - 2026-07-23: Added and tested `download_alpha_vantage_option_panel.py`, a resumable, credential-safe generic symbol/date options-panel collector that reuses the shared archive implementation. Planned next collection: extend the existing natural S&P archive from 2026-07-03 through 2026-07-22. This bounded extension supplies recent history for a later genuinely prospective shadow panel; it does not create a signal, journal entry, paper order, or live order.
+- 2026-07-23: Added and tested `audit_lightgbm_5day_holdout.py`, a report-only auditor that freezes a five-day LightGBM threshold from validation before looking up the matching historical test metric. For the existing S&P target-2% report, the validation-selected 0.60 threshold had 44 validation signals but only two test signals, with -0.895205% average net return after the stated 0.25% cost. This overturns the prior test-selected headline result; status is `RESEARCH_HOLD`. The generated audit is ignored research output and no model, data, setting, or execution behavior changed.
 
 ## Direction-change log
 
