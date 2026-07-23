@@ -258,6 +258,8 @@ Neither is promotable. The technical-plus-options model's daily top-1 had +1.348
 
 `download_alpha_vantage_option_panel.py` is the reusable bounded collector for a complete S&P symbol/date panel. It reads an explicit symbols file and inclusive date range, uses the existing credential-safe `run` archive function, skips prior completed/unavailable entries, and writes only compressed raw option snapshots plus a resumable manifest. The planned forward-history extension is 2026-07-03 through 2026-07-22 into the existing `D:\AlientAI\Data\AlphaVantage_2026\historical_options_natural_sp500_2026` archive. Do not start another collector concurrently. On completion, compile the extended feature panel and use a separate, point-in-time daily technical panel builder before calling the validation-only shadow adapter.
 
+The July 3–22 extension completed on 2026-07-23: the shared archive manifest reports 51,619 completed requests, 33 unavailable requests, and zero failures. The raw archive is ready, but `sp500_full_rows.jsonl` currently ends on 2026-07-01. Do not compile or evaluate the July 3–22 option rows against that stale base panel. First build a complete point-in-time daily technical/label panel through the extension dates, then compile the matching option features and validate it through the research-only adapter.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
