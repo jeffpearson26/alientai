@@ -29,6 +29,15 @@ def rows_newer_than(rows: Iterable[Mapping[str, Any]], latest_ms: int | None) ->
     return [dict(row) for row in rows if int(row.get("datetime_ms") or 0) > boundary]
 
 
+def remote_symbol(rows: Iterable[Mapping[str, Any]], fallback: str) -> str:
+    """Use the CSV's original symbol, not its filename-safe dash variant."""
+    for row in rows:
+        value = str(row.get("symbol") or "").strip().upper()
+        if value:
+            return value
+    return fallback.strip().upper()
+
+
 def fetch_latest_ms(supabase_url: str, service_key: str, table: str, symbol: str) -> int | None:
     response = requests.get(
         supabase_url.rstrip("/") + f"/rest/v1/{table}",
@@ -80,7 +89,8 @@ def main() -> None:
 
     results = []
     for index, path in enumerate(files, 1):
-        symbol, rows = parse_daily_csv(path)
+        filename_symbol, rows = parse_daily_csv(path)
+        symbol = remote_symbol(rows, filename_symbol)
         latest = fetch_latest_ms(url, key, args.table, symbol)
         new_rows = rows_newer_than(rows, latest)
         uploaded = 0

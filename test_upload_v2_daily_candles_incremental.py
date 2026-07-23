@@ -1,6 +1,6 @@
 import unittest
 
-from upload_v2_daily_candles_incremental import DEFAULT_SP500_INPUT_DIR, rows_newer_than
+from upload_v2_daily_candles_incremental import DEFAULT_SP500_INPUT_DIR, remote_symbol, rows_newer_than
 
 
 class IncrementalDailyUploaderTests(unittest.TestCase):
@@ -14,6 +14,9 @@ class IncrementalDailyUploaderTests(unittest.TestCase):
     def test_missing_remote_history_keeps_all_valid_rows(self):
         rows = [{"datetime_ms": 10}, {"datetime_ms": 20}]
         self.assertEqual(rows_newer_than(rows, None), rows)
+
+    def test_remote_symbol_preserves_dot_share_class(self):
+        self.assertEqual(remote_symbol([{"symbol": "BRK.B"}], "BRK-B"), "BRK.B")
 
 
 if __name__ == "__main__":
