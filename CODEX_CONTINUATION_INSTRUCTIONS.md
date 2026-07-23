@@ -244,6 +244,10 @@ The chronological held-out matched discovery ablation reports are under `data_v2
 
 Options improved the top-5% matched precision from 31.42% to 41.59%. This is promising hypothesis-generation evidence only. It cannot be treated as a probability, expected return, or trade criterion because the input is matched case-control sampling. Do not promote it. The next research requirement is an independently time-valid natural-universe panel with matching option features, followed by calibrated, cost-adjusted, tail- and drawdown-constrained evaluation.
 
+Natural-universe gate completed 2026-07-23: the bounded 2026 collector accounted for all 44,709 requests (44,683 completed, 26 unavailable, zero failures). `compile_historical_option_features.py` produced `data_v2\rcef_research\natural_option_features_2026.jsonl` with 44,683 rows. Reports are `data_v2\rcef_research\natural_options_2026_evaluation.json` and `data_v2\rcef_research\unusual_call_outcomes_2026.json`.
+
+Neither is promotable. The technical-plus-options model's daily top-1 had +1.348659% mean net return but a -0.267803% median, 46.875% post-cost win rate, -15.214847% fifth-percentile outcome, and -50.164499% approximate drawdown. The unusual-call rule was modestly enriched versus the natural universe (4.9677% vs. 3.4756% exceptional-winner rate; +0.147209% vs. +0.042264% mean net return), but had a -0.091622% median, 49.081% post-cost win rate, -27.693938% worst trade, and -28.770658% drawdown. Preserve options as a conditional feature family for future ablations; do not use either result as a standalone selector or trading input.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
