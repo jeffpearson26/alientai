@@ -254,6 +254,8 @@ Neither is promotable. The technical-plus-options model's daily top-1 had +1.348
 
 `alientai_v2/research/contextual_options_shadow_policy.py` freezes the candidate logic without wiring it into runtime: complete same-day input only; unusual public call activity; daily top technical-score quartile; maximum five candidates. Every emitted row keeps `decision="AVOID"` and uses `shadow_research_decision="BUY_CANDIDATE"`; it has no broker, order, network, or settings-write path. Do not integrate it into `engine.py` until a point-in-time current-data adapter provides complete same-day option activity and technical scores, with a dedicated test and a new review of the prospective-shadow gate.
 
+`contextual_options_shadow_adapter.py` is the validation-only boundary for that future current-data feed. It accepts a local JSONL panel only if it contains one market date, at least 400 unique symbols, all required score/unusualness/history fields, and at least 90% with ten prior call-volume observations. It produces a `research_payload_ready` JSON artifact but neither contacts a provider nor writes to the shadow journal. The current live Schwab options engine is insufficient because it intentionally scans only a small configured basket; do not use it as the complete-universe source.
+
 ### 5. Build the rare-signal selector
 
 Jeff prefers a few outstanding opportunities over many mediocre picks, but the system must allow multiple signals when several independently meet the same stringent standard. Calibrate probabilities on the natural universe. Evaluate top fractions and minimum sample sizes. Report mean, median, win rate after costs, tail loss, drawdown, turnover, symbol concentration, and regime stability.
