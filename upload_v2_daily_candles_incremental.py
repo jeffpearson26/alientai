@@ -11,7 +11,6 @@ from typing import Any, Iterable, Mapping
 import requests
 
 from upload_v2_daily_candles_to_supabase import (
-    DEFAULT_INPUT_DIR,
     ENV_PATH,
     env_value,
     load_env_file,
@@ -22,6 +21,7 @@ from upload_v2_daily_candles_to_supabase import (
 
 
 ROOT = Path(__file__).resolve().parent
+DEFAULT_SP500_INPUT_DIR = ROOT / "data_v2" / "sp500_daily_schwab_max_history"
 
 
 def rows_newer_than(rows: Iterable[Mapping[str, Any]], latest_ms: int | None) -> list[dict[str, Any]]:
@@ -55,7 +55,7 @@ def chunks(rows: list[dict[str, Any]], size: int) -> Iterable[list[dict[str, Any
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Incremental daily-candle upload; defaults to dry-run.")
-    parser.add_argument("--input-dir", type=Path, default=DEFAULT_INPUT_DIR)
+    parser.add_argument("--input-dir", type=Path, default=DEFAULT_SP500_INPUT_DIR)
     parser.add_argument("--table", default="v2_daily_candles")
     parser.add_argument("--only-symbol", default="")
     parser.add_argument("--limit", type=int, default=0)
