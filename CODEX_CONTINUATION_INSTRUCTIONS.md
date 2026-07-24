@@ -396,6 +396,8 @@ The first fixed capacity test (one, two, and three concurrent positions) did not
 
 The current AI/semiconductor thematic basket experiment is negative. `research_universes/ai_semiconductor_screen_2026.txt` is a documented current basket only, not historical membership. Across fixed 40%/50%/60% chronological splits, the top-quarter contextual model had 46.67%, 42.86%, and 36.36% win rates with too few signals and negative medians in every split. Do not create a sector-specific AI/semiconductor version of the model from this result.
 
+`FROZEN_CONTEXTUAL_OPTIONS_STUDY.md` is now the controlling low-cost prospective-study protocol. Do not restart broad collectors or tune this hypothesis. Generate only non-executing complete-universe payloads when matching same-day local Schwab technical and option panels are available, evaluate only five-session local-Schwab outcomes, and use the existing prospective gate. The study ends at 30 completed candidates across ten decision dates; a pass requires separate human risk/paper-trading review, while a failure ends this hypothesis without post-hoc changes.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
