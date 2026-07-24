@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
@@ -8,6 +10,7 @@ from train_matched_winner_premarket_ablation import (
     PREMARKET_FEATURES,
     join_feature_rows,
     join_open_entry_labels,
+    file_sha256,
     promotion_gate,
     ranked_return_slices,
     technical_features,
@@ -16,6 +19,15 @@ from train_matched_winner_premarket_ablation import (
 
 
 class MatchedWinnerPremarketAblationTests(unittest.TestCase):
+    def test_file_sha256_is_stable_and_content_sensitive(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "artifact.txt"
+            path.write_text("first", encoding="utf-8")
+            first = file_sha256(path)
+            self.assertEqual(first, file_sha256(path))
+            path.write_text("second", encoding="utf-8")
+            self.assertNotEqual(first, file_sha256(path))
+
     def test_join_requires_full_event_identity(self):
         base = [
             {"study_event_id": "e", "study_role": "winner", "symbol": "AAA", "market_date": "2024-01-02"},

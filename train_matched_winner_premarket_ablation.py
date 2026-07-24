@@ -3,6 +3,7 @@ from __future__ import annotations
 """Compare technical, premarket, and combined matched-case discovery models."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
@@ -27,6 +28,15 @@ PREMARKET_FEATURES = [
     "premarket_volume", "premarket_typical_prior_volume", "premarket_relative_volume",
     "premarket_dollar_volume", "premarket_vwap", "premarket_last_vs_vwap_pct",
 ]
+
+
+def file_sha256(path: Path) -> str:
+    """Return a stable identity for reproducible research artifacts."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def has_standard_open_entry_session(label: Mapping[str, Any]) -> bool:
@@ -242,6 +252,7 @@ def fit_experiment(
             rows, test_idx, predict(test_idx), round_trip_cost_pct,
         ),
         "top_features": importance[:30], "model_path": str(destination),
+        "model_sha256": file_sha256(destination),
     }
 
 
@@ -291,6 +302,11 @@ def main() -> None:
         "round_trip_cost_pct": args.round_trip_cost_pct,
         "base_rows": str(args.base_rows), "premarket_features": str(args.premarket_features),
         "premarket_labels": str(args.premarket_labels),
+        "input_artifacts": {
+            "base_rows_sha256": file_sha256(args.base_rows),
+            "premarket_features_sha256": file_sha256(args.premarket_features),
+            "premarket_labels_sha256": file_sha256(args.premarket_labels),
+        },
         "label_coverage": label_coverage, "feature_coverage": coverage,
         "split": split, "experiments": experiments,
         "premarket_promotion_gate": promotion_gate(experiments),

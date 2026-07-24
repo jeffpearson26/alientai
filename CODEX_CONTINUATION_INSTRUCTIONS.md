@@ -358,6 +358,8 @@ Leave them alone. Stage explicit filenames, never `git add -A`, and inspect the 
 
 The trainer now applies that exclusion itself. The corrected July 24 rerun still returns `RESEARCH_HOLD`; do not retry thresholds or launch natural-universe premarket collection from this already-observed matched study. A materially new, preregistered data scope is required before revisiting the family.
 
+The regenerated report fingerprints its three input datasets and saved model artifacts with SHA-256. Treat any premarket result without those identities as nonreproducible and ineligible for promotion review.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
