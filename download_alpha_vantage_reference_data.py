@@ -28,6 +28,7 @@ def requests_to_archive(listing_dates: List[str] | None = None) -> List[Tuple[st
         ("ipo_calendar", {"function": "IPO_CALENDAR"}),
     ]
     for listing_date in listing_dates or []:
+        listing_date = str(listing_date).strip().lstrip("\ufeff")
         try:
             datetime.strptime(listing_date, "%Y-%m-%d")
         except ValueError as exc:
@@ -92,7 +93,7 @@ def main() -> None:
     if not api_key:
         raise RuntimeError("ALPHA_VANTAGE_API_KEY is required")
     try:
-        listing_dates = args.listing_dates_file.read_text(encoding="utf-8").split() if args.listing_dates_file else None
+        listing_dates = args.listing_dates_file.read_text(encoding="utf-8-sig").split() if args.listing_dates_file else None
         result = run(args.output, api_key, listing_dates=listing_dates, delay_seconds=args.delay_seconds)
     except Exception as exc:
         raise RuntimeError(safe_message(exc, api_key)) from exc

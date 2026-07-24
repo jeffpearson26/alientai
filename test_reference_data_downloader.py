@@ -22,6 +22,10 @@ class ReferenceDataDownloaderTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             requests_to_archive(["June 30 2020"])
 
+    def test_accepts_bom_prefixed_date_from_text_file(self):
+        names = {name for name, _ in requests_to_archive(["\ufeff2020-06-30"])}
+        self.assertIn("listing_status_active_2020-06-30", names)
+
     def test_archives_compressed_content_with_hash(self):
         with TemporaryDirectory() as directory:
             with patch("download_alpha_vantage_reference_data.fetch", return_value=b"symbol,name\nIBM,IBM\n"):
