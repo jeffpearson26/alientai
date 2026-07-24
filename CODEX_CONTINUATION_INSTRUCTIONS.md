@@ -394,6 +394,8 @@ The first fixed capacity test (one, two, and three concurrent positions) did not
 
 `contextual_options_stop_evaluator.py` is a research-only fixed-stop diagnostic. It uses local Schwab OHLC data, handles adverse opening gaps conservatively, and leaves original position capacity unchanged so an early stop cannot create extra entries optimistically. The initial -5%, -7.5%, and -10% stop test on the fixed 50% split did not pass: drawdowns were -33.61%, -27.04%, and -34.98%. Do not apply these stop levels to `engine.py` or settings based on this result.
 
+The current AI/semiconductor thematic basket experiment is negative. `research_universes/ai_semiconductor_screen_2026.txt` is a documented current basket only, not historical membership. Across fixed 40%/50%/60% chronological splits, the top-quarter contextual model had 46.67%, 42.86%, and 36.36% win rates with too few signals and negative medians in every split. Do not create a sector-specific AI/semiconductor version of the model from this result.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

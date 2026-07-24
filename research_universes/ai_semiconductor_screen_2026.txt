@@ -1,0 +1,19 @@
+# Exploratory current thematic basket only; not historical index membership.
+# Semiconductor design/equipment plus large-cap AI infrastructure/software names.
+AMD
+AMAT
+AMZN
+ANET
+AVGO
+CDNS
+GOOGL
+KLAC
+LRCX
+META
+MSFT
+MU
+NVDA
+ORCL
+PLTR
+SMCI
+SNPS
