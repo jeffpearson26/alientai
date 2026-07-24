@@ -372,6 +372,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `evaluate_contextual_options_prospective_gate.py` is the only route from completed contextual-options shadow outcomes toward paper-review consideration. It accepts only source-tagged Schwab review files, rejects duplicates/unapproved sources, requires 30 completed signals across at least 10 decision dates, and applies the rare-signal gate after the stated round-trip cost. Its output never enables paper trading; Jeff must separately review any future `RESEARCH_PASS`.
 
+`build_local_schwab_daily_technical_panel.py` creates a source-labeled, research-only technical panel from `data_v2\sp500_daily_schwab_max_history`, without updating Supabase. The July-22 run produced 483 rows. Raw natural options snapshots cover July 22, but `natural_option_features_2026.jsonl` ends July 2; a full history-aware compilation step is required before a new complete daily contextual-options panel or payload is allowed.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
