@@ -4,23 +4,44 @@ import argparse, csv, json
 from pathlib import Path
 from typing import Any
 
-def five_day_return(path: Path, as_of: str) -> float | None:
-    if not path.exists(): return None
+def observed_session_returns(path: Path, as_of: str, maximum_horizon: int = 5) -> dict[int, float]:
+    if not path.exists(): return {}
     with path.open(newline="",encoding="utf-8-sig") as f: rows=list(csv.DictReader(f))
     dates=[str(r.get("date") or "") for r in rows]
-    if as_of not in dates: return None
+    if as_of not in dates: return {}
     i=dates.index(as_of)
-    if i+5>=len(rows): return None
-    a,b=float(rows[i].get("close") or 0),float(rows[i+5].get("close") or 0)
-    return ((b/a)-1)*100 if a>0 and b>0 else None
+    entry=float(rows[i].get("close") or 0)
+    if entry <= 0: return {}
+    observed = {}
+    for horizon in range(1, maximum_horizon + 1):
+        if i + horizon >= len(rows):
+            break
+        exit_price=float(rows[i+horizon].get("close") or 0)
+        if exit_price > 0:
+            observed[horizon] = ((exit_price / entry) - 1) * 100
+    return observed
+
+
+def five_day_return(path: Path, as_of: str) -> float | None:
+    observed = observed_session_returns(path, as_of)
+    return observed.get(5) if observed else None
 
 def evaluate(payload: dict[str,Any], daily_dir: Path) -> dict[str,Any]:
     if payload.get("execution_enabled") is not False or not payload.get("research_only"):
         raise ValueError("payload must be explicitly research-only and execution-disabled")
     done=[]; pending=[]
     for item in payload.get("candidates") or []:
-        value=five_day_return(daily_dir/f"{item['symbol']}_schwab_1d_max.csv",str(item["market_date"]))
-        (pending if value is None else done).append({**item, "outcome_status":"PENDING_CANDLE_COVERAGE" if value is None else "COMPLETE", **({} if value is None else {"realized_return_pct":value})})
+        observed=observed_session_returns(daily_dir/f"{item['symbol']}_schwab_1d_max.csv",str(item["market_date"])) or {}
+        value=observed.get(5)
+        record={**item, "observed_future_sessions":len(observed)}
+        if observed:
+            record["interim_session_returns_pct"]={str(key): round(value, 6) for key, value in observed.items()}
+        if value is None:
+            record["outcome_status"]="PENDING_CANDLE_COVERAGE"
+            pending.append(record)
+        else:
+            record.update({"outcome_status":"COMPLETE", "realized_return_pct":value})
+            done.append(record)
     return {"status":"complete","research_only":True,"execution_enabled":False,"completed":len(done),"pending":len(pending),"mean_realized_return_pct":sum(x["realized_return_pct"] for x in done)/len(done) if done else None,"records":done,"pending_records":pending}
 def main()->None:
  p=argparse.ArgumentParser();p.add_argument("--payload",type=Path,required=True);p.add_argument("--daily-dir",type=Path,required=True);p.add_argument("--output",type=Path,required=True);a=p.parse_args()
