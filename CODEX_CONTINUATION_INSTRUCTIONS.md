@@ -376,6 +376,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `compile_natural_options_daily_panel.py` now provides that compilation for a requested later date. Its July-22 run yielded 483 rows, using only earlier compiled call-volume history plus raw snapshots strictly after the older history boundary. Join it to the equally sized local Schwab technical panel only as a historical backfill/research validation; do not count it toward the frozen prospective gate because the decision date was already observed when joined.
 
+`build_contextual_options_backfill_panel.py` is the exact-key, fingerprinted join/score validation path. It requires complete equal technical/options keys and applies only the frozen technical artifact. Its July-22 result is `BACKFILL_RESEARCH_ONLY` (22 unusual calls; five within the daily top technical quartile) and must never be written as a shadow payload or included in `evaluate_contextual_options_prospective_gate.py`.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
