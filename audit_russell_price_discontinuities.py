@@ -10,6 +10,7 @@ does not alter source candles or training labels.
 import argparse
 import csv
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -36,10 +37,26 @@ def read_candles(path: Path) -> list[dict[str, Any]]:
     return sorted(rows, key=lambda row: str(row.get("date") or ""))
 
 
-def find_discontinuities(symbol: str, candles: Iterable[dict[str, Any]], *, threshold_pct: float, horizon_days: int) -> list[dict[str, Any]]:
+def find_discontinuities(symbol: str, candles: Iterable[dict[str, Any]], *, threshold_pct: float, horizon_days: int, max_calendar_gap_days: int = 5) -> tuple[list[dict[str, Any]], int]:
     rows = list(candles)
+    dates = []
+    for row in rows:
+        try:
+            dates.append(date.fromisoformat(str(row.get("date") or "")))
+        except ValueError:
+            dates.append(None)
+    gap_prefix = [0] * len(rows)
+    for idx in range(1, len(rows)):
+        previous = dates[idx - 1]
+        current = dates[idx]
+        invalid_gap = previous is None or current is None or (current - previous).days <= 0 or (current - previous).days > max_calendar_gap_days
+        gap_prefix[idx] = gap_prefix[idx - 1] + int(invalid_gap)
     findings = []
+    skipped_discontinuous = 0
     for idx in range(len(rows) - horizon_days):
+        if gap_prefix[idx + horizon_days] != gap_prefix[idx]:
+            skipped_discontinuous += 1
+            continue
         start = safe_float(rows[idx].get("close"))
         end = safe_float(rows[idx + horizon_days].get("close"))
         if start <= 0 or end <= 0:
@@ -55,13 +72,14 @@ def find_discontinuities(symbol: str, candles: Iterable[dict[str, Any]], *, thre
                 "end_close": end,
                 "change_pct": round(change_pct, 6),
             })
-    return findings
+    return findings, skipped_discontinuous
 
 
-def audit(daily_dir: Path, symbols: Iterable[str], *, threshold_pct: float) -> dict[str, Any]:
+def audit(daily_dir: Path, symbols: Iterable[str], *, threshold_pct: float, max_calendar_gap_days: int = 5) -> dict[str, Any]:
     one_day: list[dict[str, Any]] = []
     five_day: list[dict[str, Any]] = []
     missing = []
+    skipped_discontinuous_windows = 0
     for symbol in symbols:
         path = daily_dir / f"{symbol.replace('/', '-').replace('.', '-')}_schwab_1d_max.csv"
         if not path.exists():
@@ -71,21 +89,28 @@ def audit(daily_dir: Path, symbols: Iterable[str], *, threshold_pct: float) -> d
         if not candles:
             missing.append(symbol)
             continue
-        one_day.extend(find_discontinuities(symbol, candles, threshold_pct=threshold_pct, horizon_days=1))
-        five_day.extend(find_discontinuities(symbol, candles, threshold_pct=threshold_pct, horizon_days=5))
+        findings, skipped = find_discontinuities(symbol, candles, threshold_pct=threshold_pct, horizon_days=1, max_calendar_gap_days=max_calendar_gap_days)
+        one_day.extend(findings)
+        skipped_discontinuous_windows += skipped
+        findings, skipped = find_discontinuities(symbol, candles, threshold_pct=threshold_pct, horizon_days=5, max_calendar_gap_days=max_calendar_gap_days)
+        five_day.extend(findings)
+        skipped_discontinuous_windows += skipped
     one_day.sort(key=lambda row: abs(float(row["change_pct"])), reverse=True)
     five_day.sort(key=lambda row: abs(float(row["change_pct"])), reverse=True)
     return {
         "status": "complete",
         "research_only": True,
         "threshold_pct": threshold_pct,
+        "max_calendar_gap_days": max_calendar_gap_days,
         "symbols_missing_or_empty": len(missing),
+        "discontinuous_windows_skipped": skipped_discontinuous_windows,
         "one_day_count": len(one_day),
         "five_day_count": len(five_day),
         "top_one_day_events": one_day[:100],
         "top_five_day_events": five_day[:100],
         "limitations": [
             "Extreme returns may be real market moves, splits, reverse splits, or data-quality issues.",
+            "Windows with a date gap larger than the configured limit are excluded rather than treated as fixed-session returns.",
             "This report identifies rows for provenance/adjustment review; it does not classify or remove them.",
         ],
     }
@@ -96,14 +121,15 @@ def main() -> None:
     parser.add_argument("--daily-dir", type=Path, default=DEFAULT_DAILY_DIR)
     parser.add_argument("--symbols-file", type=Path, default=DEFAULT_SYMBOLS)
     parser.add_argument("--threshold-pct", type=float, default=50.0)
+    parser.add_argument("--max-calendar-gap-days", type=int, default=5)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.threshold_pct <= 0:
-        raise ValueError("threshold-pct must be positive")
-    report = audit(args.daily_dir, load_symbols(args.symbols_file), threshold_pct=args.threshold_pct)
+    if args.threshold_pct <= 0 or args.max_calendar_gap_days < 1:
+        raise ValueError("threshold-pct and max-calendar-gap-days must be positive")
+    report = audit(args.daily_dir, load_symbols(args.symbols_file), threshold_pct=args.threshold_pct, max_calendar_gap_days=args.max_calendar_gap_days)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({key: report[key] for key in ("status", "one_day_count", "five_day_count", "symbols_missing_or_empty")}, indent=2))
+    print(json.dumps({key: report[key] for key in ("status", "one_day_count", "five_day_count", "discontinuous_windows_skipped", "symbols_missing_or_empty")}, indent=2))
 
 
 if __name__ == "__main__":

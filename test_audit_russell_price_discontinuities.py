@@ -13,8 +13,9 @@ class RussellPriceDiscontinuityTests(unittest.TestCase):
             {"date": "2026-01-05", "close": "16"},
             {"date": "2026-01-06", "close": "16"},
         ]
-        findings = find_discontinuities("TEST", candles, threshold_pct=50.0, horizon_days=1)
+        findings, skipped = find_discontinuities("TEST", candles, threshold_pct=50.0, horizon_days=1)
         self.assertEqual(len(findings), 1)
+        self.assertEqual(skipped, 0)
         self.assertEqual(findings[0]["start_date"], "2026-01-02")
         self.assertEqual(findings[0]["end_date"], "2026-01-05")
         self.assertEqual(findings[0]["change_pct"], 60.0)
@@ -25,7 +26,16 @@ class RussellPriceDiscontinuityTests(unittest.TestCase):
             {"date": "2026-01-05", "close": "10"},
             {"date": "2026-01-06", "close": "12"},
         ]
-        self.assertEqual(find_discontinuities("TEST", candles, threshold_pct=50.0, horizon_days=1), [])
+        self.assertEqual(find_discontinuities("TEST", candles, threshold_pct=50.0, horizon_days=1)[0], [])
+
+    def test_skips_long_date_gap_instead_of_calling_it_one_day_return(self):
+        candles = [
+            {"date": "2026-01-02", "close": "10"},
+            {"date": "2026-06-02", "close": "30"},
+        ]
+        findings, skipped = find_discontinuities("TEST", candles, threshold_pct=50.0, horizon_days=1)
+        self.assertEqual(findings, [])
+        self.assertEqual(skipped, 1)
 
     def test_reader_sorts_legacy_rows_before_comparing_adjacent_days(self):
         with tempfile.TemporaryDirectory() as tmp:
