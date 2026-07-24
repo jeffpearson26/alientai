@@ -356,6 +356,8 @@ Leave them alone. Stage explicit filenames, never `git add -A`, and inspect the 
 
 `audit_matched_premarket_labels.py` is the required first audit before any new matched-study premarket feature ablation. Its July 24 report found 28 unique nonstandard-session labels: nine have a first regular bar later than 09:30 ET and 20 have a final bar earlier than 16:00 ET (one row is in both groups). Arithmetic, date ordering, and row keys otherwise pass. Do not silently fill or relabel these observations. A future research panel must explicitly exclude those 28 rows or rebuild their intraday bars from a verified source, then rerun the audit before evaluating any technical/premarket interaction.
 
+The trainer now applies that exclusion itself. The corrected July 24 rerun still returns `RESEARCH_HOLD`; do not retry thresholds or launch natural-universe premarket collection from this already-observed matched study. A materially new, preregistered data scope is required before revisiting the family.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

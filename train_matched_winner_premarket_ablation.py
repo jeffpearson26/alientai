@@ -29,6 +29,18 @@ PREMARKET_FEATURES = [
 ]
 
 
+def has_standard_open_entry_session(label: Mapping[str, Any]) -> bool:
+    """Accept only labels with the intended 09:30-to-16:00 regular session bars."""
+    market_date = str(label.get("market_date") or "")
+    future_market_date = str(label.get("future_market_date") or "")
+    return (
+        bool(market_date)
+        and bool(future_market_date)
+        and str(label.get("premarket_entry_bar_et") or "") == f"{market_date} 09:30:00"
+        and str(label.get("premarket_exit_bar_et") or "") == f"{future_market_date} 16:00:00"
+    )
+
+
 def identity(row: Mapping[str, Any]) -> Tuple[str, str, str, str]:
     return (
         str(row.get("study_event_id") or ""), str(row.get("study_role") or ""),
@@ -76,9 +88,13 @@ def join_open_entry_labels(
             raise ValueError(f"duplicate premarket label identity: {key}")
         index[key] = row
     output = []
+    nonstandard_session_labels = 0
     for source in base_rows:
         label = index.get(identity(source))
         if label is None or not bool(label.get("premarket_label_available")):
+            continue
+        if not has_standard_open_entry_session(label):
+            nonstandard_session_labels += 1
             continue
         row = dict(source)
         row["study_label"] = int(bool(label.get("premarket_label_exceptional_winner")))
@@ -88,6 +104,7 @@ def join_open_entry_labels(
         output.append(row)
     return output, {
         "base_rows": len(base_rows), "tradable_label_rows": len(output),
+        "excluded_nonstandard_session_labels": nonstandard_session_labels,
         "tradable_label_coverage_pct": round(100.0 * len(output) / max(1, len(base_rows)), 6),
         "exceptional_winner_rate_pct": round(
             100.0 * sum(int(row["study_label"]) for row in output) / max(1, len(output)), 6,

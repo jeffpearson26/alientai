@@ -45,11 +45,24 @@ class MatchedWinnerPremarketAblationTests(unittest.TestCase):
             "study_event_id": "e", "study_role": "winner", "symbol": "AAA", "market_date": "2024-01-02",
             "premarket_label_available": True, "premarket_label_exceptional_winner": False,
             "premarket_forward_return_5d_pct": 2.0, "premarket_entry_price": 100, "premarket_exit_price": 102,
+            "premarket_entry_bar_et": "2024-01-02 09:30:00", "future_market_date": "2024-01-09",
+            "premarket_exit_bar_et": "2024-01-09 16:00:00",
         }]
         joined, coverage = join_open_entry_labels(base, labels)
         self.assertEqual(joined[0]["study_label"], 0)
         self.assertEqual(joined[0]["label_forward_return_5d_pct"], 2.0)
         self.assertEqual(coverage["tradable_label_rows"], 1)
+
+    def test_nonstandard_open_entry_session_is_excluded(self):
+        base = [{"study_event_id": "e", "study_role": "winner", "symbol": "AAA", "market_date": "2024-01-02"}]
+        labels = [{
+            "study_event_id": "e", "study_role": "winner", "symbol": "AAA", "market_date": "2024-01-02",
+            "future_market_date": "2024-01-09", "premarket_label_available": True,
+            "premarket_entry_bar_et": "2024-01-02 09:35:00", "premarket_exit_bar_et": "2024-01-09 16:00:00",
+        }]
+        joined, coverage = join_open_entry_labels(base, labels)
+        self.assertEqual(joined, [])
+        self.assertEqual(coverage["excluded_nonstandard_session_labels"], 1)
 
     def test_missing_open_entry_label_is_excluded_not_negative(self):
         base = [{"study_event_id": "e", "study_role": "winner", "symbol": "AAA", "market_date": "2024-01-02"}]
