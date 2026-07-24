@@ -19,7 +19,7 @@ from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
 ROOT = Path(__file__).resolve().parent
 ENDPOINTS = {
     "EARNINGS_ESTIMATES", "SHARES_OUTSTANDING", "INSTITUTIONAL_HOLDINGS",
-    "INCOME_STATEMENT", "BALANCE_SHEET", "CASH_FLOW", "OVERVIEW",
+    "INCOME_STATEMENT", "BALANCE_SHEET", "CASH_FLOW", "OVERVIEW", "SPLITS",
 }
 
 

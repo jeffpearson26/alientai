@@ -31,6 +31,13 @@ class FundamentalSnapshotDownloaderTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run(["IBM"], ["NOT_REAL"], "secret", Path(directory), delay=0)
 
+    def test_allows_split_history_endpoint(self):
+        with TemporaryDirectory() as directory:
+            with patch("download_alpha_vantage_fundamental_snapshots.fetch", return_value={"symbol": "IBM", "data": []}) as fetch:
+                result = run(["IBM"], ["SPLITS"], "secret", Path(directory), delay=0)
+        self.assertEqual(fetch.call_count, 1)
+        self.assertEqual(result["completed"], ["SPLITS|IBM"])
+
     def test_error_redacts_key(self):
         self.assertNotIn("SECRET", safe_error("bad SECRET", "SECRET"))
 

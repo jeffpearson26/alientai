@@ -92,6 +92,7 @@ def audit(daily_dir: Path, symbols: Iterable[str], *, factors: tuple[int, ...], 
         "symbols_missing_or_empty": len(missing),
         "discontinuous_rows_skipped": skipped_discontinuous,
         "candidate_count": len(candidates),
+        "candidate_symbols": sorted({str(row["symbol"]) for row in candidates}),
         "candidate_counts_by_factor_and_type": dict(sorted(by_factor.items())),
         "top_candidates": candidates[:100],
         "limitations": [
