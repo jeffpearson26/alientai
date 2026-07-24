@@ -380,6 +380,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 The July-23 full S&P option-snapshot collection completed cleanly on 2026-07-24: all 496 requested symbols were archived at `D:\AlientAI\Data\AlphaVantage_2026\historical_options_natural_sp500_2026`, with zero unavailable requests and zero failures. The process has exited. Do not compile it into a contextual panel or prospective payload yet: the point-in-time local Schwab daily source ends on July 22, so there is no same-date technical panel to join without mixing timing. When a local Schwab July-23 close becomes available, build the matching local technical panel first, then compile the July-23 option features with history strictly before that date, and use the dedicated validation-only adapter.
 
+`prepare_natural_event_news_requests.py` creates a deterministic, point-in-time news request list from a base research panel. The July 24 run produced 44,683 unique requests from `D:\AlientAI\Data\FINRA_Short_Interest\features\natural_options_finra_research_panel_2026.jsonl`, preserving `symbol`, `market_date`, and `as_of_utc` at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026\requests.jsonl`. A natural-news collector may use this list only with `download_alpha_vantage_event_news.py --role all`, writes raw archives only, and must never be connected to execution. Any later join must preserve the original cutoff and be evaluated as a separately pre-specified chronological research study.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
