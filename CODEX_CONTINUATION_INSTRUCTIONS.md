@@ -238,13 +238,13 @@ A further three-window rolling pre-test gate now requires every pre-test correla
 
 The required causal economic-value evaluation is now complete in `evaluate_lead_lag_economic_value.py`: it observes the source at close, enters the target at a later target-session open, exits at that target close, calibrates its signal threshold only on pre-test data, and subtracts a 0.25% round-trip cost. All 106 candidates were negative by held-out mean net return, with a -0.2274% median candidate mean. Do not promote this lead-lag inventory into any model, selector, paper account, or trading logic. Preserve it as a documented negative result; revisit only for a materially different, preregistered research design.
 
-### Active catalyst-data queue
+### Completed catalyst-data archives
 
 The full matched-winner study has 13,473 unique `(symbol, market_date)` observations. Its first Alpha Vantage archive only covered 687 symbol/date pairs for both historical options and time-valid news, so do not train a combined options/news model from that small subset.
 
-`download_alpha_vantage_event_news.py` is actively collecting full 14-day, as-of event news windows into `D:\AlientAI\Data\AlphaVantage_2026\event_news_sp500_full`. It is resumable through `manifest.json`; a provider-format normalization changes dots in share-class symbols to hyphens only in the outgoing request.
+`download_alpha_vantage_event_news.py` collected full 14-day, as-of event-news windows into `D:\AlientAI\Data\AlphaVantage_2026\event_news_sp500_full`. Its manifest is complete: 13,473 completed, zero unavailable, and zero failed. It remains resumable if a future separately authorized extension is required; a provider-format normalization changes dots in share-class symbols to hyphens only in the outgoing request.
 
-`run_full_catalyst_archive_queue.ps1` is a running fail-closed monitor. It will start the full historical-options collector only after the news manifest reaches `complete`; it stops if news reaches `failed_closed`. The planned options archive has 26,221 unique symbol/date requests and writes to `D:\AlientAI\Data\AlphaVantage_2026\historical_options_sp500_full`. Do not start a second collector while either job is running. Both are data-collection work only and never enable execution.
+`run_full_catalyst_archive_queue.ps1` is a fail-closed queue monitor, but it is not currently running. The full historical-options archive at `D:\AlientAI\Data\AlphaVantage_2026\historical_options_sp500_full` also completed: 26,221 completed, zero unavailable, and zero failed. Do not start either completed collector again unless a separately authorized extension is needed. Both archives remain research data only and never enable execution.
 
 ### Existing exceptional-winner baseline
 
