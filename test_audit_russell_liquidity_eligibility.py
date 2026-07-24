@@ -22,6 +22,17 @@ class RussellLiquidityEligibilityTests(unittest.TestCase):
         self.assertEqual(result["eligible_rows"], 6)
         self.assertEqual(result["five_day_returns_over_100pct"], 1)
 
+    def test_rejects_liquidity_window_with_long_date_gap(self):
+        candles = [
+            {"date": "2026-01-02", "close": "10", "volume": "100000"},
+            {"date": "2026-06-02", "close": "10", "volume": "100000"},
+            {"date": "2026-06-03", "close": "10", "volume": "100000"},
+        ]
+        result = eligibility_counts(candles, min_price=5.0, min_avg_dollar_volume=1_000_000.0, lookback_days=2)
+        self.assertEqual(result["checked_rows"], 2)
+        self.assertEqual(result["continuous_checked_rows"], 1)
+        self.assertEqual(result["eligible_rows"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
