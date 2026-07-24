@@ -15,6 +15,13 @@ class ReferenceDataDownloaderTests(unittest.TestCase):
         self.assertIn("listing_status_active", names)
         self.assertIn("listing_status_delisted", names)
 
+    def test_includes_dated_listing_snapshot_with_validated_date(self):
+        names_and_params = requests_to_archive(["2020-06-30"])
+        params = dict(names_and_params)["listing_status_active_2020-06-30"]
+        self.assertEqual(params["date"], "2020-06-30")
+        with self.assertRaises(ValueError):
+            requests_to_archive(["June 30 2020"])
+
     def test_archives_compressed_content_with_hash(self):
         with TemporaryDirectory() as directory:
             with patch("download_alpha_vantage_reference_data.fetch", return_value=b"symbol,name\nIBM,IBM\n"):
