@@ -384,6 +384,8 @@ The July-23 full S&P option-snapshot collection completed cleanly on 2026-07-24:
 
 The natural-news archive collector is active at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026`. It uses a 14-day lookback, 1,000-article maximum, and a 0.45-second delay (about 133 requests/minute, deliberately below Jeff's 150-requests/minute premium entitlement). Monitor only its manifest and `collect_natural_news_045.err` while it is active. Do not start a duplicate collector. If it reaches `complete` with no failed records, audit counts and raw file coverage before building a time-valid feature compiler; do not join it to a model or infer performance automatically. If it reaches `failed_closed`, report the exact manifest failure and do not restart blindly.
 
+`build_natural_news_research_panel.py` is the exact-key post-collection join. Supply the existing natural base panel and the output of `compile_historical_news_features.py`; it keys both sources by `(symbol, as_of_utc)`, preserves missing archive responses explicitly, and rejects duplicate or extra feature rows. Use only after the complete archive has been compiled; then perform a timing/coverage audit before any pre-specified chronological ablation. It cannot score, train, contact a provider, change settings, or execute anything.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
