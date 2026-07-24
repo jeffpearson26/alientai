@@ -388,6 +388,8 @@ The broad natural-news archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_ev
 
 `audit_natural_news_research_panel.py` is the required timing/coverage gate after the exact join. It requires unique `(symbol, as_of_utc)` keys, explicit missing-data reasons, and no latest visible article timestamp after the row cutoff. Its JSON report records coverage only. A successful audit does not establish predictive value; the next step remains a separately specified chronological ablation with costs and risk gates.
 
+Current highest-priority research lead: the frozen technical-context plus unusual-call portfolio produced positive mean and median net returns and over-50% post-cost wins at three fixed chronological calibration splits (40%, 50%, and 60%), but every result is `RESEARCH_HOLD` solely for approximate cohort drawdown worse than -20%. Treat this as a robustness clue, not a threshold-selection result or trading model. The next allowed experiment is a separately specified portfolio/risk design aimed at reducing drawdown, followed by prospective non-executing shadow evidence; do not alter engine behavior or paper-buy settings.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
