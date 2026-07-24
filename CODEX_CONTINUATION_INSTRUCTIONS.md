@@ -370,6 +370,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `audit_daily_price_source_alignment.py` found the Alpha Vantage daily source is systematically one Schwab session behind across the July-24 reference archive. It fails closed for same-day research use. Do not use Alpha Vantage daily dates to evaluate these prospective payloads unless a separately reviewed source-date reconciliation is completed.
 
+`evaluate_contextual_options_prospective_gate.py` is the only route from completed contextual-options shadow outcomes toward paper-review consideration. It accepts only source-tagged Schwab review files, rejects duplicates/unapproved sources, requires 30 completed signals across at least 10 decision dates, and applies the rare-signal gate after the stated round-trip cost. Its output never enables paper trading; Jeff must separately review any future `RESEARCH_PASS`.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

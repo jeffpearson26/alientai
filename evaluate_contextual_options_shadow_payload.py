@@ -42,7 +42,7 @@ def evaluate(payload: dict[str,Any], daily_dir: Path) -> dict[str,Any]:
         else:
             record.update({"outcome_status":"COMPLETE", "realized_return_pct":value})
             done.append(record)
-    return {"status":"complete","research_only":True,"execution_enabled":False,"completed":len(done),"pending":len(pending),"mean_realized_return_pct":sum(x["realized_return_pct"] for x in done)/len(done) if done else None,"records":done,"pending_records":pending}
+    return {"status":"complete","research_only":True,"execution_enabled":False,"source":"schwab_local_daily_csv","completed":len(done),"pending":len(pending),"mean_realized_return_pct":sum(x["realized_return_pct"] for x in done)/len(done) if done else None,"records":done,"pending_records":pending}
 def main()->None:
  p=argparse.ArgumentParser();p.add_argument("--payload",type=Path,required=True);p.add_argument("--daily-dir",type=Path,required=True);p.add_argument("--output",type=Path,required=True);a=p.parse_args()
  r=evaluate(json.loads(a.payload.read_text(encoding="utf-8")),a.daily_dir);a.output.write_text(json.dumps(r,indent=2)+"\n",encoding="utf-8");print(json.dumps({k:v for k,v in r.items() if k not in {"records","pending_records"}},indent=2))
