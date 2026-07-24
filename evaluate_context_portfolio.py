@@ -8,6 +8,7 @@ only later rows.  It does not make an already-explored data period prospective.
 """
 
 import argparse
+import hashlib
 import json
 from datetime import date, timedelta
 from pathlib import Path
@@ -20,6 +21,15 @@ from alientai_v2.research.rare_signal_gate import evaluate_rare_signal_gate
 from evaluate_matched_winner_full_universe import selection_metrics
 from evaluate_unusual_call_contexts import score_rows
 from evaluate_unusual_call_outcomes import join_option_outcomes, read_jsonl
+
+
+def file_sha256(path: Path) -> str:
+    """Return a stable artifact identity so a report can be reproduced later."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def split_chronologically(rows: Sequence[Mapping[str, Any]], calibration_fraction: float, embargo_calendar_days: int) -> tuple[list[Mapping[str, Any]], list[Mapping[str, Any]]]:
@@ -106,6 +116,14 @@ def main() -> None:
         "calibration_fraction": args.calibration_fraction,
         "embargo_calendar_days": args.embargo_calendar_days,
         "round_trip_cost_pct": args.round_trip_cost_pct,
+        "input_artifacts": {
+            "base_rows_path": str(args.base_rows),
+            "base_rows_sha256": file_sha256(args.base_rows),
+            "option_features_path": str(args.option_features),
+            "option_features_sha256": file_sha256(args.option_features),
+            "technical_model_path": str(args.technical_model),
+            "technical_model_sha256": file_sha256(args.technical_model),
+        },
         "results": evaluate_cutoffs(calibration, test, (0.25, 0.10, 0.05), args.max_open_positions, args.round_trip_cost_pct),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
