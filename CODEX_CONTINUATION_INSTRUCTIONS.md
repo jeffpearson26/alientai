@@ -382,6 +382,8 @@ The July-23 full S&P option-snapshot collection completed cleanly on 2026-07-24:
 
 `prepare_natural_event_news_requests.py` creates a deterministic, point-in-time news request list from a base research panel. The July 24 run produced 44,683 unique requests from `D:\AlientAI\Data\FINRA_Short_Interest\features\natural_options_finra_research_panel_2026.jsonl`, preserving `symbol`, `market_date`, and `as_of_utc` at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026\requests.jsonl`. A natural-news collector may use this list only with `download_alpha_vantage_event_news.py --role all`, writes raw archives only, and must never be connected to execution. Any later join must preserve the original cutoff and be evaluated as a separately pre-specified chronological research study.
 
+The natural-news archive collector is active at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026`. It uses a 14-day lookback, 1,000-article maximum, and 0.75-second delay. Monitor only its manifest and `collect_natural_news_relaunch.err` while it is active. Do not start a duplicate collector. If it reaches `complete` with no failed records, audit counts and raw file coverage before building a time-valid feature compiler; do not join it to a model or infer performance automatically. If it reaches `failed_closed`, report the exact manifest failure and do not restart blindly.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
