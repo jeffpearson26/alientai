@@ -392,6 +392,8 @@ Current highest-priority research lead: the frozen technical-context plus unusua
 
 The first fixed capacity test (one, two, and three concurrent positions) did not resolve the issue. One position reduced drawdown to -16.933569% but supplied only 8–12 signals, below the 30-signal minimum. Two and three positions had sufficient or near-sufficient samples in some splits but drawdowns roughly -25% to -30%. Do not adopt a capacity setting from this already-observed diagnostic; it rules out simple capacity reduction as the complete solution.
 
+`contextual_options_stop_evaluator.py` is a research-only fixed-stop diagnostic. It uses local Schwab OHLC data, handles adverse opening gaps conservatively, and leaves original position capacity unchanged so an early stop cannot create extra entries optimistically. The initial -5%, -7.5%, and -10% stop test on the fixed 50% split did not pass: drawdowns were -33.61%, -27.04%, and -34.98%. Do not apply these stop levels to `engine.py` or settings based on this result.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
