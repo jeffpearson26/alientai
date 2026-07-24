@@ -366,6 +366,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `evaluate_contextual_options_shadow_payload.py` now records interim observed session returns for pending payloads, but only emits `realized_return_pct` and counts a record complete at its fifth later session. Do not aggregate or promote interim observations.
 
+`download_alpha_vantage_daily_research_fallback.py` archives raw Alpha Vantage daily responses for an explicitly research-only payload to `D:\AlientAI\Data\AlphaVantage_2026\prospective_daily_research_fallback`. It is a source-separated fallback; never merge its rows with Schwab results or use it to fill missing Schwab candles. Its July 24 archive covers TEL, NXPI, CPRT, URI, and TSCO through July 23.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
