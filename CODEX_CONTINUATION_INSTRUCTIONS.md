@@ -386,6 +386,8 @@ The natural-news archive collector is active at `D:\AlientAI\Data\AlphaVantage_2
 
 `build_natural_news_research_panel.py` is the exact-key post-collection join. Supply the existing natural base panel and the output of `compile_historical_news_features.py`; it keys both sources by `(symbol, as_of_utc)`, preserves missing archive responses explicitly, and rejects duplicate or extra feature rows. Use only after the complete archive has been compiled; then perform a timing/coverage audit before any pre-specified chronological ablation. It cannot score, train, contact a provider, change settings, or execute anything.
 
+`audit_natural_news_research_panel.py` is the required timing/coverage gate after the exact join. It requires unique `(symbol, as_of_utc)` keys, explicit missing-data reasons, and no latest visible article timestamp after the row cutoff. Its JSON report records coverage only. A successful audit does not establish predictive value; the next step remains a separately specified chronological ablation with costs and risk gates.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
