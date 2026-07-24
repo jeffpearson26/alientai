@@ -374,6 +374,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `build_local_schwab_daily_technical_panel.py` creates a source-labeled, research-only technical panel from `data_v2\sp500_daily_schwab_max_history`, without updating Supabase. The July-22 run produced 483 rows. Raw natural options snapshots cover July 22, but `natural_option_features_2026.jsonl` ends July 2; a full history-aware compilation step is required before a new complete daily contextual-options panel or payload is allowed.
 
+`compile_natural_options_daily_panel.py` now provides that compilation for a requested later date. Its July-22 run yielded 483 rows, using only earlier compiled call-volume history plus raw snapshots strictly after the older history boundary. Join it to the equally sized local Schwab technical panel only as a historical backfill/research validation; do not count it toward the frozen prospective gate because the decision date was already observed when joined.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
