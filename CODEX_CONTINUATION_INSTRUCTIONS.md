@@ -390,6 +390,8 @@ The broad natural-news archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_ev
 
 Current highest-priority research lead: the frozen technical-context plus unusual-call portfolio produced positive mean and median net returns and over-50% post-cost wins at three fixed chronological calibration splits (40%, 50%, and 60%), but every result is `RESEARCH_HOLD` solely for approximate cohort drawdown worse than -20%. Treat this as a robustness clue, not a threshold-selection result or trading model. The next allowed experiment is a separately specified portfolio/risk design aimed at reducing drawdown, followed by prospective non-executing shadow evidence; do not alter engine behavior or paper-buy settings.
 
+The first fixed capacity test (one, two, and three concurrent positions) did not resolve the issue. One position reduced drawdown to -16.933569% but supplied only 8–12 signals, below the 30-signal minimum. Two and three positions had sufficient or near-sufficient samples in some splits but drawdowns roughly -25% to -30%. Do not adopt a capacity setting from this already-observed diagnostic; it rules out simple capacity reduction as the complete solution.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
