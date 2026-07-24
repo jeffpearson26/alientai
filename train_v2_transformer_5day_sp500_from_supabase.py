@@ -230,6 +230,30 @@ def fetch_daily_candles(
     return candles
 
 
+def has_contiguous_candle_window(
+    candles: Sequence[Dict[str, Any]], start_idx: int, end_idx: int, *, max_calendar_gap_days: int = 5,
+) -> bool:
+    """Reject a feature/label window when adjacent source rows are not near trading days.
+
+    Historical symbol files can contain long ticker-history gaps.  A fixed row
+    offset must never be called a fixed trading-session horizon across such a
+    gap.  Five calendar days permits ordinary weekends and long holiday
+    weekends while failing closed on larger discontinuities.
+    """
+    if start_idx < 0 or end_idx >= len(candles) or end_idx <= start_idx:
+        return False
+    limit_ms = max(1, int(max_calendar_gap_days)) * 86_400_000
+    previous = safe_int(candles[start_idx].get("datetime_ms"), 0)
+    if previous <= 0:
+        return False
+    for idx in range(start_idx + 1, end_idx + 1):
+        current = safe_int(candles[idx].get("datetime_ms"), 0)
+        if current <= previous or current - previous > limit_ms:
+            return False
+        previous = current
+    return True
+
+
 def rolling_mean(values: List[float], end_idx: int, days: int) -> float:
     start = end_idx - days + 1
     if start < 0:
@@ -347,6 +371,7 @@ def make_symbol_windows(
     horizon_days: int,
     min_history_days: int,
     step_days: int,
+    max_calendar_gap_days: int = 5,
 ) -> Tuple[List[np.ndarray], List[int], List[float], List[Dict[str, Any]]]:
     if len(candles) < min_history_days + horizon_days + 1:
         return [], [], [], []
@@ -365,6 +390,12 @@ def make_symbol_windows(
     for idx in range(start_idx, end_idx, step_days):
         start = idx - sequence_length + 1
         end = idx + 1
+
+        if not has_contiguous_candle_window(
+            candles, start, idx + horizon_days,
+            max_calendar_gap_days=max_calendar_gap_days,
+        ):
+            continue
 
         seq = features[start:end]
 
@@ -666,6 +697,7 @@ def main() -> None:
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--split-embargo-calendar-days", type=int, default=12)
+    parser.add_argument("--max-calendar-gap-days", type=int, default=5)
     parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
     parser.add_argument("--checkpoint-threshold", type=float, default=0.55)
     parser.add_argument("--checkpoint-minimum-signals", type=int, default=1000)
@@ -703,6 +735,7 @@ def main() -> None:
     print(f"Output dir: {OUT_DIR}")
     print(f"Sequence length: {args.sequence_length}")
     print(f"Horizon days: {args.horizon_days}")
+    print(f"Maximum calendar gap: {args.max_calendar_gap_days}")
     print(f"Epochs: {args.epochs}")
     print(f"Batch size: {args.batch_size}")
     print("This does NOT touch the V2 paper account.")
@@ -734,6 +767,7 @@ def main() -> None:
                 horizon_days=args.horizon_days,
                 min_history_days=args.min_history_days,
                 step_days=args.step_days,
+                max_calendar_gap_days=args.max_calendar_gap_days,
             )
 
             all_x.extend(x_list)
@@ -975,6 +1009,7 @@ def main() -> None:
         "input_size": int(x_train.shape[2]),
         "sequence_length": args.sequence_length,
         "horizon_days": args.horizon_days,
+        "max_calendar_gap_days": args.max_calendar_gap_days,
         "min_history_days": args.min_history_days,
         "step_days": args.step_days,
         "d_model": args.d_model,
