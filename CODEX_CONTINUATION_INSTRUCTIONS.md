@@ -378,6 +378,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `build_contextual_options_backfill_panel.py` is the exact-key, fingerprinted join/score validation path. It requires complete equal technical/options keys and applies only the frozen technical artifact. Its July-22 result is `BACKFILL_RESEARCH_ONLY` (22 unusual calls; five within the daily top technical quartile) and must never be written as a shadow payload or included in `evaluate_contextual_options_prospective_gate.py`.
 
+The July-23 full S&P option-snapshot collection completed cleanly on 2026-07-24: all 496 requested symbols were archived at `D:\AlientAI\Data\AlphaVantage_2026\historical_options_natural_sp500_2026`, with zero unavailable requests and zero failures. The process has exited. Do not compile it into a contextual panel or prospective payload yet: the point-in-time local Schwab daily source ends on July 22, so there is no same-date technical panel to join without mixing timing. When a local Schwab July-23 close becomes available, build the matching local technical panel first, then compile the July-23 option features with history strictly before that date, and use the dedicated validation-only adapter.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
