@@ -94,6 +94,7 @@ def audit(daily_dir: Path, symbols: Iterable[str], *, factors: tuple[int, ...], 
         "candidate_count": len(candidates),
         "candidate_symbols": sorted({str(row["symbol"]) for row in candidates}),
         "candidate_counts_by_factor_and_type": dict(sorted(by_factor.items())),
+        "all_candidates": candidates,
         "top_candidates": candidates[:100],
         "limitations": [
             "A split-like price ratio is not confirmation of a split, reverse split, or bad data.",
