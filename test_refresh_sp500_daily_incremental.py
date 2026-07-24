@@ -1,6 +1,8 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from refresh_sp500_daily_incremental import append_only
+from refresh_sp500_daily_incremental import append_only, symbols_before_date
 
 
 class IncrementalDailyRefreshTests(unittest.TestCase):
@@ -13,6 +15,13 @@ class IncrementalDailyRefreshTests(unittest.TestCase):
 
     def test_does_not_append_stale_data(self):
         self.assertEqual([{"date": "2026-07-22"}], append_only([{"date": "2026-07-22"}], [{"date": "2026-07-21"}]))
+
+    def test_selects_only_existing_stale_histories(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A_schwab_1d_max.csv").write_text("date\n2026-07-21\n", encoding="utf-8")
+            (root / "B_schwab_1d_max.csv").write_text("date\n2026-07-22\n", encoding="utf-8")
+            self.assertEqual(["A"], symbols_before_date(["A", "B", "C"], root, "2026-07-22"))
 
 
 if __name__ == "__main__":

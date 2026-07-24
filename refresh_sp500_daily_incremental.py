@@ -42,6 +42,18 @@ def append_only(existing: list[dict[str, str]], recent: list[dict[str, str]]) ->
     return existing + sorted(additions, key=lambda row: str(row.get("date") or ""))
 
 
+def symbols_before_date(symbols: list[str], output_dir: Path, before_date: str) -> list[str]:
+    """Return only existing local histories whose latest date is still stale."""
+    selected = []
+    for symbol in symbols:
+        path = output_dir / f"{symbol.replace('/', '-').replace('.', '-')}_schwab_1d_max.csv"
+        existing = read_existing(path)
+        latest = max((str(row.get("date") or "") for row in existing), default="")
+        if existing and latest < before_date:
+            selected.append(symbol)
+    return selected
+
+
 def fetch_recent(symbol: str) -> tuple[str, list[dict[str, Any]]]:
     last_error: Exception | None = None
     for variant in schwab_symbol_variants(symbol):
@@ -85,9 +97,12 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
     parser.add_argument("--delay", type=float, default=0.20)
     parser.add_argument("--max-symbols", type=int, default=0)
+    parser.add_argument("--only-before-date", default="", help="Resume only existing files older than YYYY-MM-DD.")
     parser.add_argument("--apply", action="store_true", help="Write new rows; without this, perform a remote dry run.")
     args = parser.parse_args()
     symbols = read_symbols(args.symbols_file)
+    if args.only_before_date:
+        symbols = symbols_before_date(symbols, args.output_dir, args.only_before_date)
     if args.max_symbols:
         symbols = symbols[:args.max_symbols]
     results, failures, additions = [], {}, 0
@@ -114,6 +129,7 @@ def main() -> None:
             time.sleep(args.delay)
     report = {"status": "complete", "research_only": True, "execution_enabled": False,
               "apply": args.apply, "symbols": len(symbols), "new_rows": additions,
+              "only_before_date": args.only_before_date or None,
               "failures": failures, "results": results}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "sp500_daily_incremental_refresh_summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

@@ -360,6 +360,10 @@ The trainer now applies that exclusion itself. The corrected July 24 rerun still
 
 The regenerated report fingerprints its three input datasets and saved model artifacts with SHA-256. Treat any premarket result without those identities as nonreproducible and ineligible for promotion review.
 
+## Daily-price refresh status
+
+On July 24, the local Schwab daily archive was renewed through 2026-07-22 for all 483 available S&P histories. `refresh_sp500_daily_incremental.py` is append-only and now supports `--only-before-date YYYY-MM-DD` to safely resume only stale existing files. It does not upload to Supabase. Do not treat one later close as a five-day outcome: the five July-21 contextual-options shadow observations remain pending until five subsequent trading sessions are available.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
