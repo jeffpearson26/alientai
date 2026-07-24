@@ -368,6 +368,8 @@ On July 24, the local Schwab daily archive was renewed through 2026-07-22 for al
 
 `download_alpha_vantage_daily_research_fallback.py` archives raw Alpha Vantage daily responses for an explicitly research-only payload to `D:\AlientAI\Data\AlphaVantage_2026\prospective_daily_research_fallback`. It is a source-separated fallback; never merge its rows with Schwab results or use it to fill missing Schwab candles. Its July 24 archive covers TEL, NXPI, CPRT, URI, and TSCO through July 23.
 
+`audit_daily_price_source_alignment.py` found the Alpha Vantage daily source is systematically one Schwab session behind across the July-24 reference archive. It fails closed for same-day research use. Do not use Alpha Vantage daily dates to evaluate these prospective payloads unless a separately reviewed source-date reconciliation is completed.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
