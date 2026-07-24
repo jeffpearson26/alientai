@@ -24,6 +24,7 @@ from train_v2_transformer_20day_sp500_from_supabase import (  # noqa: E402
     chronological_three_way_indices,
     env_value,
     fetch_daily_candles,
+    has_contiguous_candle_window,
     load_env_file,
     now_iso,
     pct_change,
@@ -91,6 +92,7 @@ def make_symbol_examples(
     min_history_days: int,
     step_days: int,
     target_return_pct: float,
+    max_calendar_gap_days: int = 5,
 ) -> Tuple[List[np.ndarray], List[int], List[float], List[Dict[str, Any]]]:
     if sequence_length < 60:
         raise ValueError("sequence_length must be at least 60")
@@ -108,6 +110,11 @@ def make_symbol_examples(
     metadata: List[Dict[str, Any]] = []
 
     for idx in range(start_idx, end_idx, max(1, step_days)):
+        if not has_contiguous_candle_window(
+            candles, idx - sequence_length + 1, idx + horizon_days,
+            max_calendar_gap_days=max_calendar_gap_days,
+        ):
+            continue
         current_close = closes[idx]
         future_close = closes[idx + horizon_days]
         if current_close <= 0 or future_close <= 0:
@@ -438,6 +445,7 @@ def main() -> None:
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--split-embargo-calendar-days", type=int, default=12)
+    parser.add_argument("--max-calendar-gap-days", type=int, default=5)
     parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
     parser.add_argument("--non-overlapping-calendar-days", type=int, default=9)
     parser.add_argument("--num-boost-round", type=int, default=1500)
@@ -484,6 +492,7 @@ def main() -> None:
             min_history_days=args.min_history_days,
             step_days=args.step_days,
             target_return_pct=args.target_return_pct,
+            max_calendar_gap_days=args.max_calendar_gap_days,
         )
         all_x.extend(x_rows)
         all_y.extend(labels)
@@ -539,6 +548,7 @@ def main() -> None:
         "paper_only": True, "shadow_only": True, "execution_enabled": False,
         "symbols_seen": len(symbols), "total_examples": int(x.shape[0]), "feature_count": int(x.shape[1]),
         "horizon_trading_sessions": 5, "target_return_pct": args.target_return_pct,
+        "max_calendar_gap_days": args.max_calendar_gap_days,
         "round_trip_cost_pct": args.round_trip_cost_pct, "split": split,
         "classifier_best_iteration": int(classifier.best_iteration), "regressor_best_iteration": int(regressor.best_iteration),
         "train_metrics": partition(train_idx), "validation_metrics": partition(val_idx), "test_metrics": partition(test_idx),

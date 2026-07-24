@@ -7,6 +7,7 @@ import numpy as np
 from train_v2_transformer_20day_sp500_from_supabase import (
     apply_standardizer,
     chronological_three_way_indices,
+    make_symbol_windows,
     standardize_train_val,
 )
 
@@ -60,6 +61,25 @@ class TransformerThreeWaySplitTests(unittest.TestCase):
                 train_fraction=0.8,
                 validation_fraction=0.2,
             )
+
+    def test_windows_reject_long_gap_before_prediction_horizon(self):
+        candles = []
+        for i in range(700):
+            close = 100.0 + i
+            timestamp = (i + 1) * DAY_MS
+            if i >= 263:
+                timestamp += 365 * DAY_MS
+            candles.append({
+                "date": f"d{i}", "datetime_ms": timestamp,
+                "open": close - 0.5, "high": close + 1.0, "low": close - 1.0,
+                "close": close, "volume": 1_000 + i,
+            })
+        _, _, _, metadata = make_symbol_windows(
+            symbol="TEST", candles=candles, sequence_length=60, horizon_days=20,
+            min_history_days=220, step_days=1,
+        )
+        self.assertTrue(metadata)
+        self.assertNotIn(candles[243]["datetime_ms"], [row["datetime_ms"] for row in metadata])
 
 
 if __name__ == "__main__":

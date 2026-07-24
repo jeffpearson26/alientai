@@ -146,7 +146,7 @@ class LightGBMFiveDayBaselineTests(unittest.TestCase):
 
     def test_five_day_label_uses_future_close_only(self):
         candles = []
-        for i in range(280):
+        for i in range(700):
             close = 100.0 + i
             candles.append({
                 "date": f"d{i}", "datetime_ms": (i + 1) * 86_400_000,
@@ -161,6 +161,24 @@ class LightGBMFiveDayBaselineTests(unittest.TestCase):
         self.assertTrue(all(label == 1 for label in labels))
         self.assertEqual(meta[0]["datetime_ms"], candles[260]["datetime_ms"])
         self.assertAlmostEqual(returns[0], ((candles[265]["close"] / candles[260]["close"]) - 1) * 100)
+
+    def test_five_day_label_rejects_long_history_gaps(self):
+        candles = []
+        for i in range(700):
+            close = 100.0 + i
+            candles.append({
+                "date": f"d{i}", "datetime_ms": (i + 1) * 86_400_000,
+                "open": close - 0.5, "high": close + 1, "low": close - 1,
+                "close": close, "volume": 1_000 + i,
+            })
+        for i in range(263, len(candles)):
+            candles[i]["datetime_ms"] += 365 * 86_400_000
+        x, _, _, meta = make_symbol_examples(
+            symbol="TEST", candles=candles, sequence_length=60, horizon_days=5,
+            min_history_days=260, step_days=1, target_return_pct=0.0,
+        )
+        self.assertTrue(x)
+        self.assertNotIn(candles[260]["datetime_ms"], [row["datetime_ms"] for row in meta])
 
     def test_non_overlapping_is_per_symbol(self):
         metadata = [
