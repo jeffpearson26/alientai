@@ -120,6 +120,8 @@ The extended-hours collector will deduplicate 18,326 matched rows into approxima
 
 Large premarket collectors enforce free-space floors on the archive drive: 6 GB for the matched study and 8 GB for conditional natural-universe expansion. A low-space stop is an intentional fail-closed event; preserve the manifest, move or free storage safely, and resume.
 
+On 2026-07-26 Jeff explicitly requested the focused natural-universe premarket download needed by the selective five-day challenger. A single resumable collector was started for the 44,683-row 2026 natural options/technical panel: 3,381 deduplicated symbol-month requests, stored at `D:\AlientAI\Data\AlphaVantage_2026\selective_natural_premarket_5min_2026` with a 20 GB free-space floor. Monitor that manifest and never launch a duplicate. On clean completion, compile point-in-time features through 09:25 ET for every exact `(symbol, market_date)` key, retain explicit unavailable rows, validate coverage, and only then rerun `train_selective_five_day_challenger.py --premarket-features ...`. The matched winner/control premarket table remains forbidden for this natural training.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline

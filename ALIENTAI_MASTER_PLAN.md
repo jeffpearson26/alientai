@@ -261,6 +261,8 @@ Validation diagnostic update (2026-07-26): `audit_selective_challenger_validatio
 
 Premarket implementation update (2026-07-26): Jeff directed adding premarket movers to the model. The trainer now supports `premarket_*` columns and an optional exact-key `--premarket-features` input. `alientai_v2/research/selective_premarket_features.py` enforces the 09:25 ET cutoff, preserves explicit missingness, requires exact natural-universe keys, and blocks `study_*` winner/control metadata. The only current premarket feature table is the biased matched study: it overlaps 3,350 of 44,683 natural rows (7.4973%) and is therefore forbidden for this training run. Do not retrain with premarket until a complete, point-in-time natural-universe panel exists.
 
+Natural premarket collection update (2026-07-26): Jeff explicitly directed downloading the premarket data required for the selective five-day challenger. One credential-safe, resumable Alpha Vantage collector is running against the exact 44,683-row natural options/technical panel (483 symbols, 2026-01-02 through 2026-07-02). It has 3,381 deduplicated symbol-month requests and writes only to `D:\AlientAI\Data\AlphaVantage_2026\selective_natural_premarket_5min_2026`, with a 20 GB free-space floor. After successful completion, build an exact-key 09:25 ET feature table, verify full key coverage and explicit missingness, then retrain the isolated challenger with `--premarket-features`. Do not substitute the biased matched-study premarket table.
+
 Dependencies: Phase 6 natural-universe evaluation.
 
 Done when: A selector specification and frozen evaluation report demonstrate honest performance and acceptable risk across untouched periods and regimes.
