@@ -21,6 +21,7 @@ class SelectiveFiveDayTrainerTests(unittest.TestCase):
             "as_of_utc": "2026-01-02T21:00:00+00:00",
             "technical_rsi_14": 50.0,
             "option_call_volume": 100.0,
+            "premarket_gap_pct": 2.0,
             "label_forward_return_5d_pct": 10.0,
             "future_market_date": "2026-01-09",
         }
@@ -28,6 +29,7 @@ class SelectiveFiveDayTrainerTests(unittest.TestCase):
         self.assertEqual("AAA", result["symbol"])
         self.assertIn("technical_rsi_14", result)
         self.assertIn("option_call_volume", result)
+        self.assertIn("premarket_gap_pct", result)
         self.assertNotIn("label_forward_return_5d_pct", result)
         self.assertNotIn("future_market_date", result)
 

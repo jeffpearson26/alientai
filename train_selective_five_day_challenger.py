@@ -19,6 +19,9 @@ from alientai_v2.research.five_day_open_close_labels import (
 from alientai_v2.research.selective_five_day_panel import (
     build_selective_five_day_panel,
 )
+from alientai_v2.research.selective_premarket_features import (
+    join_natural_premarket_features,
+)
 from evaluate_matched_winner_full_universe import (
     apply_calibration,
     quantile_calibration,
@@ -26,6 +29,7 @@ from evaluate_matched_winner_full_universe import (
 
 
 BUILD = "ALIENTAI_SELECTIVE_FIVE_DAY_CHALLENGER_V1"
+FEATURE_PREFIXES = ("technical_", "option_", "premarket_")
 FIXED_POLICY = {
     "minimum_profit_probability": 0.60,
     "minimum_large_move_probability": 0.30,
@@ -76,7 +80,7 @@ def sanitized_feature_row(row: Mapping[str, Any]) -> dict[str, Any]:
         "decision_cutoff_utc": row.get("as_of_utc"),
     }
     for name, value in row.items():
-        if name.startswith("technical_") or name.startswith("option_"):
+        if name.startswith(FEATURE_PREFIXES):
             result[name] = value
     return result
 
@@ -148,7 +152,7 @@ def materialize_panel(
 def feature_names(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     names = sorted({
         name for row in rows for name in row
-        if name.startswith("technical_") or name.startswith("option_")
+        if name.startswith(FEATURE_PREFIXES)
     })
     return names + [f"{name}__missing" for name in names]
 
@@ -273,6 +277,10 @@ def main() -> None:
         default=r"D:\AlientAI\Data\FINRA_Short_Interest\features\natural_options_finra_research_panel_2026.jsonl",
     )
     parser.add_argument("--daily-dir", default="data_v2/sp500_daily_schwab_max_history")
+    parser.add_argument(
+        "--premarket-features",
+        help="Exact-key natural-universe premarket JSONL; matched winner/control files are rejected.",
+    )
     parser.add_argument("--output-dir", default="data_v2/selective_five_day_challenger_training")
     args = parser.parse_args()
 
@@ -281,6 +289,11 @@ def main() -> None:
     daily_path = (root / args.daily_dir).resolve()
     source_rows = read_jsonl(input_path)
     rows, coverage = materialize_panel(source_rows, daily_path)
+    premarket_path = Path(args.premarket_features).resolve() if args.premarket_features else None
+    if premarket_path is not None:
+        rows = join_natural_premarket_features(rows, read_jsonl(premarket_path))
+    coverage["premarket_rows_joined"] = len(rows) if premarket_path is not None else 0
+    coverage["premarket_feature_family_enabled"] = premarket_path is not None
     names = feature_names(rows)
     x = matrix(rows, names)
     positive = np.asarray([int(row["label_positive_net_return"]) for row in rows], dtype=np.int32)
@@ -335,6 +348,8 @@ def main() -> None:
             "source_panel_sha256": file_sha256(input_path),
             "daily_archive_path": str(daily_path),
             "daily_archive_sha256": daily_archive_sha256(daily_path),
+            "premarket_feature_path": str(premarket_path) if premarket_path is not None else None,
+            "premarket_feature_sha256": file_sha256(premarket_path) if premarket_path is not None else None,
         },
         "feature_count": len(names),
         "features": names,

@@ -32,6 +32,13 @@ The scorer must produce:
 3. Premarket, analyst, Form 4 purchase, earnings, and news features only through
    separately locked chronological ablations after their timing/coverage audits.
 
+Premarket support is implemented by
+`alientai_v2.research.selective_premarket_features`. It requires an exact-key
+natural-universe table, preserves unavailable rows explicitly, enforces the
+09:25 ET cutoff, and rejects matched winner/control metadata. The trainer
+accepts that future table through `--premarket-features`; it must not use the
+existing matched-study file as a substitute.
+
 Missing feature families remain explicit missingness and may not be backfilled
 with current or future observations.
 

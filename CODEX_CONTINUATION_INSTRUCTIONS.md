@@ -406,6 +406,10 @@ The current AI/semiconductor thematic basket experiment is negative. `research_u
 
 Jeff explicitly authorized the first isolated selective-challenger training run on 2026-07-26. `train_selective_five_day_challenger.py` joined 44,116 corrected local labels to the existing natural technical/options panel and used 26,340/5,753/5,787 chronological train/validation/test rows with 12-calendar-day embargoes. The positive classifier stopped at iteration 1 and validation-calibrated positive probability never reached the frozen 0.60 gate; the untouched test therefore emitted zero candidates. Keep the report as `RESEARCH_HOLD`. Do not lower thresholds, add features, or reuse this now-observed test for model selection. Artifacts are isolated in ignored `data_v2/selective_five_day_challenger_training`.
 
+The validation-only component audit found the positive classifier is worse than random (AUC 0.4834) and both return regressors have negative validation correlation. The large-move classifier is the only component showing a possible lead (AUC 0.5670; validation top 1%: 57 rows, 64.91% large moves, +8.800797% mean net return, +5.503135% median, 75.44% wins). This is validation hypothesis evidence only; do not apply a new rule to the observed test.
+
+Premarket support is available through `alientai_v2/research/selective_premarket_features.py` and the trainer's `--premarket-features` argument. It requires exact natural-universe keys, explicit missing rows, and 09:25 ET timestamps and rejects `study_*` fields. The current `matched_premarket_features.jsonl` is prohibited: it is a winner/control table and overlaps only 3,350 of 44,683 natural keys (7.4973%). A complete point-in-time natural premarket table is required before retraining.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
