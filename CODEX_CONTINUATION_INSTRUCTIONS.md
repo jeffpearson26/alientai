@@ -404,6 +404,8 @@ The current AI/semiconductor thematic basket experiment is negative. `research_u
 
 `alientai_v2/research/selective_five_day_panel.py` is the challenger's pure exact-key join. It requires matching unique symbol/date keys, timezone-aware `as_of_utc` and `decision_cutoff_utc`, feature availability no later than the cutoff, and valid future label dates. It rejects label/future/entry/exit outcome fields on the feature side. This is the required boundary before any future training-panel materialization; it currently performs no file, model, settings, or execution writes.
 
+Jeff explicitly authorized the first isolated selective-challenger training run on 2026-07-26. `train_selective_five_day_challenger.py` joined 44,116 corrected local labels to the existing natural technical/options panel and used 26,340/5,753/5,787 chronological train/validation/test rows with 12-calendar-day embargoes. The positive classifier stopped at iteration 1 and validation-calibrated positive probability never reached the frozen 0.60 gate; the untouched test therefore emitted zero candidates. Keep the report as `RESEARCH_HOLD`. Do not lower thresholds, add features, or reuse this now-observed test for model selection. Artifacts are isolated in ignored `data_v2/selective_five_day_challenger_training`.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
