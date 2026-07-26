@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-07-21 Pacific time
+Updated: 2026-07-26 Pacific time
 
 ## Mission
 
@@ -397,6 +397,8 @@ The first fixed capacity test (one, two, and three concurrent positions) did not
 The current AI/semiconductor thematic basket experiment is negative. `research_universes/ai_semiconductor_screen_2026.txt` is a documented current basket only, not historical membership. Across fixed 40%/50%/60% chronological splits, the top-quarter contextual model had 46.67%, 42.86%, and 36.36% win rates with too few signals and negative medians in every split. Do not create a sector-specific AI/semiconductor version of the model from this result.
 
 `FROZEN_CONTEXTUAL_OPTIONS_STUDY.md` is now the controlling low-cost prospective-study protocol. Do not restart broad collectors or tune this hypothesis. Generate only non-executing complete-universe payloads when matching same-day local Schwab technical and option panels are available, evaluate only five-session local-Schwab outcomes, and use the existing prospective gate. The study ends at 30 completed candidates across ten decision dates; a pass requires separate human risk/paper-trading review, while a failure ends this hypothesis without post-hoc changes.
+
+`FIVE_DAY_SELECTIVE_CATALYST_STRATEGY.md` defines a separate future challenger; it does not modify the frozen study. `alientai_v2/research/selective_five_day_policy.py` is its pure scored-row contract. It requires one complete same-day universe plus validation-frozen thresholds for calibrated profit probability, calibrated large-move probability, expected net return, lower-quantile net return, and model disagreement. Technical/options evidence must agree. It retains every independently qualifying row rather than enforcing a quota, but all rows remain `decision="AVOID"` and research-only. Missing scores, duplicate symbols, mixed dates, or incomplete coverage fail closed. Do not train or connect this challenger until its point-in-time feature/label inputs and chronological experiment are separately approved; the module itself cannot load models, contact providers, write settings, or execute.
 
 Recent relevant commits:
 
