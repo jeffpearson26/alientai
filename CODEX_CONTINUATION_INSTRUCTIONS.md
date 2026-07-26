@@ -400,6 +400,8 @@ The current AI/semiconductor thematic basket experiment is negative. `research_u
 
 `FIVE_DAY_SELECTIVE_CATALYST_STRATEGY.md` defines a separate future challenger; it does not modify the frozen study. `alientai_v2/research/selective_five_day_policy.py` is its pure scored-row contract. It requires one complete same-day universe plus validation-frozen thresholds for calibrated profit probability, calibrated large-move probability, expected net return, lower-quantile net return, and model disagreement. Technical/options evidence must agree. It retains every independently qualifying row rather than enforcing a quota, but all rows remain `decision="AVOID"` and research-only. Missing scores, duplicate symbols, mixed dates, or incomplete coverage fail closed. Do not train or connect this challenger until its point-in-time feature/label inputs and chronological experiment are separately approved; the module itself cannot load models, contact providers, write settings, or execute.
 
+`alientai_v2/research/five_day_open_close_labels.py` is the challenger's pure label-timing contract. It decides after a daily close, enters at the next regular-session open, exits at the fifth regular-session close, subtracts the specified round-trip cost, and excludes invalid or discontinuous windows. It is not connected to the existing trainers; do not replace historical labels or retrain until a separately frozen experiment and exact input panel are approved.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

@@ -11,6 +11,11 @@ fifth regular-session close. A row may use only information available before
 its recorded decision cutoff. End-of-day and premarket decisions must remain
 separate studies because their available information and entry prices differ.
 
+`alientai_v2.research.five_day_open_close_labels` is the canonical pure label
+builder for this challenger. It excludes incomplete prices, non-increasing
+dates, and adjacent calendar gaps over the configured continuity limit rather
+than converting invalid observations into losing labels.
+
 The scorer must produce:
 
 - calibrated probability that the net five-day return is positive;
