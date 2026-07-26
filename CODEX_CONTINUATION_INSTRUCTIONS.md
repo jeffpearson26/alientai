@@ -402,6 +402,8 @@ The current AI/semiconductor thematic basket experiment is negative. `research_u
 
 `alientai_v2/research/five_day_open_close_labels.py` is the challenger's pure label-timing contract. It decides after a daily close, enters at the next regular-session open, exits at the fifth regular-session close, subtracts the specified round-trip cost, and excludes invalid or discontinuous windows. It is not connected to the existing trainers; do not replace historical labels or retrain until a separately frozen experiment and exact input panel are approved.
 
+`alientai_v2/research/selective_five_day_panel.py` is the challenger's pure exact-key join. It requires matching unique symbol/date keys, timezone-aware `as_of_utc` and `decision_cutoff_utc`, feature availability no later than the cutoff, and valid future label dates. It rejects label/future/entry/exit outcome fields on the feature side. This is the required boundary before any future training-panel materialization; it currently performs no file, model, settings, or execution writes.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

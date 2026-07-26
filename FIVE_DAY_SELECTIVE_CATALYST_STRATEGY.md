@@ -35,6 +35,12 @@ The scorer must produce:
 Missing feature families remain explicit missingness and may not be backfilled
 with current or future observations.
 
+`alientai_v2.research.selective_five_day_panel` is the canonical exact-key
+feature/label join. Feature rows must contain an explicit UTC decision cutoff,
+and their latest availability timestamp may not exceed it. Duplicate or
+mismatched symbol/date keys and any outcome fields on the feature side fail
+closed.
+
 ## Model design
 
 - LightGBM binary classifiers estimate positive-return and large-move
