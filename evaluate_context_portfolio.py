@@ -33,6 +33,19 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def daily_archive_sha256(directory: Path) -> str:
+    """Fingerprint every daily CSV name and byte content in deterministic order."""
+    paths = sorted(directory.glob("*_schwab_1d_max.csv"), key=lambda item: item.name)
+    if not paths:
+        raise ValueError("daily directory contains no Schwab CSV files")
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(file_sha256(path)))
+    return digest.hexdigest()
+
+
 def split_chronologically(rows: Sequence[Mapping[str, Any]], calibration_fraction: float, embargo_calendar_days: int) -> tuple[list[Mapping[str, Any]], list[Mapping[str, Any]]]:
     if not 0 < calibration_fraction < 1:
         raise ValueError("calibration_fraction must be in (0, 1)")
@@ -240,6 +253,8 @@ def main() -> None:
             "option_features_sha256": file_sha256(args.option_features),
             "technical_model_path": str(args.technical_model),
             "technical_model_sha256": file_sha256(args.technical_model),
+            "daily_archive_path": str(args.daily_dir) if args.daily_dir else None,
+            "daily_archive_sha256": daily_archive_sha256(args.daily_dir) if args.daily_dir else None,
         },
         "results": evaluate_cutoffs(
             calibration, test, (0.25, 0.10, 0.05), args.max_open_positions,

@@ -438,6 +438,8 @@ Premarket support is available through `alientai_v2/research/selective_premarket
 
 On July 27 the existing Schwab refresh token successfully produced a new access token, and the append-only refresher added one row to all 483 existing S&P histories with zero failures. `contextual_options_shadow_review_2026-07-27.json` now observes two later sessions for each July-21 pilot candidate but zero completed five-session outcomes; `contextual_options_prospective_gate_2026-07-27.json` correctly remains `RESEARCH_HOLD`. Wait for three more Schwab sessions before evaluating the fixed outcomes. Do not treat the interim values as completed evidence and do not manufacture a retrospective payload for July 22/23.
 
+Capital-scaled portfolio reports now fingerprint the complete Schwab daily directory with `daily_archive_sha256`; the July-27 483-file identity begins `75b25e35e451`. All 40%/50%/60% reruns reproduced their prior corrected metrics exactly. Reject any future comparison that omits the daily archive identity or silently uses different candles.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

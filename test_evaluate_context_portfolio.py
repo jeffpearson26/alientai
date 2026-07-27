@@ -9,6 +9,7 @@ from datetime import date
 from evaluate_context_portfolio import (
     capital_scaled_drawdown,
     capacity_limited,
+    daily_archive_sha256,
     file_sha256,
     split_chronologically,
 )
@@ -75,6 +76,14 @@ class ContextPortfolioTests(unittest.TestCase):
             )
             closes = load_daily_closes(Path(directory))
         self.assertEqual(100.0, closes["AAA"][date(2026, 1, 5)])
+
+    def test_daily_archive_fingerprint_changes_with_price_content(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "AAA_schwab_1d_max.csv"
+            path.write_text("symbol,date,close\nAAA,2026-01-04,100\n", encoding="utf-8")
+            first = daily_archive_sha256(Path(directory))
+            path.write_text("symbol,date,close\nAAA,2026-01-04,101\n", encoding="utf-8")
+            self.assertNotEqual(first, daily_archive_sha256(Path(directory)))
 
 
 if __name__ == "__main__":
