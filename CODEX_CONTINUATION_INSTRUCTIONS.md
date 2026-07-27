@@ -124,6 +124,8 @@ On 2026-07-26 Jeff explicitly requested the focused natural-universe premarket d
 
 The focused collection and compilation are now complete: 3,367 downloaded symbol-months, 14 explicit unavailabilities, zero failures; 44,683 exact feature rows, 44,371 available. `evaluate_selective_premarket_continuation.py` uses the leakage-safe next-open-to-fifth-close label and 0.25% cost. A >=1% premarket gap showed +0.6776% validation mean and +0.6261% untouched-test mean (860 test rows, 53.60% wins), but >=5% gaps reversed in test (-1.3397% mean, 33.33% wins). Preserve the raw continuous premarket features and their missing flags for the challenger; do not turn any threshold from this audit into an execution rule.
 
+`evaluate_selective_premarket_same_day.py` tests the stricter same-session alternative: enter on the first 09:30 five-minute bar close, exit on the 16:00 bar close, and deduct 0.25%. Of 44,683 feature rows, 44,484 have strict labels and 199 are excluded. The >=1% cohort failed replication (+0.1922% validation mean versus -0.3514% untouched-test mean). Do not use premarket gap as a standalone same-day rule. The premarket-enabled five-day challenger trained on 114 columns and all 44,116 valid labeled keys but still selected zero candidates under the frozen gates, so its status remains `RESEARCH_HOLD`.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline

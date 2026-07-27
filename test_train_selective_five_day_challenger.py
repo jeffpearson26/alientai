@@ -7,6 +7,7 @@ from train_selective_five_day_challenger import (
     daily_archive_sha256,
     file_sha256,
     outcome_metrics,
+    premarket_for_labeled_rows,
     sanitized_feature_row,
 )
 from pathlib import Path
@@ -53,6 +54,16 @@ class SelectiveFiveDayTrainerTests(unittest.TestCase):
 
     def test_empty_selection_metrics_are_explicit(self):
         self.assertEqual({"signals": 0}, outcome_metrics([]))
+
+    def test_premarket_filter_removes_only_unlabeled_keys(self):
+        labeled = [{"symbol": "AAA", "market_date": "2026-01-02"}]
+        premarket = [
+            {"symbol": "AAA", "market_date": "2026-01-02"},
+            {"symbol": "BBB", "market_date": "2026-01-02"},
+        ]
+        selected, excluded = premarket_for_labeled_rows(labeled, premarket)
+        self.assertEqual([premarket[0]], selected)
+        self.assertEqual(1, excluded)
 
     def test_artifact_hashes_are_stable_and_content_sensitive(self):
         with tempfile.TemporaryDirectory() as temporary:

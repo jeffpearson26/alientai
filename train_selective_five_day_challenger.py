@@ -270,6 +270,23 @@ def outcome_metrics(net_returns: np.ndarray) -> dict[str, Any]:
     }
 
 
+def premarket_for_labeled_rows(
+    labeled_rows: list[dict[str, Any]],
+    premarket_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], int]:
+    """Discard only premarket keys whose five-day outcome could not be labeled."""
+    labeled_keys = {
+        (str(row.get("symbol") or "").upper(), str(row.get("market_date") or ""))
+        for row in labeled_rows
+    }
+    selected = [
+        row for row in premarket_rows
+        if (str(row.get("symbol") or "").upper(), str(row.get("market_date") or ""))
+        in labeled_keys
+    ]
+    return selected, len(premarket_rows) - len(selected)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -291,7 +308,11 @@ def main() -> None:
     rows, coverage = materialize_panel(source_rows, daily_path)
     premarket_path = Path(args.premarket_features).resolve() if args.premarket_features else None
     if premarket_path is not None:
-        rows = join_natural_premarket_features(rows, read_jsonl(premarket_path))
+        eligible_premarket, excluded_unlabeled = premarket_for_labeled_rows(
+            rows, read_jsonl(premarket_path)
+        )
+        rows = join_natural_premarket_features(rows, eligible_premarket)
+        coverage["premarket_rows_excluded_without_local_label"] = excluded_unlabeled
     coverage["premarket_rows_joined"] = len(rows) if premarket_path is not None else 0
     coverage["premarket_feature_family_enabled"] = premarket_path is not None
     names = feature_names(rows)

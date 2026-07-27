@@ -265,6 +265,10 @@ Natural premarket collection update (2026-07-26): Jeff explicitly directed downl
 
 Natural premarket continuation result (2026-07-26): the focused archive completed 3,367 of 3,381 requests with 14 explicit unavailabilities and zero failures. The optimized compiler produced all 44,683 exact natural keys, with valid premarket features for 44,371 rows (99.302%). A cost-adjusted next-open-to-fifth-close continuation audit found that a moderate premarket gap of at least 1% retained a positive mean in validation (+0.6776%, 786 rows) and untouched test (+0.6261%, 860 rows), with a 53.60% test win rate. Larger gaps were not monotonically better: at least 5% lost -1.3397% on average in untouched test with a 33.33% win rate. Treat premarket movement as a nonlinear model feature and possible interaction with liquidity/technical context, never as a standalone momentum rule.
 
+Same-day premarket continuation result (2026-07-26): the strict 09:25-decision study used the first 09:30 five-minute bar close as entry, the 16:00 bar close as exit, and deducted 0.25% round-trip cost. It labeled 44,484 rows and excluded 199 missing/nonstandard sessions. The >=1% gap cohort changed from +0.1922% mean / 51.56% wins in validation (803 rows) to -0.3514% / 43.12% in untouched test (886 rows). The >=5% test cohort was positive but had only 44 rows and contradicted the negative training result. Therefore same-day premarket continuation is rejected as a standalone rule; retain the features only for nonlinear/contextual model interactions.
+
+Premarket challenger retrain result (2026-07-26): the isolated LightGBM challenger successfully joined all 44,116 labeled rows after explicitly excluding the same 567 source rows without valid local five-day labels. Premarket expanded the matrix from 72 to 114 columns. The frozen promotion policy still selected zero untouched-test candidates and the run remains `RESEARCH_HOLD`; no trading path changed.
+
 Dependencies: Phase 6 natural-universe evaluation.
 
 Done when: A selector specification and frozen evaluation report demonstrate honest performance and acceptable risk across untouched periods and regimes.
