@@ -128,6 +128,8 @@ The focused collection and compilation are now complete: 3,367 downloaded symbol
 
 The generic leakage-safe label now permits a two-session horizon while preserving the five-session wrapper/default. A one-time fixed-slice evaluation trained all four current challenger heads on identical 44,116-row, 114-column data. Only the large-move classifier showed consistent top-1% mean returns: +0.8623% validation and +0.8709% untouched test (57 rows each), with 57.89% test wins. Test AUC was only 0.5705 and the other heads did not replicate consistently. Keep this as a preregistered future-period lead; do not retune against the already observed test or enable execution.
 
+`build_selective_two_day_shadow_policy.py` freezes the validation-only top-1% large-move cutoff at 0.3647459048971379 and requires at least 95% universe coverage. Its generated policy is research-only, fingerprints the model, permits any number of independently qualifying observations, and cannot create orders. Do not alter the cutoff using historical test results; score only genuinely future complete-universe panels and journal outcomes after the two-session horizon matures.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
