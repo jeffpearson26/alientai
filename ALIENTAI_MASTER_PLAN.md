@@ -273,6 +273,8 @@ Two-day model comparison (2026-07-26): the next-open label contract and isolated
 
 Two-day shadow policy update (2026-07-26): froze a validation-only large-move score cutoff of 0.3647459048971379, corresponding to the validation top 1%, with a minimum complete-universe coverage of 95%. The policy is `SHADOW_OBSERVE_ONLY`, has no candidate quota, fingerprints the exact model, and explicitly prohibits paper/live orders, incomplete-universe scoring, matched-study substitution, and threshold retuning on the observed test. The next valid evidence must come from newly arriving future dates.
 
+Two-day Transformer isolation update (2026-07-26): created and validated `train_v2_transformer_2day_sp500_from_supabase.py` from the established 20-day architecture without overwriting any 20-day or five-day artifacts. The isolated build fixes the horizon at two trading sessions, uses a one-session sampling step, 12-calendar-day split embargo, four-calendar-day non-overlap evaluation, separate build/output/artifact names, and the existing three-way chronological/scaler/checkpoint safeguards.
+
 Dependencies: Phase 6 natural-universe evaluation.
 
 Done when: A selector specification and frozen evaluation report demonstrate honest performance and acceptable risk across untouched periods and regimes.

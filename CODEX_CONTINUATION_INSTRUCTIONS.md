@@ -130,6 +130,8 @@ The generic leakage-safe label now permits a two-session horizon while preservin
 
 `build_selective_two_day_shadow_policy.py` freezes the validation-only top-1% large-move cutoff at 0.3647459048971379 and requires at least 95% universe coverage. Its generated policy is research-only, fingerprints the model, permits any number of independently qualifying observations, and cannot create orders. Do not alter the cutoff using historical test results; score only genuinely future complete-universe panels and journal outcomes after the two-session horizon matures.
 
+The legacy 20-day Transformer architecture now has a separately generated two-day trainer, `train_v2_transformer_2day_sp500_from_supabase.py`. It cannot accept another horizon and writes only under `data_v2/transformer_2day_sp500_supabase_training` with `transformer_2day_*` artifacts. Its defaults use a one-session step, 12-calendar-day embargo, and four-calendar-day non-overlap. Never point the original 20-day trainer at a two-day horizon because its fixed output names would overwrite historical artifacts.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
