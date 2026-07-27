@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from alientai_v2.features.premarket_features import build_premarket_features
+from build_matched_premarket_features import build_rows
 
 
 def candle(stamp, close, volume=100, high=None, low=None):
@@ -13,6 +14,14 @@ def candle(stamp, close, volume=100, high=None, low=None):
 
 
 class PremarketFeatureTests(unittest.TestCase):
+    def test_natural_rows_do_not_acquire_study_metadata(self):
+        rows = build_rows(
+            [{"symbol": "", "market_date": "2026-01-02"}],
+            archive=__import__("pathlib").Path("unused"),
+        )
+        self.assertEqual(rows[0]["premarket_available"], False)
+        self.assertFalse(any(key.startswith("study_") for key in rows[0]))
+
     def test_uses_only_bars_through_0925(self):
         rows = [
             candle("2024-01-02 16:00:00", 100),

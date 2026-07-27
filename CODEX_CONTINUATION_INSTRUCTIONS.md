@@ -122,6 +122,8 @@ Large premarket collectors enforce free-space floors on the archive drive: 6 GB 
 
 On 2026-07-26 Jeff explicitly requested the focused natural-universe premarket download needed by the selective five-day challenger. A single resumable collector was started for the 44,683-row 2026 natural options/technical panel: 3,381 deduplicated symbol-month requests, stored at `D:\AlientAI\Data\AlphaVantage_2026\selective_natural_premarket_5min_2026` with a 20 GB free-space floor. Monitor that manifest and never launch a duplicate. On clean completion, compile point-in-time features through 09:25 ET for every exact `(symbol, market_date)` key, retain explicit unavailable rows, validate coverage, and only then rerun `train_selective_five_day_challenger.py --premarket-features ...`. The matched winner/control premarket table remains forbidden for this natural training.
 
+The focused collection and compilation are now complete: 3,367 downloaded symbol-months, 14 explicit unavailabilities, zero failures; 44,683 exact feature rows, 44,371 available. `evaluate_selective_premarket_continuation.py` uses the leakage-safe next-open-to-fifth-close label and 0.25% cost. A >=1% premarket gap showed +0.6776% validation mean and +0.6261% untouched-test mean (860 test rows, 53.60% wins), but >=5% gaps reversed in test (-1.3397% mean, 33.33% wins). Preserve the raw continuous premarket features and their missing flags for the challenger; do not turn any threshold from this audit into an execution rule.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
