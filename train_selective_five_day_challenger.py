@@ -14,6 +14,7 @@ import lightgbm as lgb
 import numpy as np
 
 from alientai_v2.research.five_day_open_close_labels import (
+    build_next_open_horizon_close_labels,
     build_next_open_five_close_labels,
 )
 from alientai_v2.research.selective_five_day_panel import (
@@ -111,6 +112,7 @@ def read_candles(path: Path) -> list[dict[str, Any]]:
 def materialize_panel(
     source_rows: Sequence[Mapping[str, Any]],
     daily_directory: Path,
+    horizon_sessions: int = 5,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     features = [sanitized_feature_row(row) for row in source_rows]
     features_by_key = {
@@ -125,7 +127,17 @@ def materialize_panel(
         path = files.get(symbol)
         if path is None:
             continue
-        for row in build_next_open_five_close_labels(
+        label_builder = (
+            build_next_open_five_close_labels
+            if horizon_sessions == 5
+            else lambda label_symbol, label_candles, **kwargs: build_next_open_horizon_close_labels(
+                label_symbol,
+                label_candles,
+                horizon_sessions=horizon_sessions,
+                **kwargs,
+            )
+        )
+        for row in label_builder(
             symbol,
             read_candles(path),
             round_trip_cost_pct=float(FIXED_POLICY["round_trip_cost_pct"]),
@@ -299,13 +311,15 @@ def main() -> None:
         help="Exact-key natural-universe premarket JSONL; matched winner/control files are rejected.",
     )
     parser.add_argument("--output-dir", default="data_v2/selective_five_day_challenger_training")
+    parser.add_argument("--horizon-sessions", type=int, default=5)
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parent
     input_path = Path(args.input_panel).resolve()
     daily_path = (root / args.daily_dir).resolve()
     source_rows = read_jsonl(input_path)
-    rows, coverage = materialize_panel(source_rows, daily_path)
+    rows, coverage = materialize_panel(source_rows, daily_path, args.horizon_sessions)
+    coverage["horizon_sessions"] = args.horizon_sessions
     premarket_path = Path(args.premarket_features).resolve() if args.premarket_features else None
     if premarket_path is not None:
         eligible_premarket, excluded_unlabeled = premarket_for_labeled_rows(
@@ -358,7 +372,7 @@ def main() -> None:
         model.save_model(str(output / filename), num_iteration=model.best_iteration)
 
     report = {
-        "build": BUILD,
+        "build": BUILD if args.horizon_sessions == 5 else f"ALIENTAI_SELECTIVE_{args.horizon_sessions}_DAY_CHALLENGER_V1",
         "status": "RESEARCH_HOLD",
         "research_only": True,
         "execution_enabled": False,

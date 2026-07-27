@@ -269,6 +269,8 @@ Same-day premarket continuation result (2026-07-26): the strict 09:25-decision s
 
 Premarket challenger retrain result (2026-07-26): the isolated LightGBM challenger successfully joined all 44,116 labeled rows after explicitly excluding the same 567 source rows without valid local five-day labels. Premarket expanded the matrix from 72 to 114 columns. The frozen promotion policy still selected zero untouched-test candidates and the run remains `RESEARCH_HOLD`; no trading path changed.
 
+Two-day model comparison (2026-07-26): the next-open label contract and isolated challenger now support an explicit `--horizon-sessions 2` without changing the five-day default. All four current challenger heads trained on the same 44,116 labeled rows and 114 technical/options/premarket columns. Fixed top-10%, top-5%, and top-1% slices were declared before the one-time test read. The large-move classifier was the only head with a directionally consistent top-1% result: validation 57 rows, +0.8623% mean / 50.88% wins; untouched test 57 rows, +0.8709% mean / 57.89% wins. Its AUC fell from 0.6506 validation to 0.5705 test, so this is a lead, not promotion evidence. The profit classifier, expected-return regressor, and lower-quantile regressor were inconsistent or weak. Status remains `RESEARCH_HOLD`; do not use the observed test to retune thresholds.
+
 Dependencies: Phase 6 natural-universe evaluation.
 
 Done when: A selector specification and frozen evaluation report demonstrate honest performance and acceptable risk across untouched periods and regimes.

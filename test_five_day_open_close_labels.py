@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from alientai_v2.research.five_day_open_close_labels import (
+    build_next_open_horizon_close_labels,
     build_next_open_five_close_labels,
 )
 
@@ -20,6 +21,17 @@ def candles():
 
 
 class FiveDayOpenCloseLabelTests(unittest.TestCase):
+    def test_generic_two_session_horizon_uses_second_close(self):
+        rows = candles()
+        labels = build_next_open_horizon_close_labels(
+            "AAA", rows, horizon_sessions=2, round_trip_cost_pct=0.0
+        )
+        first = labels[0]
+        self.assertEqual(first["holding_sessions"], 2)
+        self.assertEqual(first["entry_date"], rows[1]["date"])
+        self.assertEqual(first["exit_date"], rows[2]["date"])
+        self.assertEqual(first["exit_price"], rows[2]["close"])
+
     def test_uses_next_open_and_fifth_session_close(self):
         rows = build_next_open_five_close_labels("abc", candles())
         first = rows[0]

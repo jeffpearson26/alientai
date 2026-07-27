@@ -126,6 +126,8 @@ The focused collection and compilation are now complete: 3,367 downloaded symbol
 
 `evaluate_selective_premarket_same_day.py` tests the stricter same-session alternative: enter on the first 09:30 five-minute bar close, exit on the 16:00 bar close, and deduct 0.25%. Of 44,683 feature rows, 44,484 have strict labels and 199 are excluded. The >=1% cohort failed replication (+0.1922% validation mean versus -0.3514% untouched-test mean). Do not use premarket gap as a standalone same-day rule. The premarket-enabled five-day challenger trained on 114 columns and all 44,116 valid labeled keys but still selected zero candidates under the frozen gates, so its status remains `RESEARCH_HOLD`.
 
+The generic leakage-safe label now permits a two-session horizon while preserving the five-session wrapper/default. A one-time fixed-slice evaluation trained all four current challenger heads on identical 44,116-row, 114-column data. Only the large-move classifier showed consistent top-1% mean returns: +0.8623% validation and +0.8709% untouched test (57 rows each), with 57.89% test wins. Test AUC was only 0.5705 and the other heads did not replicate consistently. Keep this as a preregistered future-period lead; do not retune against the already observed test or enable execution.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
