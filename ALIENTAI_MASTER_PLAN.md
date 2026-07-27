@@ -277,6 +277,8 @@ Two-day Transformer isolation update (2026-07-26): created and validated `train_
 
 Two-day Transformer result (2026-07-27): the full 496-symbol CPU run completed 2,233,585 windows (1,104,724 train / 552,390 validation / 568,704 untouched test). Validation selected epoch 2 at the frozen 0.55 threshold: 1,966 signals and +0.234609% mean net return. That result did not replicate: untouched test produced 1,929 signals, -0.121585% mean net return, 48.8854% cost-adjusted wins, and 0.909755 profit factor; the non-overlapping test subset averaged -0.124948%. The two-day Transformer therefore fails and remains research-only. Do not promote or retune it on this observed test.
 
+Two-day Russell Transformer preparation (2026-07-27): the legacy Russell trainer was rejected because it lacks an untouched test, embargo, cost-adjusted checkpoint selection, and scaler isolation. Instead, `train_v2_transformer_2day_russell_from_supabase.py` is generated from the validated two-day S&P pipeline and retains its safeguards while isolating Russell build/output/artifact names. Use a full-universe screening run with a three-session sampling step and three epochs before considering an exhaustive one-session/five-epoch run.
+
 Dependencies: Phase 6 natural-universe evaluation.
 
 Done when: A selector specification and frozen evaluation report demonstrate honest performance and acceptable risk across untouched periods and regimes.

@@ -134,6 +134,8 @@ The legacy 20-day Transformer architecture now has a separately generated two-da
 
 The full two-day Transformer run completed on 2026-07-27 with 2,233,585 windows across 496 symbols. Epoch 2 won validation at threshold 0.55 (+0.234609% mean net across 1,966 signals), but the untouched test failed: -0.121585% mean net, 48.8854% cost-adjusted win rate, 0.909755 profit factor across 1,929 signals; non-overlapping mean was -0.124948%. Preserve the artifacts as negative evidence. Do not promote, integrate, or retune this model using its observed test.
 
+Do not use `train_v2_transformer_20day_russell_from_supabase.py` for a two-day experiment: that legacy file has only an 80/20 train-validation split and lacks the current embargo, untouched test, cost-adjusted checkpoint, and scaler safeguards. The isolated replacement is `train_v2_transformer_2day_russell_from_supabase.py`, generated from the validated S&P two-day pipeline with separate Russell artifacts. Screen the full Russell list first at `--step-days 3 --epochs 3`; run the much more expensive one-session/five-epoch design only if the untouched screening test passes.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
