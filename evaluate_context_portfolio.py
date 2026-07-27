@@ -95,10 +95,7 @@ def load_daily_closes(directory: Path) -> dict[str, dict[date, float]]:
         closes: dict[date, float] = {}
         for row in rows:
             try:
-                # The local Schwab archive stores the UTC candle-start date,
-                # which is the calendar day before the corresponding US
-                # regular session used by the research panel.
-                day = date.fromisoformat(str(row.get("date") or "")) + timedelta(days=1)
+                day = date.fromisoformat(str(row.get("date") or ""))
                 close = float(row.get("close"))
             except (TypeError, ValueError):
                 continue
@@ -121,19 +118,48 @@ def capital_scaled_drawdown(
     if max_open_positions < 1:
         raise ValueError("max_open_positions must be positive")
     trades = []
+    maximum_label_alignment_error = 0.0
+
+    def resolve_day(path: Mapping[date, float], nominal_day: date, expected_price: float) -> date:
+        candidates = [
+            day for day, close in path.items()
+            if abs((day - nominal_day).days) <= 3
+            and abs(close / expected_price - 1.0) <= 0.00001
+        ]
+        if not candidates:
+            raise ValueError(f"no price-anchored candle near {nominal_day} at {expected_price}")
+        return min(candidates, key=lambda day: (abs((day - nominal_day).days), day))
+
     for row in rows:
         symbol = str(row.get("symbol") or "").strip().upper()
         try:
-            entry_day = date.fromisoformat(str(row["market_date"]))
-            exit_day = date.fromisoformat(str(row["future_market_date"]))
-            entry_price = float(daily_closes[symbol][entry_day])
-            exit_price = float(daily_closes[symbol][exit_day])
+            nominal_entry_day = date.fromisoformat(str(row["market_date"]))
+            nominal_exit_day = date.fromisoformat(str(row["future_market_date"]))
+            path = daily_closes[symbol]
+            entry_price = float(row.get("close") or path[nominal_entry_day])
+            entry_day = resolve_day(path, nominal_entry_day, entry_price)
+            if row.get("label_forward_return_5d_pct") is not None:
+                label_return = float(row["label_forward_return_5d_pct"])
+                expected_exit_price = entry_price * (1.0 + label_return / 100.0)
+                exit_day = resolve_day(path, nominal_exit_day, expected_exit_price)
+            else:
+                exit_day = nominal_exit_day
+            exit_price = float(path[exit_day])
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"missing complete daily path for {symbol or '<blank>'}") from exc
-        path = daily_closes[symbol]
         observed_days = sorted(day for day in path if entry_day <= day <= exit_day)
         if not observed_days or observed_days[0] != entry_day or observed_days[-1] != exit_day:
             raise ValueError(f"incomplete entry/exit path for {symbol}")
+        if row.get("label_forward_return_5d_pct") is not None:
+            path_return = (exit_price / entry_price - 1.0) * 100.0
+            label_return = float(row["label_forward_return_5d_pct"])
+            alignment_error = abs(path_return - label_return)
+            maximum_label_alignment_error = max(maximum_label_alignment_error, alignment_error)
+            if alignment_error > 0.001:
+                raise ValueError(
+                    f"daily path does not reproduce label for {symbol}: "
+                    f"{path_return:.6f} versus {label_return:.6f}"
+                )
         trades.append({
             "symbol": symbol, "entry_day": entry_day, "exit_day": exit_day,
             "entry_price": entry_price, "exit_price": exit_price, "path": path,
@@ -144,6 +170,7 @@ def capital_scaled_drawdown(
             "capital_scaled_final_return_pct": 0.0,
             "capital_scaled_observed_days": 0,
             "capital_scaled_peak_open_positions": 0,
+            "maximum_label_alignment_error_pct": 0.0,
         }
     all_days = sorted({day for trade in trades for day in trade["path"] if trade["entry_day"] <= day <= trade["exit_day"]})
     entries: dict[date, list[dict[str, Any]]] = {}
@@ -184,6 +211,7 @@ def capital_scaled_drawdown(
         "capital_scaled_final_return_pct": round((equity - 1.0) * 100.0, 6),
         "capital_scaled_observed_days": len(all_days),
         "capital_scaled_peak_open_positions": peak_open,
+        "maximum_label_alignment_error_pct": round(maximum_label_alignment_error, 9),
     }
 
 

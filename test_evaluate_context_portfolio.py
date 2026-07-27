@@ -66,7 +66,21 @@ class ContextPortfolioTests(unittest.TestCase):
         metrics = capital_scaled_drawdown(rows, closes, 5, 0.25)
         self.assertEqual(-0.05, metrics["capital_scaled_final_return_pct"])
 
-    def test_local_schwab_archive_date_is_mapped_to_us_session(self):
+    def test_capital_scaled_curve_rejects_missing_label_price_anchor(self):
+        closes = {"AAA": {
+            date(2026, 1, 2): 100.0,
+            date(2026, 1, 5): 110.0,
+        }}
+        rows = [{
+            "symbol": "AAA",
+            "market_date": "2026-01-02",
+            "future_market_date": "2026-01-05",
+            "label_forward_return_5d_pct": 5.0,
+        }]
+        with self.assertRaisesRegex(ValueError, "missing complete daily path"):
+            capital_scaled_drawdown(rows, closes, 5, 0.25)
+
+    def test_local_schwab_archive_preserves_source_date(self):
         from evaluate_context_portfolio import load_daily_closes
         with TemporaryDirectory() as directory:
             path = Path(directory) / "AAA_schwab_1d_max.csv"
@@ -75,7 +89,7 @@ class ContextPortfolioTests(unittest.TestCase):
                 encoding="utf-8",
             )
             closes = load_daily_closes(Path(directory))
-        self.assertEqual(100.0, closes["AAA"][date(2026, 1, 5)])
+        self.assertEqual(100.0, closes["AAA"][date(2026, 1, 4)])
 
     def test_daily_archive_fingerprint_changes_with_price_content(self):
         with TemporaryDirectory() as directory:
