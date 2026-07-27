@@ -432,6 +432,8 @@ The validation-only component audit found the positive classifier is worse than 
 
 Premarket support is available through `alientai_v2/research/selective_premarket_features.py` and the trainer's `--premarket-features` argument. It requires exact natural-universe keys, explicit missing rows, and 09:25 ET timestamps and rejects `study_*` fields. The current `matched_premarket_features.jsonl` is prohibited: it is a winner/control table and overlaps only 3,350 of 44,683 natural keys (7.4973%). A complete point-in-time natural premarket table is required before retraining.
 
+`train_multi_horizon_pullback.py` is the completed isolated uptrend-dip experiment. It uses 20/63/126-session log-price slopes, pullback/distance/volatility features, next-open entries, two- and five-session exits, 0.25% round-trip cost, chronological 60/20/20 partitions, 12-calendar-day embargoes, and validation-frozen top-5% score cutoffs. Its 135,713-row S&P run failed untouched testing: two-day mean net return -0.064428% with 48.05% wins on 1,028 rows; five-day mean net return -0.055000% with 47.62% wins on 1,136 rows. The rule-only slices were also negative. Preserve `RESEARCH_HOLD`; the observed test cannot be used for tuning, and this model must not enter `engine.py` or paper/live trading.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
