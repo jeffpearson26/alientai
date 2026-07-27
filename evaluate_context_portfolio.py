@@ -8,6 +8,7 @@ only later rows.  It does not make an already-explored data period prospective.
 """
 
 import argparse
+import csv
 import hashlib
 import json
 from datetime import date, timedelta
@@ -70,7 +71,110 @@ def capacity_limited(rows: Sequence[Mapping[str, Any]], max_open_positions: int)
     return selected
 
 
-def evaluate_cutoffs(calibration_rows: Sequence[Mapping[str, Any]], test_rows: Sequence[Mapping[str, Any]], fractions: Sequence[float], max_open_positions: int, round_trip_cost_pct: float) -> list[dict[str, Any]]:
+def load_daily_closes(directory: Path) -> dict[str, dict[date, float]]:
+    output: dict[str, dict[date, float]] = {}
+    for path in sorted(directory.glob("*_schwab_1d_max.csv")):
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        if not rows:
+            continue
+        symbol = str(rows[0].get("symbol") or "").strip().upper()
+        closes: dict[date, float] = {}
+        for row in rows:
+            try:
+                # The local Schwab archive stores the UTC candle-start date,
+                # which is the calendar day before the corresponding US
+                # regular session used by the research panel.
+                day = date.fromisoformat(str(row.get("date") or "")) + timedelta(days=1)
+                close = float(row.get("close"))
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(close) and close > 0:
+                closes[day] = close
+        if symbol and closes:
+            output[symbol] = closes
+    if not output:
+        raise ValueError("daily directory contains no usable close histories")
+    return output
+
+
+def capital_scaled_drawdown(
+    rows: Sequence[Mapping[str, Any]],
+    daily_closes: Mapping[str, Mapping[date, float]],
+    max_open_positions: int,
+    round_trip_cost_pct: float,
+) -> dict[str, Any]:
+    """Mark a fixed-slot portfolio to market daily, leaving unused slots in cash."""
+    if max_open_positions < 1:
+        raise ValueError("max_open_positions must be positive")
+    trades = []
+    for row in rows:
+        symbol = str(row.get("symbol") or "").strip().upper()
+        try:
+            entry_day = date.fromisoformat(str(row["market_date"]))
+            exit_day = date.fromisoformat(str(row["future_market_date"]))
+            entry_price = float(daily_closes[symbol][entry_day])
+            exit_price = float(daily_closes[symbol][exit_day])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(f"missing complete daily path for {symbol or '<blank>'}") from exc
+        path = daily_closes[symbol]
+        observed_days = sorted(day for day in path if entry_day <= day <= exit_day)
+        if not observed_days or observed_days[0] != entry_day or observed_days[-1] != exit_day:
+            raise ValueError(f"incomplete entry/exit path for {symbol}")
+        trades.append({
+            "symbol": symbol, "entry_day": entry_day, "exit_day": exit_day,
+            "entry_price": entry_price, "exit_price": exit_price, "path": path,
+        })
+    if not trades:
+        return {
+            "capital_scaled_max_drawdown_pct": 0.0,
+            "capital_scaled_final_return_pct": 0.0,
+            "capital_scaled_observed_days": 0,
+            "capital_scaled_peak_open_positions": 0,
+        }
+    all_days = sorted({day for trade in trades for day in trade["path"] if trade["entry_day"] <= day <= trade["exit_day"]})
+    entries: dict[date, list[dict[str, Any]]] = {}
+    for trade in trades:
+        entries.setdefault(trade["entry_day"], []).append(trade)
+    cash, equity, peak, worst = 1.0, 1.0, 1.0, 0.0
+    active: list[dict[str, Any]] = []
+    peak_open = 0
+    for day in all_days:
+        # Existing positions are marked at the latest available close no later
+        # than this portfolio day. Entry and exit occur at their closing prices.
+        for position in active:
+            if day in position["path"]:
+                position["last_price"] = position["path"][day]
+        exiting = [position for position in active if position["exit_day"] == day]
+        for position in exiting:
+            proceeds = position["shares"] * position["last_price"]
+            proceeds *= 1.0 - round_trip_cost_pct / 100.0
+            cash += proceeds
+            active.remove(position)
+        marked_equity = cash + sum(position["shares"] * position["last_price"] for position in active)
+        for trade in entries.get(day, []):
+            if len(active) >= max_open_positions:
+                raise ValueError("selected rows violate fixed-slot capacity")
+            # Never borrow to refill a slot after other open positions have
+            # appreciated. Invest at most one target slot and at most cash.
+            slot_notional = min(cash, marked_equity / max_open_positions)
+            if slot_notional <= 0:
+                raise ValueError("selected entry has no available cash")
+            cash -= slot_notional
+            active.append({**trade, "shares": slot_notional / trade["entry_price"], "last_price": trade["entry_price"]})
+        peak_open = max(peak_open, len(active))
+        equity = cash + sum(position["shares"] * position["last_price"] for position in active)
+        peak = max(peak, equity)
+        worst = min(worst, (equity / peak - 1.0) * 100.0)
+    return {
+        "capital_scaled_max_drawdown_pct": round(worst, 6),
+        "capital_scaled_final_return_pct": round((equity - 1.0) * 100.0, 6),
+        "capital_scaled_observed_days": len(all_days),
+        "capital_scaled_peak_open_positions": peak_open,
+    }
+
+
+def evaluate_cutoffs(calibration_rows: Sequence[Mapping[str, Any]], test_rows: Sequence[Mapping[str, Any]], fractions: Sequence[float], max_open_positions: int, round_trip_cost_pct: float, daily_closes: Mapping[str, Mapping[date, float]] | None = None) -> list[dict[str, Any]]:
     calibration_scores = np.asarray([float(row["technical_context_score"]) for row in calibration_rows], dtype=float)
     output = []
     for fraction in fractions:
@@ -80,13 +184,25 @@ def evaluate_cutoffs(calibration_rows: Sequence[Mapping[str, Any]], test_rows: S
         candidates = [row for row in test_rows if row.get("call_volume_unusual") and float(row["technical_context_score"]) >= cutoff]
         selected = capacity_limited(candidates, max_open_positions)
         metrics = selection_metrics(selected, round_trip_cost_pct)
+        capital_metrics = capital_scaled_drawdown(
+            selected, daily_closes, max_open_positions, round_trip_cost_pct,
+        ) if daily_closes is not None else {}
+        capital_gate = None
+        if capital_metrics:
+            corrected_gate_metrics = {
+                **metrics,
+                "approximate_cohort_max_drawdown_pct": capital_metrics["capital_scaled_max_drawdown_pct"],
+            }
+            capital_gate = evaluate_rare_signal_gate(corrected_gate_metrics)
         output.append({
             "technical_top_fraction_selected_on_calibration": fraction,
             "technical_score_cutoff_from_calibration": cutoff,
             "test_unusual_call_candidates": len(candidates),
             "max_open_positions": max_open_positions,
             **metrics,
+            **capital_metrics,
             "rare_signal_gate": evaluate_rare_signal_gate(metrics),
+            "capital_scaled_rare_signal_gate": capital_gate,
         })
     return output
 
@@ -101,6 +217,7 @@ def main() -> None:
     parser.add_argument("--embargo-calendar-days", type=int, default=7)
     parser.add_argument("--max-open-positions", type=int, default=5)
     parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
+    parser.add_argument("--daily-dir", type=Path)
     args = parser.parse_args()
     raw_rows = join_option_outcomes(read_jsonl(args.base_rows), read_jsonl(args.option_features))
     model = lgb.Booster(model_file=str(args.technical_model))
@@ -124,7 +241,11 @@ def main() -> None:
             "technical_model_path": str(args.technical_model),
             "technical_model_sha256": file_sha256(args.technical_model),
         },
-        "results": evaluate_cutoffs(calibration, test, (0.25, 0.10, 0.05), args.max_open_positions, args.round_trip_cost_pct),
+        "results": evaluate_cutoffs(
+            calibration, test, (0.25, 0.10, 0.05), args.max_open_positions,
+            args.round_trip_cost_pct,
+            load_daily_closes(args.daily_dir) if args.daily_dir else None,
+        ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

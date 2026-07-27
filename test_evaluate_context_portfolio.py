@@ -4,7 +4,14 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from evaluate_context_portfolio import capacity_limited, file_sha256, split_chronologically
+from datetime import date
+
+from evaluate_context_portfolio import (
+    capital_scaled_drawdown,
+    capacity_limited,
+    file_sha256,
+    split_chronologically,
+)
 
 
 class ContextPortfolioTests(unittest.TestCase):
@@ -29,6 +36,45 @@ class ContextPortfolioTests(unittest.TestCase):
             first = file_sha256(path)
             path.write_text("second", encoding="utf-8")
             self.assertNotEqual(first, file_sha256(path))
+
+    def test_capital_scaled_curve_leaves_unused_slots_in_cash(self):
+        closes = {"AAA": {
+            date(2026, 1, 2): 100.0,
+            date(2026, 1, 5): 80.0,
+        }}
+        rows = [{
+            "symbol": "AAA",
+            "market_date": "2026-01-02",
+            "future_market_date": "2026-01-05",
+        }]
+        metrics = capital_scaled_drawdown(rows, closes, 5, 0.0)
+        self.assertEqual(-4.0, metrics["capital_scaled_max_drawdown_pct"])
+        self.assertEqual(-4.0, metrics["capital_scaled_final_return_pct"])
+        self.assertEqual(1, metrics["capital_scaled_peak_open_positions"])
+
+    def test_capital_scaled_curve_subtracts_cost_from_deployed_slot(self):
+        closes = {"AAA": {
+            date(2026, 1, 2): 100.0,
+            date(2026, 1, 5): 100.0,
+        }}
+        rows = [{
+            "symbol": "AAA",
+            "market_date": "2026-01-02",
+            "future_market_date": "2026-01-05",
+        }]
+        metrics = capital_scaled_drawdown(rows, closes, 5, 0.25)
+        self.assertEqual(-0.05, metrics["capital_scaled_final_return_pct"])
+
+    def test_local_schwab_archive_date_is_mapped_to_us_session(self):
+        from evaluate_context_portfolio import load_daily_closes
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "AAA_schwab_1d_max.csv"
+            path.write_text(
+                "symbol,date,close\nAAA,2026-01-04,100\n",
+                encoding="utf-8",
+            )
+            closes = load_daily_closes(Path(directory))
+        self.assertEqual(100.0, closes["AAA"][date(2026, 1, 5)])
 
 
 if __name__ == "__main__":
