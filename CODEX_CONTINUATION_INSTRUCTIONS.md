@@ -132,6 +132,8 @@ The generic leakage-safe label now permits a two-session horizon while preservin
 
 The legacy 20-day Transformer architecture now has a separately generated two-day trainer, `train_v2_transformer_2day_sp500_from_supabase.py`. It cannot accept another horizon and writes only under `data_v2/transformer_2day_sp500_supabase_training` with `transformer_2day_*` artifacts. Its defaults use a one-session step, 12-calendar-day embargo, and four-calendar-day non-overlap. Never point the original 20-day trainer at a two-day horizon because its fixed output names would overwrite historical artifacts.
 
+The full two-day Transformer run completed on 2026-07-27 with 2,233,585 windows across 496 symbols. Epoch 2 won validation at threshold 0.55 (+0.234609% mean net across 1,966 signals), but the untouched test failed: -0.121585% mean net, 48.8854% cost-adjusted win rate, 0.909755 profit factor across 1,929 signals; non-overlapping mean was -0.124948%. Preserve the artifacts as negative evidence. Do not promote, integrate, or retune this model using its observed test.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
