@@ -140,6 +140,8 @@ The full two-day Transformer run completed on 2026-07-27 with 2,233,585 windows 
 
 Do not use `train_v2_transformer_20day_russell_from_supabase.py` for a two-day experiment: that legacy file has only an 80/20 train-validation split and lacks the current embargo, untouched test, cost-adjusted checkpoint, and scaler safeguards. The isolated replacement is `train_v2_transformer_2day_russell_from_supabase.py`, generated from the validated S&P two-day pipeline with separate Russell artifacts. Screen the full Russell list first at `--step-days 3 --epochs 3`; run the much more expensive one-session/five-epoch design only if the untouched screening test passes.
 
+The Russell screening run completed with 879,971 windows across the 1,909-symbol request list. The validation-selected threshold-0.55 checkpoint averaged only +0.021583% net and failed untouched test at -0.021745% mean net, 48.5507% cost-adjusted wins, and 0.985305 profit factor across 31,499 signals; non-overlapping mean was -0.020699%. The screening gate failed. Preserve the artifacts as negative evidence and do not launch the exhaustive Russell run.
+
 ## Completed research infrastructure
 
 - Leakage-safe five-day LightGBM baseline
