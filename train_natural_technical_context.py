@@ -87,6 +87,7 @@ def main() -> None:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--winner-return-pct", type=float, default=10.0)
+    parser.add_argument("--target", default=TARGET)
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
@@ -94,10 +95,10 @@ def main() -> None:
     parser.add_argument("--early-stopping-rounds", type=int, default=60)
     args = parser.parse_args()
 
-    rows = [row for row in read_jsonl(args.input) if row.get(TARGET) is not None and row.get("market_date")]
+    rows = [row for row in read_jsonl(args.input) if row.get(args.target) is not None and row.get("market_date")]
     names = technical_feature_names(rows)
     x = matrix(rows, names)
-    y = np.asarray([safe_float(row[TARGET]) >= args.winner_return_pct for row in rows], dtype=np.int32)
+    y = np.asarray([safe_float(row[args.target]) >= args.winner_return_pct for row in rows], dtype=np.int32)
     train_idx, validation_idx, test_idx, split = chronological_split(
         rows, args.train_fraction, args.validation_fraction, args.embargo_calendar_days,
     )
@@ -121,7 +122,8 @@ def main() -> None:
     report = {
         "status": "complete", "research_only": True, "execution_enabled": False,
         "warning": "Scores are uncalibrated research ranks, not trading recommendations or promised probabilities.",
-        "input": str(args.input), "rows": len(rows), "winner_return_pct": args.winner_return_pct,
+        "input": str(args.input), "rows": len(rows), "target": args.target,
+        "winner_return_pct": args.winner_return_pct,
         "feature_names": names, "best_iteration": int(model.best_iteration), "split": split,
         "train": metrics(y[train_idx], predict(train_idx)), "validation": metrics(y[validation_idx], predict(validation_idx)),
         "test": metrics(y[test_idx], predict(test_idx)), "top_features": importance[:30], "model_path": str(model_path),
