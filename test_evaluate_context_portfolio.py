@@ -30,6 +30,13 @@ class ContextPortfolioTests(unittest.TestCase):
         ]
         self.assertEqual(["2026-01-01", "2026-01-06"], [row["market_date"] for row in capacity_limited(rows, 1)])
 
+    def test_capacity_uses_executable_next_session_entry_date(self):
+        rows = [
+            {"market_date": "2026-01-01", "entry_market_date": "2026-01-02", "future_market_date": "2026-01-06", "technical_context_score": 0.9},
+            {"market_date": "2026-01-02", "entry_market_date": "2026-01-05", "future_market_date": "2026-01-09", "technical_context_score": 0.8},
+        ]
+        self.assertEqual(["2026-01-01"], [row["market_date"] for row in capacity_limited(rows, 1)])
+
     def test_file_hash_changes_when_artifact_changes(self):
         with TemporaryDirectory() as directory:
             path = Path(directory) / "artifact.txt"
@@ -79,6 +86,23 @@ class ContextPortfolioTests(unittest.TestCase):
         }]
         with self.assertRaisesRegex(ValueError, "missing complete daily path"):
             capital_scaled_drawdown(rows, closes, 5, 0.25)
+
+    def test_capital_scaled_curve_supports_next_open_entry(self):
+        bars = {"AAA": {
+            date(2026, 1, 2): {"open": 100.0, "close": 105.0},
+            date(2026, 1, 5): {"open": 108.0, "close": 110.0},
+        }}
+        rows = [{
+            "symbol": "AAA",
+            "market_date": "2026-01-01",
+            "entry_market_date": "2026-01-02",
+            "entry_price": 100.0,
+            "future_market_date": "2026-01-05",
+            "label_forward_return_5d_pct": 10.0,
+        }]
+        metrics = capital_scaled_drawdown(rows, bars, 5, 0.0)
+        self.assertEqual(2.0, metrics["capital_scaled_final_return_pct"])
+        self.assertEqual(0.0, metrics["maximum_label_alignment_error_pct"])
 
     def test_local_schwab_archive_preserves_source_date(self):
         from evaluate_context_portfolio import load_daily_closes

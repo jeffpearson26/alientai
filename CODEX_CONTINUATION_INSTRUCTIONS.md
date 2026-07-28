@@ -450,6 +450,12 @@ The evaluator now also separates an explicitly named directional buy-volume prox
 
 `evaluate_analyst_upgrade_same_day.py` reads only explicitly parsed old-to-new rating headlines and uses return metrics only when the announcement was timestamped before 09:30 Eastern. The unofficial archive has zero exact Hold-to-Strong-Buy events. For Hold-to-Buy it has 402 events, 277 premarket, but only 42 unique symbol-days with matching prices in the current S&P survivor archive. Those 42 averaged -0.069222% open-to-close with 50% positive outcomes and -0.191087 points versus their prior-20-session intraday mean. Do not infer a same-day analyst edge from this small survivor-biased sample. The exact Strong Buy question remains unanswered pending a licensed structured feed and broader historical price coverage including delisted/non-current names.
 
+## Nasdaq executable-label correction (July 28)
+
+`build_local_technical_training_rows.py --entry-assumption next_regular_session_open` now preserves the decision close for technical features while labeling entry at the next session's open and exit at the fifth later session close. It records explicit entry date/price and `holding_sessions=5`. `evaluate_context_portfolio.py` now supports those explicit open entries, marks them to each session close, and retains legacy close-entry behavior for prior reports. `evaluate_nasdaq100_clone_portfolio.py` now fails closed unless a selected validation fraction has the minimum signal count, positive mean and median net return, and at least a 50% net win rate.
+
+The isolated complete-101 executable result is at `data_v2\rcef_research\nasdaq100_executable_101` (ignored generated data). Validation selected top 0.25% / `0.23346458789809038`: 21 signals, +6.281492% mean, +4.771091% median, 76.19% wins. Its later test is `RESEARCH_FAIL_EXECUTABLE_LABELS`: 11 signals, +3.580862% mean, **-1.292366% median**, 45.45% wins, +7.376964% capital-scaled return, -13.018128% drawdown, and zero label-alignment error. Do not paper-enable or tune it. The frozen QQQ-relative challenger now fails the stricter validation-quality gate. The legacy paper champion and all account/settings files remain unchanged. A trading-session runtime exit mechanism has not been activated because it would alter existing paper behavior and cannot rescue the failed executable-label challenger.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

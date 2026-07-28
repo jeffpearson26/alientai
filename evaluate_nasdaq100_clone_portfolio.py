@@ -17,7 +17,7 @@ from evaluate_context_portfolio import (
     capacity_limited,
     daily_archive_sha256,
     file_sha256,
-    load_daily_closes,
+    load_daily_bars,
 )
 
 
@@ -56,6 +56,9 @@ def select_validation_fraction(
     fractions: Sequence[float],
     minimum_signals: int,
     cost_pct: float,
+    minimum_mean_net_return_pct: float = 0.0,
+    minimum_median_net_return_pct: float = 0.0,
+    minimum_net_win_rate_pct: float = 50.0,
 ) -> tuple[float, float, list[dict[str, Any]]]:
     scores = np.asarray([float(row["technical_context_score"]) for row in validation])
     candidates = []
@@ -64,9 +67,18 @@ def select_validation_fraction(
         selected = [row for row in validation if float(row["technical_context_score"]) >= cutoff]
         metrics = trade_metrics(selected, cost_pct)
         candidates.append({"fraction": fraction, "cutoff": cutoff, **metrics})
-    eligible = [row for row in candidates if row["signals"] >= minimum_signals]
+    eligible = [
+        row for row in candidates
+        if row["signals"] >= minimum_signals
+        and row["mean_net_return_pct"] is not None
+        and row["median_net_return_pct"] is not None
+        and row["net_win_rate_pct"] is not None
+        and row["mean_net_return_pct"] > minimum_mean_net_return_pct
+        and row["median_net_return_pct"] > minimum_median_net_return_pct
+        and row["net_win_rate_pct"] >= minimum_net_win_rate_pct
+    ]
     if not eligible:
-        raise ValueError("no validation fraction meets minimum_signals")
+        raise ValueError("no validation fraction meets the locked quality gates")
     winner = max(eligible, key=lambda row: (row["mean_net_return_pct"], -row["fraction"]))
     return float(winner["fraction"]), float(winner["cutoff"]), candidates
 
@@ -82,6 +94,9 @@ def main() -> None:
     parser.add_argument("--minimum-validation-signals", type=int, default=20)
     parser.add_argument("--max-open-positions", type=int, default=5)
     parser.add_argument("--round-trip-cost-pct", type=float, default=0.25)
+    parser.add_argument("--minimum-mean-net-return-pct", type=float, default=0.0)
+    parser.add_argument("--minimum-median-net-return-pct", type=float, default=0.0)
+    parser.add_argument("--minimum-net-win-rate-pct", type=float, default=50.0)
     args = parser.parse_args()
 
     report = json.loads(args.training_report.read_text(encoding="utf-8"))
@@ -98,10 +113,12 @@ def main() -> None:
     test = [row for row in scored if date.fromisoformat(row["market_date"]) >= test_start]
     fraction, cutoff, diagnostics = select_validation_fraction(
         validation, args.fractions, args.minimum_validation_signals, args.round_trip_cost_pct,
+        args.minimum_mean_net_return_pct, args.minimum_median_net_return_pct,
+        args.minimum_net_win_rate_pct,
     )
     test_candidates = [row for row in test if float(row["technical_context_score"]) >= cutoff]
     selected = capacity_limited(test_candidates, args.max_open_positions)
-    daily_closes = load_daily_closes(args.daily_dir)
+    daily_closes = load_daily_bars(args.daily_dir)
     result = {
         "status": "complete",
         "research_only": True,
@@ -118,6 +135,9 @@ def main() -> None:
             "minimum_validation_signals": args.minimum_validation_signals,
             "max_open_positions": args.max_open_positions,
             "round_trip_cost_pct": args.round_trip_cost_pct,
+            "minimum_mean_net_return_pct": args.minimum_mean_net_return_pct,
+            "minimum_median_net_return_pct": args.minimum_median_net_return_pct,
+            "minimum_net_win_rate_pct": args.minimum_net_win_rate_pct,
         },
         "validation_diagnostics": diagnostics,
         "selected_fraction": fraction,

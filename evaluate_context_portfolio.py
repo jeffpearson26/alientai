@@ -66,8 +66,8 @@ def capacity_limited(rows: Sequence[Mapping[str, Any]], max_open_positions: int)
         raise ValueError("max_open_positions must be positive")
     active_exits: list[date] = []
     selected = []
-    for row in sorted(rows, key=lambda item: (str(item["market_date"]), -float(item["technical_context_score"]))):
-        day = date.fromisoformat(str(row["market_date"]))
+    for row in sorted(rows, key=lambda item: (str(item.get("entry_market_date") or item["market_date"]), -float(item["technical_context_score"]))):
+        day = date.fromisoformat(str(row.get("entry_market_date") or row["market_date"]))
         # Free capital only after the exit-session close, a conservative rule.
         active_exits = [exit_day for exit_day in active_exits if day <= exit_day]
         if len(active_exits) >= max_open_positions:
@@ -108,9 +108,35 @@ def load_daily_closes(directory: Path) -> dict[str, dict[date, float]]:
     return output
 
 
+def load_daily_bars(directory: Path) -> dict[str, dict[date, dict[str, float]]]:
+    """Load positive open/close prices for executable entry/exit reconciliation."""
+    output: dict[str, dict[date, dict[str, float]]] = {}
+    for path in sorted(directory.glob("*_schwab_1d_max.csv")):
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        if not rows:
+            continue
+        symbol = str(rows[0].get("symbol") or "").strip().upper()
+        bars: dict[date, dict[str, float]] = {}
+        for row in rows:
+            try:
+                day = date.fromisoformat(str(row.get("date") or ""))
+                open_price = float(row.get("open"))
+                close_price = float(row.get("close"))
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(open_price) and open_price > 0 and np.isfinite(close_price) and close_price > 0:
+                bars[day] = {"open": open_price, "close": close_price}
+        if symbol and bars:
+            output[symbol] = bars
+    if not output:
+        raise ValueError("daily directory contains no usable open/close histories")
+    return output
+
+
 def capital_scaled_drawdown(
     rows: Sequence[Mapping[str, Any]],
-    daily_closes: Mapping[str, Mapping[date, float]],
+    daily_closes: Mapping[str, Mapping[date, Any]],
     max_open_positions: int,
     round_trip_cost_pct: float,
 ) -> dict[str, Any]:
@@ -120,11 +146,20 @@ def capital_scaled_drawdown(
     trades = []
     maximum_label_alignment_error = 0.0
 
-    def resolve_day(path: Mapping[date, float], nominal_day: date, expected_price: float) -> date:
+    def bar_value(value: Any, field: str) -> float:
+        if isinstance(value, Mapping):
+            return float(value[field])
+        if field != "close":
+            raise ValueError("open price unavailable in close-only daily path")
+        return float(value)
+
+    def resolve_day(
+        path: Mapping[date, Any], nominal_day: date, expected_price: float, field: str,
+    ) -> date:
         candidates = [
-            day for day, close in path.items()
+            day for day, bar in path.items()
             if abs((day - nominal_day).days) <= 3
-            and abs(close / expected_price - 1.0) <= 0.00001
+            and abs(bar_value(bar, field) / expected_price - 1.0) <= 0.00001
         ]
         if not candidates:
             raise ValueError(f"no price-anchored candle near {nominal_day} at {expected_price}")
@@ -133,18 +168,19 @@ def capital_scaled_drawdown(
     for row in rows:
         symbol = str(row.get("symbol") or "").strip().upper()
         try:
-            nominal_entry_day = date.fromisoformat(str(row["market_date"]))
+            nominal_entry_day = date.fromisoformat(str(row.get("entry_market_date") or row["market_date"]))
             nominal_exit_day = date.fromisoformat(str(row["future_market_date"]))
             path = daily_closes[symbol]
-            entry_price = float(row.get("close") or path[nominal_entry_day])
-            entry_day = resolve_day(path, nominal_entry_day, entry_price)
+            entry_price = float(row.get("entry_price") or row.get("close") or bar_value(path[nominal_entry_day], "close"))
+            entry_field = "open" if row.get("entry_market_date") else "close"
+            entry_day = resolve_day(path, nominal_entry_day, entry_price, entry_field)
             if row.get("label_forward_return_5d_pct") is not None:
                 label_return = float(row["label_forward_return_5d_pct"])
                 expected_exit_price = entry_price * (1.0 + label_return / 100.0)
-                exit_day = resolve_day(path, nominal_exit_day, expected_exit_price)
+                exit_day = resolve_day(path, nominal_exit_day, expected_exit_price, "close")
             else:
                 exit_day = nominal_exit_day
-            exit_price = float(path[exit_day])
+            exit_price = bar_value(path[exit_day], "close")
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError(f"missing complete daily path for {symbol or '<blank>'}") from exc
         observed_days = sorted(day for day in path if entry_day <= day <= exit_day)
@@ -181,10 +217,11 @@ def capital_scaled_drawdown(
     peak_open = 0
     for day in all_days:
         # Existing positions are marked at the latest available close no later
-        # than this portfolio day. Entry and exit occur at their closing prices.
+        # than this portfolio day. New entries may use the open, but are marked
+        # to that session's close before the daily equity snapshot.
         for position in active:
             if day in position["path"]:
-                position["last_price"] = position["path"][day]
+                position["last_price"] = bar_value(position["path"][day], "close")
         exiting = [position for position in active if position["exit_day"] == day]
         for position in exiting:
             proceeds = position["shares"] * position["last_price"]
@@ -201,7 +238,12 @@ def capital_scaled_drawdown(
             if slot_notional <= 0:
                 raise ValueError("selected entry has no available cash")
             cash -= slot_notional
-            active.append({**trade, "shares": slot_notional / trade["entry_price"], "last_price": trade["entry_price"]})
+            entry_close = bar_value(trade["path"][day], "close")
+            active.append({
+                **trade,
+                "shares": slot_notional / trade["entry_price"],
+                "last_price": entry_close,
+            })
         peak_open = max(peak_open, len(active))
         equity = cash + sum(position["shares"] * position["last_price"] for position in active)
         peak = max(peak, equity)

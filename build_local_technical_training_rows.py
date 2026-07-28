@@ -9,6 +9,9 @@ from datetime import date
 from pathlib import Path
 
 from alientai_v2.features.technical_snapshot import build_technical_snapshot
+from alientai_v2.research.five_day_open_close_labels import (
+    build_next_open_horizon_close_labels,
+)
 
 
 def symbols(path: Path) -> list[str]:
@@ -26,10 +29,22 @@ def build_rows(
     horizon_sessions: int = 5,
     benchmark_candles: list[dict] | None = None,
     benchmark_symbol: str | None = None,
+    entry_assumption: str = "same_session_close",
 ) -> list[dict]:
+    if entry_assumption not in {"same_session_close", "next_regular_session_open"}:
+        raise ValueError("entry_assumption must be same_session_close or next_regular_session_open")
     benchmark_by_date = {
         row["date"]: index for index, row in enumerate(benchmark_candles or [])
     }
+    executable_labels = {
+        str(row["decision_date"]): row
+        for row in build_next_open_horizon_close_labels(
+            symbol,
+            candles,
+            horizon_sessions=horizon_sessions,
+            round_trip_cost_pct=0.0,
+        )
+    } if entry_assumption == "next_regular_session_open" else {}
     output = []
     for index in range(59, len(candles) - horizon_sessions):
         current = candles[index]
@@ -38,14 +53,28 @@ def build_rows(
             continue
         close = float(current["close"])
         future = candles[index + horizon_sessions]
+        executable = executable_labels.get(current["date"])
+        if entry_assumption == "next_regular_session_open" and executable is None:
+            continue
         row = {
             "symbol": symbol,
             "market_date": current["date"],
             "future_market_date": future["date"],
             "close": close,
-            "label_forward_return_5d_pct": (float(future["close"]) / close - 1.0) * 100.0,
+            "label_forward_return_5d_pct": (
+                float(executable["gross_return_pct"])
+                if executable is not None
+                else (float(future["close"]) / close - 1.0) * 100.0
+            ),
+            "entry_assumption": entry_assumption,
             **build_technical_snapshot(candles[index - 59:index + 1]),
         }
+        if executable is not None:
+            row.update({
+                "entry_market_date": str(executable["entry_date"]),
+                "entry_price": float(executable["entry_price"]),
+                "holding_sessions": int(executable["holding_sessions"]),
+            })
         if benchmark_candles is not None and benchmark_symbol:
             benchmark_index = benchmark_by_date.get(current["date"])
             if benchmark_index is None or benchmark_index < 60:
@@ -78,6 +107,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--benchmark-symbol")
+    parser.add_argument(
+        "--entry-assumption",
+        choices=("same_session_close", "next_regular_session_open"),
+        default="same_session_close",
+    )
     args = parser.parse_args()
     benchmark_candles = None
     benchmark_symbol = (args.benchmark_symbol or "").strip().upper() or None
@@ -102,6 +136,7 @@ def main() -> None:
             args.end_date,
             benchmark_candles=benchmark_candles,
             benchmark_symbol=benchmark_symbol,
+            entry_assumption=args.entry_assumption,
         )
         all_rows.extend(rows)
         coverage.append({

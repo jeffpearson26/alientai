@@ -48,6 +48,22 @@ class LocalTechnicalTrainingRowsTests(unittest.TestCase):
         self.assertAlmostEqual(rows[0]["technical_relative_return_20d_pct"], 0.0)
         self.assertAlmostEqual(rows[0]["technical_relative_return_60d_pct"], 0.0)
 
+    def test_executable_labels_enter_next_open_and_exit_fifth_close(self):
+        rows = build_rows(
+            self.candles(),
+            "AAA",
+            date(2025, 1, 1),
+            date(2025, 12, 31),
+            entry_assumption="next_regular_session_open",
+        )
+        first = rows[0]
+        self.assertEqual(first["market_date"], self.candles()[59]["date"])
+        self.assertEqual(first["entry_market_date"], self.candles()[60]["date"])
+        self.assertEqual(first["future_market_date"], self.candles()[64]["date"])
+        expected = (float(self.candles()[64]["close"]) / float(self.candles()[60]["open"]) - 1.0) * 100.0
+        self.assertAlmostEqual(first["label_forward_return_5d_pct"], expected)
+        self.assertEqual(first["holding_sessions"], 5)
+
     def test_benchmark_mode_skips_dates_without_required_history(self):
         candles = self.candles()
         benchmark = self.candles()[10:]

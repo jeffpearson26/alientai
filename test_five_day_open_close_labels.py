@@ -59,6 +59,15 @@ class FiveDayOpenCloseLabelTests(unittest.TestCase):
         self.assertEqual(1, rows[0]["label_positive_net_return"])
         self.assertEqual(0, rows[0]["label_large_move"])
 
+    def test_accepts_csv_string_prices(self):
+        source = [
+            {key: str(value) if key in {"open", "close"} else value for key, value in row.items()}
+            for row in candles()
+        ]
+        rows = build_next_open_five_close_labels("ABC", source)
+        self.assertEqual(2, len(rows))
+        self.assertAlmostEqual(4.75, rows[0]["net_return_pct"])
+
     def test_skips_discontinuous_window(self):
         source = candles()
         source[3] = {**source[3], "date": "2026-08-16"}

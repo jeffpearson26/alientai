@@ -32,6 +32,16 @@ class NasdaqPortfolioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_validation_fraction(rows, [0.5], minimum_signals=2, cost_pct=0.25)
 
+    def test_selection_rejects_positive_mean_with_negative_typical_trade(self):
+        rows = [
+            {"technical_context_score": 0.99, "label_forward_return_5d_pct": 20.0},
+            {"technical_context_score": 0.98, "label_forward_return_5d_pct": -6.0},
+            {"technical_context_score": 0.97, "label_forward_return_5d_pct": -6.0},
+            {"technical_context_score": 0.96, "label_forward_return_5d_pct": -6.0},
+        ]
+        with self.assertRaisesRegex(ValueError, "locked quality gates"):
+            select_validation_fraction(rows, [1.0], minimum_signals=4, cost_pct=0.25)
+
 
 if __name__ == "__main__":
     unittest.main()
