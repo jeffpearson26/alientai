@@ -442,6 +442,8 @@ Capital-scaled portfolio reports fingerprint the complete Schwab daily directory
 
 `export_contextual_options_selected_events.py` reproducibly exports the frozen 60%/top-quarter/five-slot cohort for instrument-payoff research. Its July-28 output contains 39 events across 31 symbols and fingerprints the same base rows, option features, and technical model used by the portfolio study. Running `evaluate_historical_calls.py` against `historical_options_natural_sp500_2026` produced 30 valid trades for each fixed policy (37 complete chain pairs; two missing). Both policies fail a typical-trade test despite positive means: ATM-30d median -26.056060% / 40.00% profitable; delta60-30d median -16.697239% / 43.33% profitable. Treat the positive means as winner-skew, not a pass. Do not enable options paper buying or tune strikes/expiry on this observed cohort.
 
+`evaluate_afterhours_premarket_continuation.py` is the fixed-threshold, research-only test of the prior 16:05-19:55 ET session plus the current 04:00-09:25 ET session. It reads the existing extended-hours archive, requires complete 09:30 and 16:00 bars, subtracts 0.25% round-trip cost, and reports chronological partitions. Its July-28 run labeled 44,484 rows. All full-history joint 1.5x/2x/3x/5x relative-volume thresholds were negative after costs. The untouched 5x joint subset had 70 rows, -0.450914% mean net return, -0.127161% median, and 48.57% net wins. This rejects unusual extended-hours volume as a standalone same-day long rule. Preserve it only as contextual evidence for a future pre-specified multivariate experiment; do not tune these observed thresholds or connect the evaluator to paper/live trading.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
