@@ -19,6 +19,115 @@ THRESHOLDS = (1.5, 2.0, 3.0, 5.0)
 MINIMUM_CANDIDATES = 30
 
 
+def signed_volume_proxy(
+    rows: list[dict[str, str]], reference_close: float | None,
+) -> dict[str, float | None]:
+    """Approximate buyer/seller pressure from five-minute close direction."""
+    buy_volume = 0.0
+    sell_volume = 0.0
+    neutral_volume = 0.0
+    previous = reference_close
+    for row in rows:
+        try:
+            close = float(row["close"])
+            volume = max(0.0, float(row.get("volume") or 0.0))
+        except (KeyError, TypeError, ValueError):
+            continue
+        if previous is None or close == previous:
+            neutral_volume += volume
+        elif close > previous:
+            buy_volume += volume
+        else:
+            sell_volume += volume
+        previous = close
+    directional = buy_volume + sell_volume
+    return {
+        "buy_volume_proxy": buy_volume,
+        "sell_volume_proxy": sell_volume,
+        "neutral_volume_proxy": neutral_volume,
+        "buy_share_proxy": buy_volume / directional if directional else None,
+        "signed_volume_imbalance_proxy": (
+            (buy_volume - sell_volume) / directional if directional else None
+        ),
+    }
+
+
+def directional_features(
+    by_date: dict[str, list[dict[str, str]]], market_date: str,
+) -> dict[str, Any]:
+    """Build separate prior-after-hours and current-premarket pressure proxies."""
+    prior_dates = sorted(day for day in by_date if day < market_date)
+    if not prior_dates:
+        return {"directional_buy_proxy_available": False}
+    session_day = prior_dates[-1]
+
+    def rows_between(day: str, start: str, end: str) -> list[dict[str, str]]:
+        return [
+            row for row in by_date.get(day, [])
+            if start <= str(row.get("timestamp") or "")[10:16] <= end
+        ]
+
+    prior_regular = rows_between(session_day, " 09:30", " 16:00")
+    afterhours = rows_between(session_day, " 16:05", " 19:55")
+    current_premarket = rows_between(market_date, " 04:00", " 09:25")
+    if not prior_regular or not afterhours or not current_premarket:
+        return {"directional_buy_proxy_available": False}
+    try:
+        prior_close = float(prior_regular[-1]["close"])
+    except (KeyError, TypeError, ValueError):
+        return {"directional_buy_proxy_available": False}
+
+    after = signed_volume_proxy(afterhours, prior_close)
+    pre = signed_volume_proxy(current_premarket, prior_close)
+    prior_after_buy = []
+    prior_pre_buy = []
+    for day in prior_dates[:-1][-10:]:
+        regular = rows_between(day, " 09:30", " 16:00")
+        if not regular:
+            continue
+        try:
+            close = float(regular[-1]["close"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        ah_buy = signed_volume_proxy(rows_between(day, " 16:05", " 19:55"), close)["buy_volume_proxy"]
+        earlier_days = [candidate for candidate in prior_dates if candidate < day]
+        earlier_regular = (
+            rows_between(earlier_days[-1], " 09:30", " 16:00") if earlier_days else []
+        )
+        earlier_close = None
+        if earlier_regular:
+            try:
+                earlier_close = float(earlier_regular[-1]["close"])
+            except (KeyError, TypeError, ValueError):
+                pass
+        pm_buy = signed_volume_proxy(
+            rows_between(day, " 04:00", " 09:25"), earlier_close
+        )["buy_volume_proxy"]
+        if ah_buy:
+            prior_after_buy.append(float(ah_buy))
+        if pm_buy:
+            prior_pre_buy.append(float(pm_buy))
+    typical_after = median(prior_after_buy) if prior_after_buy else None
+    typical_pre = median(prior_pre_buy) if prior_pre_buy else None
+    return {
+        "directional_buy_proxy_available": True,
+        "afterhours_buy_volume_proxy": after["buy_volume_proxy"],
+        "afterhours_sell_volume_proxy": after["sell_volume_proxy"],
+        "afterhours_buy_share_proxy": after["buy_share_proxy"],
+        "afterhours_signed_volume_imbalance_proxy": after["signed_volume_imbalance_proxy"],
+        "afterhours_relative_buy_volume_proxy": (
+            float(after["buy_volume_proxy"]) / typical_after if typical_after else None
+        ),
+        "premarket_buy_volume_proxy": pre["buy_volume_proxy"],
+        "premarket_sell_volume_proxy": pre["sell_volume_proxy"],
+        "premarket_buy_share_proxy": pre["buy_share_proxy"],
+        "premarket_signed_volume_imbalance_proxy": pre["signed_volume_imbalance_proxy"],
+        "premarket_relative_buy_volume_proxy": (
+            float(pre["buy_volume_proxy"]) / typical_pre if typical_pre else None
+        ),
+    }
+
+
 def afterhours_from_index(
     by_date: dict[str, list[dict[str, str]]], market_date: str,
 ) -> dict[str, Any]:
@@ -104,7 +213,20 @@ def evaluate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         and row.get("afterhours_relative_volume") is not None
         and row.get("premarket_relative_volume") is not None
     ]
-    output: dict[str, Any] = {"eligible": metrics(eligible), "fixed_thresholds": {}}
+    directional = [
+        row for row in rows
+        if row.get("directional_buy_proxy_available") is True
+        and row.get("afterhours_relative_buy_volume_proxy") is not None
+        and row.get("premarket_relative_buy_volume_proxy") is not None
+        and row.get("afterhours_buy_share_proxy") is not None
+        and row.get("premarket_buy_share_proxy") is not None
+    ]
+    output: dict[str, Any] = {
+        "eligible": metrics(eligible),
+        "directional_buy_proxy_eligible": metrics(directional),
+        "fixed_thresholds": {},
+        "fixed_directional_buy_proxy_thresholds": {},
+    }
     for threshold in THRESHOLDS:
         afterhours = [
             row for row in eligible
@@ -124,6 +246,18 @@ def evaluate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "premarket_only": metrics(premarket),
             "joint": metrics(joint),
         }
+        directional_joint = [
+            row for row in directional
+            if float(row["afterhours_relative_buy_volume_proxy"]) >= threshold
+            and float(row["premarket_relative_buy_volume_proxy"]) >= threshold
+            and float(row["afterhours_buy_share_proxy"]) >= 0.60
+            and float(row["premarket_buy_share_proxy"]) >= 0.60
+            and float(row.get("afterhours_session_return_pct") or 0.0) > 0.0
+            and float(row.get("premarket_session_return_pct") or 0.0) > 0.0
+        ]
+        output["fixed_directional_buy_proxy_thresholds"][f"at_least_{threshold:g}x"] = {
+            "joint_positive_pressure": metrics(directional_joint),
+        }
     return output
 
 
@@ -141,6 +275,7 @@ def build_rows(features: list[dict[str, Any]], archive: Path) -> tuple[list[dict
             continue
         row = dict(feature)
         row.update(afterhours_from_index(by_date, market_date))
+        row.update(directional_features(by_date, market_date))
         row["net_return_pct"] = net_return
         output.append(row)
     return output, missing_label
@@ -178,6 +313,7 @@ def main() -> None:
         "research_only": True,
         "execution_enabled": False,
         "feature_definition": "previous completed 16:05-19:55 ET session plus current 04:00-09:25 ET session",
+        "directional_proxy_definition": "five-minute uptick volume versus downtick volume; not exchange-classified buyer-initiated volume",
         "label": "same_day_0930_close_to_1600_close_minus_0.25pct_round_trip_cost",
         "feature_rows": len(features),
         "labeled_rows": len(rows),

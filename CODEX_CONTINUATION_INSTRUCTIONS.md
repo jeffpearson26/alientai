@@ -444,6 +444,8 @@ Capital-scaled portfolio reports fingerprint the complete Schwab daily directory
 
 `evaluate_afterhours_premarket_continuation.py` is the fixed-threshold, research-only test of the prior 16:05-19:55 ET session plus the current 04:00-09:25 ET session. It reads the existing extended-hours archive, requires complete 09:30 and 16:00 bars, subtracts 0.25% round-trip cost, and reports chronological partitions. Its July-28 run labeled 44,484 rows. All full-history joint 1.5x/2x/3x/5x relative-volume thresholds were negative after costs. The untouched 5x joint subset had 70 rows, -0.450914% mean net return, -0.127161% median, and 48.57% net wins. This rejects unusual extended-hours volume as a standalone same-day long rule. Preserve it only as contextual evidence for a future pre-specified multivariate experiment; do not tune these observed thresholds or connect the evaluator to paper/live trading.
 
+The evaluator now also separates an explicitly named directional buy-volume proxy: volume on rising five-minute closes is buy proxy and volume on falling closes is sell proxy. This is not true exchange-classified aggressor-side volume. The fixed rule requires positive price pressure, at least 60% buy-proxy share, and unusual buy-proxy volume in both sessions. Every threshold remained negative. Untouched results were 1.5x: 81 rows, 39.51% net wins, -0.266448% mean; 2x: 48, 41.67%, -0.389225%; 3x: 32, 34.38%, -0.831475%; 5x: 11, 45.45%, -0.355808%. Do not tune the observed rule. A future directional-volume study requires true trade-and-quote classification or a separately frozen interaction with catalyst/options/technical context.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
