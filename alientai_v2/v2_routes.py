@@ -31,45 +31,69 @@ def _read_v2_engine_accounts_summary_file():
     """
     try:
         project_root = Path(__file__).resolve().parents[1]
-        summary_path = project_root / "data_v2" / "engine_accounts" / "engine_accounts_summary.json"
-
-        document = (
-            json.loads(summary_path.read_text(encoding="utf-8"))
-            if summary_path.exists() else {"engines": []}
-        )
+        account_path = project_root / "data_v2" / "v2_paper_account.json"
+        account = json.loads(account_path.read_text(encoding="utf-8")) if account_path.exists() else {}
         status = get_status()
         enabled = [
             str(value) for value in status.get("enabled_engines", [])
             if str(value).strip()
         ]
-        historical = {
-            str(row.get("engine_id") or ""): row
-            for row in document.get("engines", [])
+        raw_open = account.get("open_positions") or {}
+        open_rows = []
+        if isinstance(raw_open, dict):
+            for symbol, position in raw_open.items():
+                if isinstance(position, dict):
+                    open_rows.append({**position, "symbol": position.get("symbol") or symbol})
+        elif isinstance(raw_open, list):
+            open_rows = [row for row in raw_open if isinstance(row, dict)]
+        closed_rows = [
+            row for row in (account.get("closed_trades") or [])
             if isinstance(row, dict)
-        }
+        ]
+
+        def number(value, default=0.0):
+            try:
+                return float(value if value not in (None, "") else default)
+            except (TypeError, ValueError):
+                return default
+
         engines = []
         for engine_id in enabled:
-            row = historical.get(engine_id)
-            if row is not None:
-                engines.append(row)
-                continue
+            own_open = [
+                row for row in open_rows
+                if str(row.get("engine_id") or "").strip() == engine_id
+            ]
+            own_closed = [
+                row for row in closed_rows
+                if str(row.get("engine_id") or "").strip() == engine_id
+            ]
+            open_cost = sum(number(row.get("cost"), number(row.get("shares")) * number(row.get("entry_price"))) for row in own_open)
+            open_value = sum(number(row.get("shares")) * number(row.get("last_price"), number(row.get("entry_price"))) for row in own_open)
+            closed_pnls = [number(row.get("pnl")) for row in own_closed]
+            realized = sum(closed_pnls)
+            unrealized = open_value - open_cost
+            wins = [value for value in closed_pnls if value > 0]
+            losses = [value for value in closed_pnls if value < 0]
+            total_pnl = realized + unrealized
             engines.append({
                 "engine_id": engine_id,
-                "account_value": status.get("account_value", 0.0),
-                "total_pnl": status.get("total_pnl", 0.0),
-                "total_pnl_pct": status.get("total_pnl_pct", 0.0),
-                "realized_pnl": status.get("realized_pnl", 0.0),
-                "unrealized_pnl": status.get("unrealized_pnl", 0.0),
-                "open_positions_count": status.get("open_positions_count", 0),
-                "closed_trades_count": 0,
-                "closed_win_rate_pct": 0.0,
-                "profit_factor": None,
-                "current_shared_paper_account": True,
+                "account_value": round(10000.0 + total_pnl, 4),
+                "total_pnl": round(total_pnl, 4),
+                "total_pnl_pct": round(total_pnl / 100.0, 4),
+                "realized_pnl": round(realized, 4),
+                "unrealized_pnl": round(unrealized, 4),
+                "open_positions_count": len(own_open),
+                "closed_trades_count": len(own_closed),
+                "closed_win_rate_pct": round(100.0 * len(wins) / len(closed_pnls), 4) if closed_pnls else 0.0,
+                "profit_factor": round(sum(wins) / abs(sum(losses)), 4) if losses else None,
+                "open_positions": own_open,
+                "closed_trades": own_closed,
+                "has_engine_trades": bool(own_open or own_closed),
             })
         return {
             "status": "success",
             "engines": engines,
-            "note": "Only currently enabled paper engines are shown.",
+            "note": "Only each enabled engine's own attributed paper positions and sales are shown.",
         }
 
     except Exception as exc:
@@ -1235,10 +1259,24 @@ function renderEngineAccounts(data) {
     const engineId = e.engine_id || "";
     const pnl = Number(e.total_pnl || 0);
     const pnlPct = Number(e.total_pnl_pct || 0);
+    const openTrades = Array.isArray(e.open_positions) ? e.open_positions : [];
+    const closedTrades = Array.isArray(e.closed_trades) ? e.closed_trades : [];
+    const openLabels = openTrades.map(t => {
+      const symbol = escapeHtml(String(t.symbol || ""));
+      const shares = escapeHtml(String(t.shares ?? ""));
+      return `<span class="pill">OPEN ${symbol}${shares ? ` ×${shares}` : ""}</span>`;
+    });
+    const soldLabels = closedTrades.map(t => {
+      const symbol = escapeHtml(String(t.symbol || ""));
+      const tradePnl = Number(t.pnl || 0);
+      return `<span class="pill">SOLD ${symbol} (${money(tradePnl)})</span>`;
+    });
+    const tradeLabels = [...openLabels, ...soldLabels];
+    const activity = tradeLabels.length ? tradeLabels.join(" ") : `<span class="small">No trades yet</span>`;
 
     html += `
       <tr>
-        <td>${escapeHtml(engineId)}</td>
+        <td><div>${escapeHtml(engineId)}</div><div style="margin-top:6px">${activity}</div></td>
         <td>${money(e.account_value)}</td>
         <td>${money(pnl)}</td>
         <td>${pct(pnlPct)}</td>
