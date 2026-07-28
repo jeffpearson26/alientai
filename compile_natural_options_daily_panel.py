@@ -79,7 +79,14 @@ def extension_history(symbol_list: Iterable[str], chains: Path, start_date: str,
     return totals, target_chains
 
 
-def compile_panel(symbol_list: list[str], previous: list[Mapping[str, Any]], chains: Path, daily_dir: Path, target_date: str) -> tuple[list[dict[str, Any]], list[str]]:
+def compile_panel(
+    symbol_list: list[str],
+    previous: list[Mapping[str, Any]],
+    chains: Path,
+    daily_dir: Path,
+    target_date: str,
+    price_rows: Iterable[Mapping[str, Any]] = (),
+) -> tuple[list[dict[str, Any]], list[str]]:
     prior = prior_rows(previous, target_date)
     latest_prior_date = max((str(row["market_date"]) for row in prior), default="")
     if not latest_prior_date or latest_prior_date >= target_date:
@@ -87,9 +94,17 @@ def compile_panel(symbol_list: list[str], previous: list[Mapping[str, Any]], cha
     extension, target_chains = extension_history(symbol_list, chains, latest_prior_date, target_date)
     history = unusual_call_features([*prior, *extension])
     history_by_key = {(row["symbol"], row["market_date"]): row for row in history}
+    prices = {
+        (str(row.get("symbol") or "").upper(), str(row.get("market_date") or "")): float(row["close"])
+        for row in price_rows
+        if row.get("symbol") and row.get("market_date") and row.get("close") is not None
+    }
     rows, missing = [], []
     for symbol in symbol_list:
-        chain, close = target_chains.get(symbol), local_close(daily_dir, symbol, target_date)
+        chain = target_chains.get(symbol)
+        close = prices.get((symbol, target_date))
+        if close is None:
+            close = local_close(daily_dir, symbol, target_date)
         activity = history_by_key.get((symbol, target_date))
         if chain is None or close is None or activity is None:
             missing.append(symbol)
@@ -106,9 +121,14 @@ def main() -> None:
     parser.add_argument("--previous-features", type=Path, required=True)
     parser.add_argument("--chains", type=Path, required=True)
     parser.add_argument("--daily-dir", type=Path, required=True)
+    parser.add_argument("--price-panel", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    rows, missing = compile_panel(symbols(args.symbols_file), read_jsonl(args.previous_features), args.chains, args.daily_dir, args.target_date)
+    price_rows = read_jsonl(args.price_panel) if args.price_panel else []
+    rows, missing = compile_panel(
+        symbols(args.symbols_file), read_jsonl(args.previous_features), args.chains,
+        args.daily_dir, args.target_date, price_rows,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:

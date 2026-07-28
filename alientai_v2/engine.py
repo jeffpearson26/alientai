@@ -15,6 +15,7 @@ from alientai_v2.paper_account import (
     sell_position,
 )
 from alientai_v2.engines.engine_registry import run_enabled_engines
+from alientai_v2.engines.contextual_options_paper import candidate_symbols as contextual_candidate_symbols
 from alientai_v2.schwab_client import get_real_v2_quotes
 from alientai_v2.settings import load_settings
 from alientai_v2.options_paper import maybe_buy_from_research_rows
@@ -582,7 +583,9 @@ def run_one_scan() -> Dict[str, Any]:
 
     sell_actions = manage_open_positions(account, settings)
 
-    watchlist = settings.get("watchlist", [])
+    watchlist = list(settings.get("watchlist", []))
+    if "contextual_options_shadow_v1" in settings.get("enabled_engines", []):
+        watchlist = list(dict.fromkeys([*watchlist, *contextual_candidate_symbols(settings)]))
     quotes = get_real_v2_quotes(watchlist)
 
     try:

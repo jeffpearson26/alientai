@@ -7,6 +7,8 @@
   "max_open_positions": 5,
   "max_new_buys_per_scan": 5,
   "max_new_buys_per_day": 5,
+  "max_shares_per_paper_trade": 1,
+  "contextual_options_payload_max_calendar_age_days": 3,
   "take_profit_pct": 3.0,
   "stop_loss_pct": -1.5,
   "trailing_stop_pct": 1.0,

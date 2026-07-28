@@ -38,6 +38,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "max_open_positions": 25,
     "max_new_buys_per_scan": 6,
     "max_new_buys_per_day": 5,
+    "max_shares_per_paper_trade": 0,
+    "contextual_options_payload_max_calendar_age_days": 3,
 
     "prediction_horizon_days": 20.0,
     "minimum_hold_minutes": 28800.0,

@@ -171,6 +171,10 @@ def approve_candidate_buy(
         # If stock is expensive but allowed, buy exactly 1 share.
         shares = 1
 
+    max_shares_per_trade = int(settings.get("max_shares_per_paper_trade", 0) or 0)
+    if max_shares_per_trade > 0:
+        shares = min(shares, max_shares_per_trade)
+
     if shares < 1:
         return {
             "approved": False,
