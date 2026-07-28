@@ -93,6 +93,7 @@ def scan(quotes: list[dict[str, Any]], settings: dict[str, Any]) -> list[dict[st
         try:
             price = float(quote.get("price") or quote.get("last_price") or quote.get("last") or 0.0)
             score = float(candidate.get("technical_context_score") or 0.0) * 100.0
+            cutoff = float(candidate.get("shadow_policy_score_cutoff") or 0.0) * 100.0
         except (TypeError, ValueError):
             continue
         if price <= 0:
@@ -102,7 +103,10 @@ def scan(quotes: list[dict[str, Any]], settings: dict[str, Any]) -> list[dict[st
             "engine_id": POLICY_ID,
             "decision": "BUY_CANDIDATE",
             "price": price,
-            "score": max(55.0, min(100.0, score)),
+            "score": max(0.0, min(100.0, score)),
+            "model_score_pct": max(0.0, min(100.0, score)),
+            "selection_cutoff_pct": max(0.0, min(100.0, cutoff)),
+            "requested_position_dollars": price,
             "prediction_horizon_days": 5,
             "minimum_hold_minutes": 5 * 24 * 60,
             "reason": (

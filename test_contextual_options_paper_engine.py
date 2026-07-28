@@ -39,6 +39,8 @@ class ContextualOptionsPaperEngineTests(unittest.TestCase):
                 )
         self.assertEqual(rows[0]["decision"], "BUY_CANDIDATE")
         self.assertEqual(rows[0]["engine_id"], "contextual_options_shadow_v1")
+        self.assertEqual(rows[0]["score"], 80.0)
+        self.assertEqual(rows[0]["model_score_pct"], 80.0)
 
     def test_stale_payload_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

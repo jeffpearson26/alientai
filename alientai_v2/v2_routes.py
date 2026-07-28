@@ -793,7 +793,7 @@ function renderOpenPositions(openPositions) {
           <th>Age</th>
           <th>Countdown</th>
           <th>Sell Lock</th>
-          <th>Entry Score</th>
+          <th>Entry Model Score %</th>
           <th>Quote Source</th>
           <th>Sell Blocked Reason</th>
           <th>Entry Time</th>
@@ -850,7 +850,8 @@ function renderCandidates(rows) {
           <th>Engine</th>
           <th>Symbol</th>
           <th>Decision</th>
-          <th>Score</th>
+          <th>Model Score %</th>
+          <th>Daily Cutoff %</th>
           <th>Price</th>
           <th>Move %</th>
           <th>Rel Vol</th>
@@ -863,15 +864,16 @@ function renderCandidates(rows) {
   `;
 
   rows.forEach((r, index) => {
-    const score = Number(r.score || 0);
-    const kind = score >= 75 ? "good" : (score >= 55 ? "warn" : "");
+    const score = Number(r.model_score_pct ?? r.score ?? 0);
+    const kind = "";
     html += `
       <tr>
         <td>${index + 1}</td>
         <td>${escapeHtml(r.engine_id || "")}</td>
         <td><b>${escapeHtml(r.symbol || "")}</b></td>
         <td>${pill(r.decision || "", kind)}</td>
-        <td class="${kind}">${num(r.score, 1)}</td>
+        <td>${num(score, 2)}</td>
+        <td>${num(r.selection_cutoff_pct, 2)}</td>
         <td>${money(r.price)}</td>
         <td>${num(r.move_pct, 3)}%</td>
         <td>${num(r.relative_volume, 3)}</td>
