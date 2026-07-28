@@ -37,17 +37,46 @@ cost would reduce each mean and median by 0.25 percentage points.
 | Top 5.00% | Active broad model | 446 | 15.70% | +2.0255% | +1.1818% | 57.85% |
 | Top 5.00% | Nasdaq clone | 446 | 12.78% | +1.4893% | +0.8813% | 56.95% |
 
+## Validation-locked portfolio result
+
+The model was then evaluated under a stricter contract:
+
+- Candidate ranking fractions were limited in advance to 0.25%, 0.50%, and
+  1.00%.
+- The fraction and exact score cutoff were selected only from validation data.
+- The untouched test was evaluated once.
+- Returns include a 0.25% round-trip cost.
+- The portfolio has five equal target slots, leaves unused capital in cash,
+  never borrows, and is marked to market daily.
+
+Validation selected the top 0.25% fraction (score cutoff
+`0.15986412677273237`). On the untouched test:
+
+- 42 candidates before the position-capacity rule and 40 executed simulations.
+- +1.947586% mean net five-day return per trade.
+- +1.692813% median net five-day return.
+- 75.00% post-cost winning trades.
+- +16.246296% capital-scaled portfolio return.
+- -7.443113% capital-scaled maximum drawdown.
+- Five peak concurrent positions and zero label/price alignment error.
+
+The report fingerprints the rows, model, training report, and complete daily
+price archive. The generated JSON is stored in the ignored research-data
+directory as `nasdaq100_clone/portfolio_validation.json`.
+
 ## Conclusion
 
-`RESEARCH_HOLD`, but more promising than the semiconductor-only clone.
+`RESEARCH_PASS_HISTORICAL`, but not yet prospective.
 
 The Nasdaq clone improves the top-0.25% mean return, positive rate, and large
 winner rate, and improves the top-1% large-winner rate. The active broad model
 remains stronger on several neighboring slices, including top-0.5%, top-1%
 mean/median return, and top-5%. The clone therefore does not clearly dominate.
 
-Next evidence should come from a pre-specified, validation-frozen threshold,
-cost-adjusted non-overlapping portfolio simulation with capital-scaled
-drawdown. The 21 missing current constituents should be added through a
-source-consistent historical dataset before calling this a complete
-Nasdaq-100 model.
+The required validation-frozen, cost-adjusted, capacity-limited,
+capital-scaled historical simulation now passes convincingly. This is the
+strongest technical-only clone result so far, but its test archive has now
+been observed and only 80 of 101 requested securities were available.
+Therefore it must remain isolated from execution. The next evidence is a
+frozen prospective shadow period plus source-consistent history for the 21
+missing current constituents.
