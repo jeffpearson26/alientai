@@ -440,6 +440,8 @@ On July 27 the existing Schwab refresh token successfully produced a new access 
 
 Capital-scaled portfolio reports fingerprint the complete Schwab daily directory with `daily_archive_sha256`; the strict July-27 483-file identity begins `75b25e35e451`. Reject any future comparison that omits the daily archive identity, has nonzero label-alignment error, or silently uses different candles.
 
+`export_contextual_options_selected_events.py` reproducibly exports the frozen 60%/top-quarter/five-slot cohort for instrument-payoff research. Its July-28 output contains 39 events across 31 symbols and fingerprints the same base rows, option features, and technical model used by the portfolio study. Running `evaluate_historical_calls.py` against `historical_options_natural_sp500_2026` produced 30 valid trades for each fixed policy (37 complete chain pairs; two missing). Both policies fail a typical-trade test despite positive means: ATM-30d median -26.056060% / 40.00% profitable; delta60-30d median -16.697239% / 43.33% profitable. Treat the positive means as winner-skew, not a pass. Do not enable options paper buying or tune strikes/expiry on this observed cohort.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
