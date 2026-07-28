@@ -56,6 +56,16 @@ def select_shadow_candidates(rows: Iterable[Mapping[str, Any]], top_fraction: fl
     valid_scores = [score for score in all_scores if score is not None]
     if not valid_scores:
         return []
+    ordered_scores = np.sort(np.asarray(valid_scores, dtype=float))
+
+    def confidence_rank(score: float) -> int:
+        # Cross-sectional percentile rank, deliberately not a probability.
+        if len(ordered_scores) == 1:
+            return 100
+        below_or_equal = int(np.searchsorted(ordered_scores, score, side="right"))
+        percentile = 1.0 + 99.0 * (below_or_equal - 1) / (len(ordered_scores) - 1)
+        return max(1, min(100, int(round(percentile))))
+
     cutoff = float(np.quantile(np.asarray(valid_scores), 1.0 - top_fraction))
     chosen = sorted((row for row in normalized if row["technical_context_score"] >= cutoff), key=lambda row: (-row["technical_context_score"], row["symbol"]))[:max_candidates]
     return [{
@@ -66,6 +76,8 @@ def select_shadow_candidates(rows: Iterable[Mapping[str, Any]], top_fraction: fl
         "shadow_policy_id": POLICY_ID,
         "shadow_policy_top_fraction": top_fraction,
         "shadow_policy_score_cutoff": cutoff,
+        "confidence_rank_1_to_100": confidence_rank(row["technical_context_score"]),
+        "confidence_rank_definition": "same-day eligible-universe model-score percentile; not probability",
         "prediction_horizon_days": 5,
         "reason": "Research-only: unusual public call activity within the daily top technical-score context.",
     } for row in chosen]

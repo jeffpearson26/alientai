@@ -18,6 +18,8 @@ class ContextualOptionsShadowPolicyTests(unittest.TestCase):
         self.assertEqual("AVOID", result[0]["decision"])
         self.assertEqual("BUY_CANDIDATE", result[0]["shadow_research_decision"])
         self.assertEqual(POLICY_ID, result[0]["engine_id"])
+        self.assertEqual(100, result[0]["confidence_rank_1_to_100"])
+        self.assertGreaterEqual(result[1]["confidence_rank_1_to_100"], 1)
 
     def test_rejects_mixed_market_dates(self):
         rows = [

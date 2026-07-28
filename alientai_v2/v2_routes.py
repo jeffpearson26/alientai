@@ -875,6 +875,7 @@ function renderCandidates(rows) {
           <th>Symbol</th>
           <th>Decision</th>
           <th>Model Score %</th>
+          <th title="Same-day model-score percentile rank, not probability of profit">Confidence Rank</th>
           <th>Daily Cutoff %</th>
           <th>Price</th>
           <th>Move %</th>
@@ -897,6 +898,7 @@ function renderCandidates(rows) {
         <td><b>${escapeHtml(r.symbol || "")}</b></td>
         <td>${pill(r.decision || "", kind)}</td>
         <td>${num(score, 2)}</td>
+        <td>${escapeHtml(String(r.confidence_rank_1_to_100 ?? ""))}</td>
         <td>${num(r.selection_cutoff_pct, 2)}</td>
         <td>${money(r.price)}</td>
         <td>${num(r.move_pct, 3)}%</td>

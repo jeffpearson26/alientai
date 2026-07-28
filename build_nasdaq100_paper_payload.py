@@ -56,12 +56,25 @@ def build_payload(
         ),
         key=lambda row: (-row["technical_context_score"], str(row["symbol"])),
     )
+    ordered_scores = np.sort(np.asarray(
+        [row["technical_context_score"] for row in scored], dtype=float,
+    ))
+
+    def confidence_rank(score: float) -> int:
+        if len(ordered_scores) == 1:
+            return 100
+        below_or_equal = int(np.searchsorted(ordered_scores, score, side="right"))
+        percentile = 1.0 + 99.0 * (below_or_equal - 1) / (len(ordered_scores) - 1)
+        return max(1, min(100, int(round(percentile))))
+
     candidates = [
         {
             "symbol": str(row["symbol"]).upper(),
             "market_date": str(row["market_date"]),
             "technical_context_score": row["technical_context_score"],
             "locked_score_cutoff": cutoff,
+            "confidence_rank_1_to_100": confidence_rank(row["technical_context_score"]),
+            "confidence_rank_definition": "same-day trained-universe model-score percentile; not probability",
             "paper_decision": "BUY_CANDIDATE",
             "policy_id": POLICY_ID,
         }
