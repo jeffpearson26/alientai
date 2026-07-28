@@ -37,6 +37,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "max_single_share_price": 2500.0,
     "max_open_positions": 25,
     "max_new_buys_per_scan": 6,
+    "max_new_buys_per_day": 5,
 
     "prediction_horizon_days": 20.0,
     "minimum_hold_minutes": 28800.0,

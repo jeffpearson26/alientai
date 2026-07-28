@@ -33,14 +33,44 @@ def _read_v2_engine_accounts_summary_file():
         project_root = Path(__file__).resolve().parents[1]
         summary_path = project_root / "data_v2" / "engine_accounts" / "engine_accounts_summary.json"
 
-        if not summary_path.exists():
-            return {
-                "status": "missing",
-                "engines": [],
-                "note": "Engine accounts summary has not been built yet. Run build_v2_engine_accounts_v1.py.",
-            }
-
-        return json.loads(summary_path.read_text(encoding="utf-8"))
+        document = (
+            json.loads(summary_path.read_text(encoding="utf-8"))
+            if summary_path.exists() else {"engines": []}
+        )
+        status = get_status()
+        enabled = [
+            str(value) for value in status.get("enabled_engines", [])
+            if str(value).strip()
+        ]
+        historical = {
+            str(row.get("engine_id") or ""): row
+            for row in document.get("engines", [])
+            if isinstance(row, dict)
+        }
+        engines = []
+        for engine_id in enabled:
+            row = historical.get(engine_id)
+            if row is not None:
+                engines.append(row)
+                continue
+            engines.append({
+                "engine_id": engine_id,
+                "account_value": status.get("account_value", 0.0),
+                "total_pnl": status.get("total_pnl", 0.0),
+                "total_pnl_pct": status.get("total_pnl_pct", 0.0),
+                "realized_pnl": status.get("realized_pnl", 0.0),
+                "unrealized_pnl": status.get("unrealized_pnl", 0.0),
+                "open_positions_count": status.get("open_positions_count", 0),
+                "closed_trades_count": 0,
+                "closed_win_rate_pct": 0.0,
+                "profit_factor": None,
+                "current_shared_paper_account": True,
+            })
+        return {
+            "status": "success",
+            "engines": engines,
+            "note": "Only currently enabled paper engines are shown.",
+        }
 
     except Exception as exc:
         return {
@@ -155,7 +185,7 @@ def v2_monitor():
   <title>AlientAI V2 Monitor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
+    <style>
     :root {
       --bg: #070b14;
       --panel: #111827;
@@ -182,6 +212,8 @@ def v2_monitor():
       color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
     }
+
+    #optionsPaperAccountSection { display: none !important; }
 
     a {
       color: var(--blue);
@@ -553,9 +585,9 @@ def v2_monitor():
 
 
   <div class="section card">
-    <h2>Engine Performance Scoreboard</h2>
+    <h2>Active Paper Engine</h2>
     <div class="small">
-      Research-only reconstructed per-engine accounts. Existing shared V2 paper account is unchanged.
+      Only the currently enabled paper engine is shown.
     </div>
     <div id="engineAccountsTable">Loading...</div>
   </div>
@@ -722,6 +754,10 @@ function render(data) {
     last_message: data.last_message,
     last_action: data.last_action,
     last_scan_time: data.last_scan_time,
+    enabled_engines: data.enabled_engines,
+    paper_buys_today: data.paper_buys_today,
+    max_new_buys_per_day: data.max_new_buys_per_day,
+    paper_buys_remaining_today: data.paper_buys_remaining_today,
     note: data.note
   }, null, 2));
 

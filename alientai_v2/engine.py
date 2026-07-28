@@ -38,6 +38,24 @@ def is_running() -> bool:
     return bool(_engine_thread and _engine_thread.is_alive() and not _stop_event.is_set())
 
 
+def paper_buys_on_market_day(
+    account: Dict[str, Any], settings: Dict[str, Any], market_day: str | None = None,
+) -> int:
+    """Count completed paper BUY actions for one configured local market day."""
+    if market_day is None:
+        timezone = ZoneInfo(str(settings.get("timezone") or "America/Los_Angeles"))
+        market_day = datetime.now(timezone).date().isoformat()
+    trade_log = account.get("trade_log", [])
+    if not isinstance(trade_log, list):
+        return 0
+    return sum(
+        1 for trade in trade_log
+        if isinstance(trade, dict)
+        and str(trade.get("action") or "").upper() == "BUY"
+        and str(trade.get("time") or "")[:10] == market_day
+    )
+
+
 def save_status(extra: Dict[str, Any]) -> Dict[str, Any]:
     account = load_account()
     settings = load_settings()
@@ -46,6 +64,8 @@ def save_status(extra: Dict[str, Any]) -> Dict[str, Any]:
         open_positions = {}
 
     metrics = calculate_account_metrics(account, settings)
+    buys_today = paper_buys_on_market_day(account, settings)
+    daily_limit = max(0, int(settings.get("max_new_buys_per_day", 5)))
 
     status = {
         "status": "success",
@@ -55,6 +75,10 @@ def save_status(extra: Dict[str, Any]) -> Dict[str, Any]:
         "v2_enabled": settings.get("v2_enabled", True),
         "paper_trading_enabled": settings.get("paper_trading_enabled", True),
         "old_scanner_decision_making_enabled": False,
+        "enabled_engines": settings.get("enabled_engines", []),
+        "paper_buys_today": buys_today,
+        "max_new_buys_per_day": daily_limit,
+        "paper_buys_remaining_today": max(0, daily_limit - buys_today),
 
         **metrics,
 
@@ -603,7 +627,10 @@ def run_one_scan() -> Dict[str, Any]:
     friday_buys_this_scan = 0
 
     if settings.get("paper_trading_enabled", True) and buy_window.get("new_buys_allowed", False):
-        max_new = int(settings.get("max_new_buys_per_scan", 6))
+        daily_limit = max(0, int(settings.get("max_new_buys_per_day", 5)))
+        already_bought_today = paper_buys_on_market_day(account, settings)
+        remaining_today = max(0, daily_limit - already_bought_today)
+        max_new = min(int(settings.get("max_new_buys_per_scan", 6)), remaining_today)
 
         manager_ranked = rank_candidates_for_manager(scored)
 

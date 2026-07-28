@@ -12,6 +12,7 @@ from alientai_v2.engines.similarity_engine import run as run_similarity_engine
 from alientai_v2.engines.transformer_20day import scan as run_transformer_20day
 from alientai_v2.engines.options_research import scan as run_options_research
 from alientai_v2.engines.rcef_engine import scan as run_rcef_research
+from alientai_v2.engines.contextual_options_paper import scan as run_contextual_options_paper
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +32,7 @@ ENGINE_RUNNERS: Dict[str, Callable[[List[Dict[str, Any]], Dict[str, Any]], List[
     "transformer_20day": run_transformer_20day,
     "options_research": run_options_research,
     "rcef_research": run_rcef_research,
+    "contextual_options_shadow_v1": run_contextual_options_paper,
 }
 
 
