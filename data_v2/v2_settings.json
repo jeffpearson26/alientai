@@ -111,7 +111,8 @@
   "allow_trailing_before_min_hold": false,
   "allow_take_profit_before_min_hold": false,
   "enabled_engines": [
-    "contextual_options_shadow_v1"
+    "contextual_options_shadow_v1",
+    "nasdaq100_technical_clone_v1"
   ],
   "prediction_20day_horizon_days": 20,
   "prediction_20day_minimum_hold_minutes": 28800,
@@ -600,7 +601,8 @@
   "stop_reentry_cooldown_enabled": true,
   "stop_reentry_cooldown_hours": 168.0,
   "main_account_enabled_buy_engines": [
-    "contextual_options_shadow_v1"
+    "contextual_options_shadow_v1",
+    "nasdaq100_technical_clone_v1"
   ],
   "shadow_signal_journal_enabled": true,
   "shadow_signal_decisions": [
@@ -611,5 +613,6 @@
   "shadow_scorecard_min_completed_signals": 100,
   "shadow_scorecard_min_profit_factor": 1.2,
   "transformer_20day_shadow_research_enabled": true,
-  "transformer_20day_shadow_min_probability": 0.55
+  "transformer_20day_shadow_min_probability": 0.55,
+  "nasdaq100_payload_max_calendar_age_days": 3
 }

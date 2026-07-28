@@ -13,6 +13,7 @@ from alientai_v2.engines.transformer_20day import scan as run_transformer_20day
 from alientai_v2.engines.options_research import scan as run_options_research
 from alientai_v2.engines.rcef_engine import scan as run_rcef_research
 from alientai_v2.engines.contextual_options_paper import scan as run_contextual_options_paper
+from alientai_v2.engines.nasdaq100_technical_paper import scan as run_nasdaq100_technical_paper
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -33,6 +34,7 @@ ENGINE_RUNNERS: Dict[str, Callable[[List[Dict[str, Any]], Dict[str, Any]], List[
     "options_research": run_options_research,
     "rcef_research": run_rcef_research,
     "contextual_options_shadow_v1": run_contextual_options_paper,
+    "nasdaq100_technical_clone_v1": run_nasdaq100_technical_paper,
 }
 
 

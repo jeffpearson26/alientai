@@ -80,3 +80,15 @@ been observed and only 80 of 101 requested securities were available.
 Therefore it must remain isolated from execution. The next evidence is a
 frozen prospective shadow period plus source-consistent history for the 21
 missing current constituents.
+
+## Paper observation
+
+On 2026-07-28 the frozen clone was added to the local owner control panel as
+`nasdaq100_technical_clone_v1`. Its candidate universe is restricted to the
+exact 80 symbols present in training, not the broader 101-security constituent
+request. The adapter requires a complete, recent, paper-only payload; checks
+the frozen cutoff again; rejects untrained symbols; and uses the existing
+one-share, five-position, five-daily-buy paper safeguards. Live trading remains
+disabled. The first July 27 payload identified INTC, MCHP, and LRCX, but the
+shared account had already used all five daily paper buys, so no Nasdaq-clone
+orders were placed immediately.
