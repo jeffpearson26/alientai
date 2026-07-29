@@ -23,6 +23,17 @@ class NaturalTechnicalContextTests(unittest.TestCase):
         self.assertEqual(split["validation_start"], "2026-01-17")
         self.assertEqual(split["test_start"], "2026-01-24")
 
+    def test_split_purges_label_windows_that_cross_a_boundary(self) -> None:
+        rows = [
+            {**row(f"2026-01-{day:02d}", float(day), 1.0), "future_market_date": f"2026-01-{day + 4:02d}"}
+            for day in range(1, 31)
+        ]
+        train, validation, test, split = chronological_split(rows, 0.50, 0.25, 2)
+        self.assertLess(split["train_label_end"], split["validation_start"])
+        self.assertLess(split["validation_label_end"], split["test_start"])
+        self.assertLess(max(train), min(validation))
+        self.assertLess(max(validation), min(test))
+
 
 if __name__ == "__main__":
     unittest.main()

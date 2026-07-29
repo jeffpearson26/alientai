@@ -462,6 +462,12 @@ The evaluator now also separates an explicitly named directional buy-volume prox
 
 The isolated complete-101 executable result is at `data_v2\rcef_research\nasdaq100_executable_101` (ignored generated data). Validation selected top 0.25% / `0.23346458789809038`: 21 signals, +6.281492% mean, +4.771091% median, 76.19% wins. Its later test is `RESEARCH_FAIL_EXECUTABLE_LABELS`: 11 signals, +3.580862% mean, **-1.292366% median**, 45.45% wins, +7.376964% capital-scaled return, -13.018128% drawdown, and zero label-alignment error. Do not paper-enable or tune it. The frozen QQQ-relative challenger now fails the stricter validation-quality gate. The legacy paper champion and all account/settings files remain unchanged. A trading-session runtime exit mechanism has not been activated because it would alter existing paper behavior and cannot rescue the failed executable-label challenger.
 
+## Multi-horizon correction (July 29)
+
+The July-29 80-security 2/5/10/20-session comparison must use only the corrected artifacts at `data_v2\rcef_research\nasdaq80_multi_horizon_purged_capacity_20260729` (ignored). The older `nasdaq80_multi_horizon_executable_20260729` 10- and 20-session reports allowed label windows to overlap partition boundaries, and every old cutoff was chosen before applying the five-slot capacity constraint. Treat its headline 10- and 20-session results as invalid.
+
+The corrected trainer purges based on every preceding row's `future_market_date`; the evaluator capacity-limits validation selections as well as test selections; and capital-scaled marking reads the report's actual target key. All 31 focused tests and Python compilation passed. Corrected validation leaves 2-session and 5-session variants eligible, but their later tests each contain only 12 capacity-limited trades: 2-session +5.634527% mean / +3.891531% median / 83.33% wins; 5-session +2.870035% / +1.616327% / 58.33%. Both remain exploratory `RESEARCH_HOLD`. Corrected 10-session validation fails all slices on negative median and sub-50% win rate. Corrected 20-session validation fails all slices on insufficient capacity-limited signals or negative median/win rate. Do not enable, tune, or paper-trade any of these variants; do not modify settings.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features

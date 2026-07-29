@@ -39,8 +39,8 @@ def score_rows(
     return [{**row, "technical_context_score": float(score)} for row, score in zip(rows, scores)]
 
 
-def trade_metrics(rows: Sequence[Mapping[str, Any]], cost_pct: float) -> dict[str, Any]:
-    values = [float(row["label_forward_return_5d_pct"]) - cost_pct for row in rows]
+def trade_metrics(rows: Sequence[Mapping[str, Any]], cost_pct: float, label_field: str = "label_forward_return_5d_pct") -> dict[str, Any]:
+    values = [float(row[label_field]) - cost_pct for row in rows]
     if not values:
         return {"signals": 0, "mean_net_return_pct": None, "median_net_return_pct": None, "net_win_rate_pct": None}
     return {
@@ -59,14 +59,21 @@ def select_validation_fraction(
     minimum_mean_net_return_pct: float = 0.0,
     minimum_median_net_return_pct: float = 0.0,
     minimum_net_win_rate_pct: float = 50.0,
+    max_open_positions: int = 5,
+    label_field: str = "label_forward_return_5d_pct",
 ) -> tuple[float, float, list[dict[str, Any]]]:
     scores = np.asarray([float(row["technical_context_score"]) for row in validation])
     candidates = []
     for fraction in fractions:
         cutoff = float(np.quantile(scores, 1.0 - fraction))
-        selected = [row for row in validation if float(row["technical_context_score"]) >= cutoff]
-        metrics = trade_metrics(selected, cost_pct)
-        candidates.append({"fraction": fraction, "cutoff": cutoff, **metrics})
+        raw_selected = [row for row in validation if float(row["technical_context_score"]) >= cutoff]
+        selected = capacity_limited(raw_selected, max_open_positions)
+        metrics = trade_metrics(selected, cost_pct, label_field)
+        candidates.append({
+            "fraction": fraction, "cutoff": cutoff,
+            "candidates_before_capacity": len(raw_selected),
+            **metrics,
+        })
     eligible = [
         row for row in candidates
         if row["signals"] >= minimum_signals
@@ -100,6 +107,7 @@ def main() -> None:
     args = parser.parse_args()
 
     report = json.loads(args.training_report.read_text(encoding="utf-8"))
+    label_field = str(report.get("target") or "label_forward_return_5d_pct")
     rows = read_jsonl(args.rows)
     model = lgb.Booster(model_file=str(args.model))
     scored = score_rows(rows, model, report["feature_names"])
@@ -114,7 +122,7 @@ def main() -> None:
     fraction, cutoff, diagnostics = select_validation_fraction(
         validation, args.fractions, args.minimum_validation_signals, args.round_trip_cost_pct,
         args.minimum_mean_net_return_pct, args.minimum_median_net_return_pct,
-        args.minimum_net_win_rate_pct,
+        args.minimum_net_win_rate_pct, args.max_open_positions, label_field,
     )
     test_candidates = [row for row in test if float(row["technical_context_score"]) >= cutoff]
     selected = capacity_limited(test_candidates, args.max_open_positions)
@@ -124,6 +132,8 @@ def main() -> None:
         "research_only": True,
         "execution_enabled": False,
         "selection_contract": "fraction and score cutoff selected using validation only; test evaluated once",
+        "label_return_field": label_field,
+        "horizon_sessions": sorted({int(row["holding_sessions"]) for row in rows if row.get("holding_sessions") is not None}),
         "artifacts": {
             "rows_sha256": file_sha256(args.rows),
             "model_sha256": file_sha256(args.model),
@@ -144,9 +154,9 @@ def main() -> None:
         "locked_score_cutoff": cutoff,
         "test_candidates_before_capacity": len(test_candidates),
         "test": {
-            **trade_metrics(selected, args.round_trip_cost_pct),
+            **trade_metrics(selected, args.round_trip_cost_pct, label_field),
             **capital_scaled_drawdown(
-                selected, daily_closes, args.max_open_positions, args.round_trip_cost_pct,
+                selected, daily_closes, args.max_open_positions, args.round_trip_cost_pct, label_field,
             ),
         },
     }

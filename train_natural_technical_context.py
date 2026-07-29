@@ -45,7 +45,7 @@ def matrix(rows: Sequence[Mapping[str, Any]], names: Sequence[str]) -> np.ndarra
 
 
 def chronological_split(rows: Sequence[Mapping[str, Any]], train_fraction: float, validation_fraction: float,
-                        embargo_days: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, str]]:
+                        embargo_days: int, label_end_field: str = "future_market_date") -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, str]]:
     if not 0 < train_fraction < 1 or not 0 < validation_fraction < 1 or train_fraction + validation_fraction >= 1:
         raise ValueError("train and validation fractions must be positive and total less than one")
     days = sorted({date.fromisoformat(str(row["market_date"])) for row in rows})
@@ -53,8 +53,19 @@ def chronological_split(rows: Sequence[Mapping[str, Any]], train_fraction: float
         raise ValueError("at least 30 market dates are required")
     train_end = days[max(0, int(len(days) * train_fraction) - 1)]
     validation_end = days[max(0, int(len(days) * (train_fraction + validation_fraction)) - 1)]
-    validation_start = train_end + timedelta(days=embargo_days)
-    test_start = validation_end + timedelta(days=embargo_days)
+    def label_end(row: Mapping[str, Any]) -> date:
+        return date.fromisoformat(str(row.get(label_end_field) or row["market_date"]))
+
+    train_label_end = max(label_end(row) for row in rows if date.fromisoformat(str(row["market_date"])) <= train_end)
+    validation_start = max(train_end + timedelta(days=embargo_days), train_label_end + timedelta(days=1))
+    validation_rows = [
+        row for row in rows
+        if validation_start <= date.fromisoformat(str(row["market_date"])) <= validation_end
+    ]
+    if not validation_rows:
+        raise ValueError("chronological split with purge produced an empty validation partition")
+    validation_label_end = max(label_end(row) for row in validation_rows)
+    test_start = max(validation_end + timedelta(days=embargo_days), validation_label_end + timedelta(days=1))
     train, validation, test = [], [], []
     for index, row in enumerate(rows):
         day = date.fromisoformat(str(row["market_date"]))
@@ -67,8 +78,10 @@ def chronological_split(rows: Sequence[Mapping[str, Any]], train_fraction: float
     if not train or not validation or not test:
         raise ValueError("chronological split with embargo produced an empty partition")
     return (np.asarray(train), np.asarray(validation), np.asarray(test), {
-        "train_end": train_end.isoformat(), "validation_start": validation_start.isoformat(),
-        "validation_end": validation_end.isoformat(), "test_start": test_start.isoformat(),
+        "train_end": train_end.isoformat(), "train_label_end": train_label_end.isoformat(),
+        "validation_start": validation_start.isoformat(), "validation_end": validation_end.isoformat(),
+        "validation_label_end": validation_label_end.isoformat(), "test_start": test_start.isoformat(),
+        "label_end_field": label_end_field,
     })
 
 

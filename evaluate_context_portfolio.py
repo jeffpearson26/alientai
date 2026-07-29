@@ -139,6 +139,7 @@ def capital_scaled_drawdown(
     daily_closes: Mapping[str, Mapping[date, Any]],
     max_open_positions: int,
     round_trip_cost_pct: float,
+    label_return_key: str = "label_forward_return_5d_pct",
 ) -> dict[str, Any]:
     """Mark a fixed-slot portfolio to market daily, leaving unused slots in cash."""
     if max_open_positions < 1:
@@ -174,8 +175,8 @@ def capital_scaled_drawdown(
             entry_price = float(row.get("entry_price") or row.get("close") or bar_value(path[nominal_entry_day], "close"))
             entry_field = "open" if row.get("entry_market_date") else "close"
             entry_day = resolve_day(path, nominal_entry_day, entry_price, entry_field)
-            if row.get("label_forward_return_5d_pct") is not None:
-                label_return = float(row["label_forward_return_5d_pct"])
+            if row.get(label_return_key) is not None:
+                label_return = float(row[label_return_key])
                 expected_exit_price = entry_price * (1.0 + label_return / 100.0)
                 exit_day = resolve_day(path, nominal_exit_day, expected_exit_price, "close")
             else:
@@ -186,9 +187,9 @@ def capital_scaled_drawdown(
         observed_days = sorted(day for day in path if entry_day <= day <= exit_day)
         if not observed_days or observed_days[0] != entry_day or observed_days[-1] != exit_day:
             raise ValueError(f"incomplete entry/exit path for {symbol}")
-        if row.get("label_forward_return_5d_pct") is not None:
+        if row.get(label_return_key) is not None:
             path_return = (exit_price / entry_price - 1.0) * 100.0
-            label_return = float(row["label_forward_return_5d_pct"])
+            label_return = float(row[label_return_key])
             alignment_error = abs(path_return - label_return)
             maximum_label_alignment_error = max(maximum_label_alignment_error, alignment_error)
             if alignment_error > 0.001:
