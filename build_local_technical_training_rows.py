@@ -104,6 +104,7 @@ def main() -> None:
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--start-date", type=date.fromisoformat, required=True)
     parser.add_argument("--end-date", type=date.fromisoformat, required=True)
+    parser.add_argument("--horizon-sessions", type=int, default=5)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--benchmark-symbol")
@@ -113,6 +114,8 @@ def main() -> None:
         default="same_session_close",
     )
     args = parser.parse_args()
+    if args.horizon_sessions < 1:
+        raise SystemExit("--horizon-sessions must be at least 1")
     benchmark_candles = None
     benchmark_symbol = (args.benchmark_symbol or "").strip().upper() or None
     if benchmark_symbol:
@@ -134,6 +137,7 @@ def main() -> None:
             symbol,
             args.start_date,
             args.end_date,
+            horizon_sessions=args.horizon_sessions,
             benchmark_candles=benchmark_candles,
             benchmark_symbol=benchmark_symbol,
             entry_assumption=args.entry_assumption,
@@ -154,6 +158,8 @@ def main() -> None:
         "benchmark_symbol": benchmark_symbol,
         "start_date": args.start_date.isoformat(),
         "end_date": args.end_date.isoformat(),
+        "horizon_sessions": args.horizon_sessions,
+        "entry_assumption": args.entry_assumption,
         "symbols_requested": len(coverage),
         "symbols_with_rows": sum(row["rows"] > 0 for row in coverage),
         "rows": len(all_rows),

@@ -64,6 +64,19 @@ class LocalTechnicalTrainingRowsTests(unittest.TestCase):
         self.assertAlmostEqual(first["label_forward_return_5d_pct"], expected)
         self.assertEqual(first["holding_sessions"], 5)
 
+    def test_executable_labels_support_requested_horizon(self):
+        rows = build_rows(
+            self.candles(),
+            "AAA",
+            date(2025, 1, 1),
+            date(2025, 12, 31),
+            horizon_sessions=2,
+            entry_assumption="next_regular_session_open",
+        )
+        self.assertTrue(rows)
+        self.assertEqual(rows[0]["holding_sessions"], 2)
+        self.assertEqual(rows[0]["future_market_date"], self.candles()[61]["date"])
+
     def test_benchmark_mode_skips_dates_without_required_history(self):
         candles = self.candles()
         benchmark = self.candles()[10:]
