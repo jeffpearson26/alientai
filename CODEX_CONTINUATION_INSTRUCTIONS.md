@@ -474,6 +474,8 @@ The same basket audit was safely reproduced on six prior Nasdaq artifacts whose 
 
 `journal_nasdaq_score_baskets.py` is the forward-only companion study for score-percentile bins. It reuses only the two frozen complete-101 Nasdaq artifacts, computes each model's validation-score boundaries at 0/50/60/70/80/90/100, and appends all 101 scores per model for a fresh complete daily universe. It records model/report fingerprints, the score percentile basket, same-day score rank (not a probability), and `execution_decision: AVOID`; it cannot place paper or live orders. It refuses a panel older than one calendar day. As of July 29, a dry run scored 202 rows but made no output directory, manifest, or journal write because the newest common local session was July 27 (two calendar days old). When the next Schwab refresh makes a fresh complete common date available, run this journal once; never backfill July 27 after its date has been observed.
 
+Jeff requested an alternate source while the Schwab panel lagged. `download_alpha_vantage_daily_panel.py` completed an independent 101/101 compact-daily archive, zero failures, at `D:\AlientAI\Data\AlphaVantage_2026\nasdaq100_score_baskets_daily_20260729`; all 101 share common daily coverage through July 29. `build_alpha_vantage_daily_technical_panel.py` produced its 101-row, zero-missing July-29 panel in that same folder. This archive is explicitly source-separated and cannot extend, evaluate, or replace the Schwab-only prospective journal. Use it only as current coverage backup unless a separately tested source-consistency protocol is approved.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
