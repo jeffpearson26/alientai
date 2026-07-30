@@ -26,9 +26,9 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def technical_feature_names(rows: Sequence[Mapping[str, Any]]) -> list[str]:
-    """Return only nonconstant point-in-time technical features."""
-    names = sorted({name for row in rows for name in row if name.startswith("technical_")})
+def technical_feature_names(rows: Sequence[Mapping[str, Any]], prefixes: Sequence[str] = ("technical_",)) -> list[str]:
+    """Return only nonconstant, point-in-time features from approved prefixes."""
+    names = sorted({name for row in rows for name in row if any(name.startswith(prefix) for prefix in prefixes)})
     return [
         name for name in names
         if len({safe_float(row.get(name)) for row in rows if row.get(name) is not None}) > 1
@@ -106,10 +106,11 @@ def main() -> None:
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
     parser.add_argument("--num-boost-round", type=int, default=800)
     parser.add_argument("--early-stopping-rounds", type=int, default=60)
+    parser.add_argument("--include-prefix", action="append", default=[], help="Additional approved point-in-time feature prefix.")
     args = parser.parse_args()
 
     rows = [row for row in read_jsonl(args.input) if row.get(args.target) is not None and row.get("market_date")]
-    names = technical_feature_names(rows)
+    names = technical_feature_names(rows, ("technical_", *args.include_prefix))
     x = matrix(rows, names)
     y = np.asarray([safe_float(row[args.target]) >= args.winner_return_pct for row in rows], dtype=np.int32)
     train_idx, validation_idx, test_idx, split = chronological_split(
