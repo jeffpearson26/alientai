@@ -20,6 +20,13 @@ class ContextualOptionsProspectiveGateTests(unittest.TestCase):
         self.assertIn("report_source_not_approved", result["input_failures"])
         self.assertEqual(result["status"], "RESEARCH_HOLD")
 
+    def test_ignores_legacy_progress_snapshot_without_completed_outcomes(self):
+        completed = {"outcome_status": "COMPLETE", "shadow_policy_id": "p", "symbol": "ABC", "market_date": "2026-01-02", "realized_return_pct": 1.0}
+        legacy_progress = {"research_only": True, "execution_enabled": False, "records": []}
+        result = evaluate([legacy_progress, report([completed])])
+        self.assertEqual(result["completed_outcomes"], 1)
+        self.assertNotIn("report_source_not_approved", result["input_failures"])
+
 
 if __name__ == "__main__":
     unittest.main()

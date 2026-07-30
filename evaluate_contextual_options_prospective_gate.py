@@ -17,15 +17,23 @@ MINIMUM_DISTINCT_MARKET_DATES = 10
 def completed_records(reports: Iterable[Mapping[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
     rows, failures, seen = [], [], set()
     for report in reports:
+        # Older progress snapshots may have no completed outcomes at all. They
+        # cannot affect aggregate performance, so they must not invalidate a
+        # later completed, source-approved review merely because that snapshot
+        # predates source metadata.
+        completed = [
+            record for record in (report.get("records") or [])
+            if isinstance(record, Mapping) and record.get("outcome_status") == "COMPLETE"
+        ]
+        if not completed:
+            continue
         if report.get("research_only") is not True or report.get("execution_enabled") is not False:
             failures.append("report_not_explicitly_research_only")
             continue
         if report.get("source") != REQUIRED_SOURCE:
             failures.append("report_source_not_approved")
             continue
-        for record in report.get("records") or []:
-            if record.get("outcome_status") != "COMPLETE":
-                continue
+        for record in completed:
             key = (str(record.get("shadow_policy_id") or ""), str(record.get("symbol") or ""), str(record.get("market_date") or ""))
             if not all(key) or key in seen:
                 failures.append("missing_or_duplicate_outcome_identity")
