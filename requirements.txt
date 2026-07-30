@@ -5,3 +5,8 @@ requests
 kagglehub
 supabase
 psycopg[binary]
+numpy
+pandas
+lightgbm
+torch
+schwab-py

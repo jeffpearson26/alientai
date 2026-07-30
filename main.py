@@ -1,21 +1,41 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+import os
+from pathlib import Path
 
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from dotenv import load_dotenv
+
+from alientai_v2.control_auth import CONTROL_HEADER, control_request_allowed, is_control_request
 from alientai_v2.v2_routes import router as v2_router
 
 
+load_dotenv(Path(__file__).resolve().parent / ".env")
 app = FastAPI(title="AlientAI V2 Clean App")
 
 app.include_router(v2_router)
 
 
-@app.get("/")
-def home():
+@app.middleware("http")
+async def protect_remote_control_requests(request: Request, call_next):
+    if is_control_request(request.method, request.url.path):
+        client_host = request.client.host if request.client else ""
+        supplied = request.headers.get(CONTROL_HEADER, "")
+        configured = os.getenv("ALIENTAI_CONTROL_TOKEN", "")
+        if not control_request_allowed(client_host, supplied, configured):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Remote control request denied."},
+            )
+    return await call_next(request)
+
+
+@app.get("/api")
+def api_home():
     return {
         "status": "success",
         "message": "AlientAI V2 Clean App is running.",
         "monitor": "/v2/monitor",
-        "status": "/v2/status",
+        "status_url": "/v2/status",
         "build": "ALIENTAI_V2_REFACTORED_CLEAN_APP_V1",
     }
 

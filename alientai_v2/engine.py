@@ -17,7 +17,7 @@ from alientai_v2.paper_account import (
 from alientai_v2.engines.engine_registry import run_enabled_engines
 from alientai_v2.engines.contextual_options_paper import candidate_symbols as contextual_candidate_symbols
 from alientai_v2.engines.nasdaq100_technical_paper import candidate_symbols as nasdaq100_candidate_symbols
-from alientai_v2.schwab_client import get_real_v2_quotes
+from alientai_v2.alpha_vantage_quote_client import get_real_v2_quotes
 from alientai_v2.settings import load_settings
 from alientai_v2.options_paper import maybe_buy_from_research_rows
 from alientai_v2.shadow_signals import record_shadow_signals
@@ -241,7 +241,7 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
         pos["last_price"] = round(new_price, 4)
         pos["highest_price"] = round(highest, 4)
         pos["last_quote_update"] = now_iso()
-        pos["quote_source"] = quote.get("source", "schwab_live_quote")
+        pos["quote_source"] = quote.get("source", "alpha_vantage_realtime_bulk_quote")
 
         pnl_pct = ((new_price - entry_price) / entry_price) * 100.0
         trail_drop_pct = ((new_price - highest) / highest) * 100.0 if highest else 0.0

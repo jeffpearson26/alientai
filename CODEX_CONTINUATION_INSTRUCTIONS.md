@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-07-26 Pacific time
+Updated: 2026-07-30 Pacific time
 
 ## Mission
 
@@ -43,6 +43,13 @@ Verified on 2026-07-21 after the master queue completed:
 - The HTTP 503 traceback issue was corrected in the collectors and both known local log copies were replaced with non-secret incident notices. The existing Alpha Vantage key is present only in ignored `.env`, is absent from Git history, and Jeff explicitly authorized its continued use on 2026-07-21. The queue may resume once no duplicate process is running.
 
 Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.
+
+### Current runtime handoff (July 30)
+
+- One stratified, research-only Alpha Vantage news collector is active for 22,918 requests across 48 deterministic dates at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_stratified_48_20260730`. Its manifest was still `running` with 1,803 completed, zero unavailable, and zero failed at the last check. Do not start a duplicate collector or make competing Alpha Vantage quote calls while it runs.
+- The currently running Uvicorn process is still the pre-change build bound to `0.0.0.0:8010`. Its paper engine remains enabled with five existing positions, but its last scan failed because the old Schwab refresh token is expired. Preserve those positions and do not change `data_v2/v2_settings.json`.
+- The repository now contains a tested native Alpha Vantage bulk-quote replacement and a loopback/token control boundary, but those changes are not active until a controlled server restart. Wait for the news collector to finish, capture the five positions, stop only the exact Uvicorn process tree, restart through `START_ALIENTAI_V2.bat`, verify `/api` and local control behavior, make one bounded quote validation, then restore/verify the paper engine without changing its allowlist or settings.
+- Do not copy the ignored legacy quote implementation back into active code. `alientai_v2/schwab_client.py` is now only a compatibility adapter to the Alpha Vantage client.
 
 ### Check whether the queue is running
 
@@ -417,6 +424,14 @@ The broad natural-news archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_ev
 ## Default market-data source (July 30, 2026)
 
 Jeff directed that all new collection, feature-building, and research work use Alpha Vantage by default. Existing Schwab-based frozen prospective studies and historical artifacts remain source-isolated; never substitute Alpha Vantage candles into them. Do not start a new Schwab downloader or use Schwab as a fallback unless Jeff later explicitly changes this direction.
+
+`alientai_v2/alpha_vantage_quote_client.py` is the active-code replacement for the ignored legacy Schwab quote bridge. It uses the credential-safe shared HTTP layer and the premium `REALTIME_BULK_QUOTES` endpoint in chunks no larger than 100 symbols. `alientai_v2/schwab_client.py` remains only as a backward-compatible import adapter. Do not reintroduce dynamic loading from `old_system_reference`.
+
+`alientai_v2/control_auth.py` protects mutating `/v2/` requests. Localhost callers are allowed; remote callers must supply the configured `ALIENTAI_CONTROL_TOKEN` in `X-AlienTAI-Control-Token`, and remote mutations fail closed when no token is configured. `START_ALIENTAI_V2.bat` binds to `127.0.0.1`. Do not weaken these defaults to expose the control plane publicly. The public informational page is separate from control endpoints.
+
+The July-30 critique remediation passed 24 focused tests and all 557 discovered repository tests, plus Python compilation and `git diff --check`. `requirements.txt` now declares NumPy, pandas, LightGBM, PyTorch, and schwab-py for reproducible fresh installs. The large `routes/` tree, patch/fix scripts, backup-named files, duplicated trainer families, broad exception handling, and oversized settings remain technical-debt work; audit reachability and provenance before quarantining anything, and never mass-delete them.
+
+Methodology reminder: the large retrospective model/search surface relative to the strongest cohorts is a genuine multiple-testing risk. Retrospective results may generate hypotheses, but only predeclared prospective journals and untouched chronological evidence may support promotion.
 
 `audit_natural_news_research_panel.py` is the required timing/coverage gate after the exact join. It requires unique `(symbol, as_of_utc)` keys, explicit missing-data reasons, and no latest visible article timestamp after the row cutoff. Its JSON report records coverage only. A successful audit does not establish predictive value; the next step remains a separately specified chronological ablation with costs and risk gates.
 
