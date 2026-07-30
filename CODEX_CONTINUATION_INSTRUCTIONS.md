@@ -414,6 +414,10 @@ The broad natural-news archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_ev
 
 `build_natural_news_research_panel.py` is the exact-key post-collection join. Supply the existing natural base panel and the output of `compile_historical_news_features.py`; it keys both sources by `(symbol, as_of_utc)`, preserves missing archive responses explicitly, and rejects duplicate or extra feature rows. Use only after the complete archive has been compiled; then perform a timing/coverage audit before any pre-specified chronological ablation. It cannot score, train, contact a provider, change settings, or execute anything.
 
+## Default market-data source (July 30, 2026)
+
+Jeff directed that all new collection, feature-building, and research work use Alpha Vantage by default. Existing Schwab-based frozen prospective studies and historical artifacts remain source-isolated; never substitute Alpha Vantage candles into them. Do not start a new Schwab downloader or use Schwab as a fallback unless Jeff later explicitly changes this direction.
+
 `audit_natural_news_research_panel.py` is the required timing/coverage gate after the exact join. It requires unique `(symbol, as_of_utc)` keys, explicit missing-data reasons, and no latest visible article timestamp after the row cutoff. Its JSON report records coverage only. A successful audit does not establish predictive value; the next step remains a separately specified chronological ablation with costs and risk gates.
 
 Current highest-priority research lead: the frozen technical-context plus unusual-call portfolio produced positive mean and median net returns and over-50% post-cost wins at three fixed chronological calibration splits (40%, 50%, and 60%), but every result is `RESEARCH_HOLD` solely for approximate cohort drawdown worse than -20%. Treat this as a robustness clue, not a threshold-selection result or trading model. The next allowed experiment is a separately specified portfolio/risk design aimed at reducing drawdown, followed by prospective non-executing shadow evidence; do not alter engine behavior or paper-buy settings.
