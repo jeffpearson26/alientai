@@ -60,3 +60,17 @@ Choosing top 10% after seeing test results would be test-set overfitting.
 - The next valid step is a new frozen prospective journal or a later, non-overlapping
   Alpha Vantage period. Do not tune again on the 2026-06-04 test partition.
 
+## Frozen prospective journal
+
+The technical+premarket model and top-two policy were frozen after the historical
+evaluation. A complete Alpha Vantage snapshot for 2026-07-30 contained all 17
+technical and all 17 premarket rows. The first append-only prospective entries are:
+
+| Rank | Symbol | Decision close | Model score | Status |
+|---:|---|---:|---:|---|
+| 1 | AVGO | 387.84 | 0.258344 | Pending |
+| 2 | ORCL | 127.56 | 0.258344 | Pending |
+
+The score is an uncalibrated LightGBM rank, not a probability. Entry reference is
+the 2026-07-31 open and the outcome remains unknown until the fifth subsequent
+session close. No paper order was created.

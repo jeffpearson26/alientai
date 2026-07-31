@@ -28,10 +28,22 @@ def create_requests(rows: list[dict]) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--input", type=Path)
+    parser.add_argument("--symbols-file", type=Path)
+    parser.add_argument("--market-date")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    rows = [json.loads(line) for line in args.input.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if args.input:
+        rows = [json.loads(line) for line in args.input.read_text(encoding="utf-8").splitlines() if line.strip()]
+    elif args.symbols_file and args.market_date:
+        symbols = [
+            line.strip().upper()
+            for line in args.symbols_file.read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
+        rows = [{"symbol": symbol, "market_date": args.market_date} for symbol in symbols]
+    else:
+        raise ValueError("supply --input or both --symbols-file and --market-date")
     requests = create_requests(rows)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in requests), encoding="utf-8")

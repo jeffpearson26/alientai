@@ -530,3 +530,7 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
 - Do not integrate any of these models into `engine.py` or paper trading.
 - Do not select a new score fraction using the held-out partition beginning
   2026-06-04. Use a new frozen prospective period for further confirmation.
+- Frozen technical+premarket prospective journal:
+  `data_v2\rcef_research\ai_semiconductor_premarket_prospective_journal.jsonl`.
+  The first 2026-07-30 entries are AVGO and ORCL, both pending and non-executing.
+  Do not evaluate them before the fifth subsequent market-session close.
