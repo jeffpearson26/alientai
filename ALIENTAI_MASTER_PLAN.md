@@ -604,3 +604,7 @@ Done when: This remains an ongoing standard for all phases.
 - Frozen daily fractions: 20m technical 20%, 20m premarket 10%, 20m calls 10%;
   60m technical 50%, 60m premarket 10%, and 60m calls 10%.
 - This workflow never places orders and must remain isolated from `engine.py`.
+- Testing is continuous. Results are divided into permanent, sequential,
+  non-overlapping 20-market-day cohorts. Completing one cohort automatically
+  starts the next while retaining cumulative and prior-cohort evidence.
+- Frozen models and selection fractions are never retuned between cohorts.

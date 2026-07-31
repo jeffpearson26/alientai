@@ -554,3 +554,7 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_outcomes.jsonl`.
 - Keep the journal and outcome ledger append-only and model-specific. Never
   substitute another price source or use current-day close/call features.
+- Do not stop prospective collection when the 20-day evidence gate is reached.
+  `summarize_intraday_prospective.py` maintains sequential 20-day cohorts and
+  cumulative evidence. A completed cohort must roll directly into the next
+  collecting cohort without resetting, deleting history, or tuning models.

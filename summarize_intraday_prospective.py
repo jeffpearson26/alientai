@@ -19,35 +19,58 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def model_metrics(model_rows: Sequence[Mapping[str, Any]], minimum_days: int) -> dict[str, Any]:
+    by_date: dict[str, list[float]] = defaultdict(list)
+    trade_returns = []
+    for row in model_rows:
+        target = f"label_forward_return_{int(row['horizon_minutes'])}m_net_pct"
+        value = float(row[target])
+        trade_returns.append(value)
+        by_date[str(row["market_date"])].append(value)
+    daily_returns = [float(np.mean(by_date[day])) for day in sorted(by_date)]
+    return {
+        "horizon_minutes": int(model_rows[0]["horizon_minutes"]),
+        "days": len(daily_returns),
+        "trades": len(trade_returns),
+        "minimum_days_required": minimum_days,
+        "evidence_gate_met": len(daily_returns) >= minimum_days,
+        "positive_trade_rate": round(sum(value > 0 for value in trade_returns) / len(trade_returns), 6),
+        "mean_trade_net_return_pct": round(float(np.mean(trade_returns)), 6),
+        "positive_day_rate": round(sum(value > 0 for value in daily_returns) / len(daily_returns), 6),
+        "mean_daily_net_return_pct": round(float(np.mean(daily_returns)), 6),
+        "compounded_return_pct": round(
+            (float(np.prod([1.0 + value / 100.0 for value in daily_returns])) - 1.0) * 100.0,
+            6,
+        ),
+        "max_drawdown_pct": round(max_drawdown(daily_returns), 6),
+    }
+
+
 def summarize(rows: Sequence[Mapping[str, Any]], minimum_days: int = 20) -> dict[str, Any]:
     grouped: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
         grouped[str(row["model_id"])].append(row)
     models = {}
     for model_id, model_rows in sorted(grouped.items()):
-        by_date: dict[str, list[float]] = defaultdict(list)
-        trade_returns = []
-        for row in model_rows:
-            target = f"label_forward_return_{int(row['horizon_minutes'])}m_net_pct"
-            value = float(row[target])
-            trade_returns.append(value)
-            by_date[str(row["market_date"])].append(value)
-        daily_returns = [float(np.mean(by_date[day])) for day in sorted(by_date)]
+        cumulative = model_metrics(model_rows, minimum_days)
+        dates = sorted({str(row["market_date"]) for row in model_rows})
+        cohorts = []
+        for start in range(0, len(dates), minimum_days):
+            cohort_dates = dates[start:start + minimum_days]
+            cohort_rows = [row for row in model_rows if str(row["market_date"]) in cohort_dates]
+            cohort = model_metrics(cohort_rows, minimum_days)
+            cohort.update({
+                "cohort_number": start // minimum_days + 1,
+                "start_date": cohort_dates[0],
+                "end_date": cohort_dates[-1],
+                "status": "complete" if len(cohort_dates) == minimum_days else "collecting",
+            })
+            cohorts.append(cohort)
         models[model_id] = {
-            "horizon_minutes": int(model_rows[0]["horizon_minutes"]),
-            "days": len(daily_returns),
-            "trades": len(trade_returns),
-            "minimum_days_required": minimum_days,
-            "evidence_gate_met": len(daily_returns) >= minimum_days,
-            "positive_trade_rate": round(sum(value > 0 for value in trade_returns) / len(trade_returns), 6),
-            "mean_trade_net_return_pct": round(float(np.mean(trade_returns)), 6),
-            "positive_day_rate": round(sum(value > 0 for value in daily_returns) / len(daily_returns), 6),
-            "mean_daily_net_return_pct": round(float(np.mean(daily_returns)), 6),
-            "compounded_return_pct": round(
-                (float(np.prod([1.0 + value / 100.0 for value in daily_returns])) - 1.0) * 100.0,
-                6,
-            ),
-            "max_drawdown_pct": round(max_drawdown(daily_returns), 6),
+            **cumulative,
+            "completed_cohorts": sum(cohort["status"] == "complete" for cohort in cohorts),
+            "active_cohort_number": cohorts[-1]["cohort_number"],
+            "cohorts": cohorts,
         }
     return {
         "status": "complete",
