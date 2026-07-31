@@ -558,3 +558,21 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
   `summarize_intraday_prospective.py` maintains sequential 20-day cohorts and
   cumulative evidence. A completed cohort must roll directly into the next
   collecting cohort without resetting, deleting history, or tuning models.
+## AI/semiconductor call-option shadow layer (2026-07-31)
+
+`shadow_call_options.py` and `capture_alpha_vantage_shadow_calls.py` are a
+separate, research-only derivative test for the six frozen 20/60-minute stock
+models. Contract selection is fixed before outcomes: calls only, 14-45 DTE,
+delta 0.60-0.75 (target 0.675), open interest at least 100, quoted spread no
+more than 10%, deterministic liquidity-first ranking. Conservative returns buy
+at the entry ask and sell at the exit bid. Every record is `research_only` and
+`execution_decision=AVOID`; there is no broker or order path.
+
+The active Alpha Vantage key was probed on July 31. `REALTIME_OPTIONS` returned
+the provider's four-row artificial example and a message requiring a 600- or
+1200-request/minute realtime-options plan. The validator rejects this response.
+Do not journal it, infer returns from `last`, use end-of-day historical chains
+for intraday fills, or select a contract after observing the outcome. The
+existing stock-model prospective automation remains active. Option capture can
+start without code changes once a genuine real-time bid/ask entitlement or a
+separately approved source passes the same validator.

@@ -608,3 +608,15 @@ Done when: This remains an ongoing standard for all phases.
   non-overlapping 20-market-day cohorts. Completing one cohort automatically
   starts the next while retaining cumulative and prior-cohort evidence.
 - Frozen models and selection fractions are never retuned between cohorts.
+- 2026-07-31: Built the research-only call-option shadow layer for the six frozen
+  AI/semiconductor intraday stock models. `shadow_call_options.py` freezes a
+  deterministic 14-45 DTE, 0.60-0.75 delta, minimum-100-open-interest,
+  maximum-10%-spread policy and prices entries at the ask and exits at the bid.
+  `capture_alpha_vantage_shadow_calls.py` provides append-only entry/outcome
+  capture and rejects Alpha Vantage's artificial sample schema. The current
+  Alpha Vantage key was directly verified against `REALTIME_OPTIONS`; it is not
+  entitled and returns four explicitly artificial contracts. Therefore option
+  return capture remains fail-closed, while the six stock-model prospective
+  tests continue. Do not substitute last prices, end-of-day chains, or
+  retrospective contract selection. Start option capture only after a genuine
+  time-stamped bid/ask source passes the validator.
