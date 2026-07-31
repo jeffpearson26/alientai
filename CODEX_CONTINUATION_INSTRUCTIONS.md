@@ -539,3 +539,8 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
   is technical + 09:25 premarket, daily top 10%, entry 09:30 open, exit 09:45
   bar close, with 0.25% cost. It has only 20 held-out dates and is not authorized
   for paper/live execution. Never use same-day closing technical or call data.
+- The one-hour extension is documented in
+  `AI_SEMICONDUCTOR_60MIN_REPORT_20260731.md`. The leading historical model uses
+  prior-close technical + 09:25 premarket + prior-day unusual-call features and
+  a validation-frozen daily top-10% policy. It has only 20 held-out dates and is
+  research-only. Preserve the 09:30-open to 10:25-bar-close timing contract.

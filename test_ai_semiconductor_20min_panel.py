@@ -1,6 +1,7 @@
 import unittest
+from datetime import datetime, timedelta
 
-from build_ai_semiconductor_20min_panel import shift_prior_close_features, twenty_minute_label
+from build_ai_semiconductor_20min_panel import intraday_label, shift_prior_close_features, twenty_minute_label
 from evaluate_ai_semiconductor_intraday_daily_policy import daily_policy_metrics
 import numpy as np
 
@@ -23,6 +24,21 @@ class TwentyMinutePanelTests(unittest.TestCase):
             {"timestamp": "2026-01-05 09:45:00", "open": "103", "close": "104"},
         ]
         self.assertIsNone(twenty_minute_label(rows, "2026-01-05"))
+
+    def test_sixty_minute_label_uses_1025_bar_close(self):
+        rows = []
+        start = datetime.strptime("09:30", "%H:%M")
+        for index in range(12):
+            stamp = (start + timedelta(minutes=5 * index)).strftime("%H:%M")
+            rows.append({
+                "timestamp": f"2026-01-05 {stamp}:00",
+                "open": "100",
+                "close": "106" if stamp == "10:25" else "100",
+            })
+        result = intraday_label(rows, "2026-01-05", 60)
+        self.assertAlmostEqual(result["label_forward_return_60m_gross_pct"], 6.0)
+        self.assertAlmostEqual(result["label_forward_return_60m_net_pct"], 5.75)
+        self.assertEqual(result["label_exit_timestamp_et"], "2026-01-05 10:30:00")
 
     def test_close_features_are_shifted_from_immediately_prior_session(self):
         rows = [

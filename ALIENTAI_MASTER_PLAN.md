@@ -582,3 +582,14 @@ Done when: This remains an ongoing standard for all phases.
   compounded return, and -4.56% max drawdown.
 - This is promising but too small for paper-trading authorization. Freeze and
   gather prospective evidence. See `AI_SEMICONDUCTOR_20MIN_REPORT_20260731.md`.
+
+## One-hour follow-up
+
+- Repeated the same three leakage-safe models from 09:30 open to the 10:25 bar
+  close, with 0.25% round-trip cost.
+- The technical+premarket+prior-day-unusual-call validation-selected top-10%
+  policy produced +0.70% mean daily net, 65% positive days, +14.28% compounded
+  return, and -5.70% max drawdown across 20 held-out dates.
+- Technical+premarket was close behind at +0.62% mean daily net.
+- Freeze both for prospective comparison; do not authorize execution from this
+  small test. See `AI_SEMICONDUCTOR_60MIN_REPORT_20260731.md`.
