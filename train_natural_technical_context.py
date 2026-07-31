@@ -104,6 +104,7 @@ def main() -> None:
     parser.add_argument("--train-fraction", type=float, default=0.60)
     parser.add_argument("--validation-fraction", type=float, default=0.20)
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
+    parser.add_argument("--label-end-field", default="future_market_date")
     parser.add_argument("--num-boost-round", type=int, default=800)
     parser.add_argument("--early-stopping-rounds", type=int, default=60)
     parser.add_argument("--min-data-in-leaf", type=int, default=100)
@@ -116,6 +117,7 @@ def main() -> None:
     y = np.asarray([safe_float(row[args.target]) >= args.winner_return_pct for row in rows], dtype=np.int32)
     train_idx, validation_idx, test_idx, split = chronological_split(
         rows, args.train_fraction, args.validation_fraction, args.embargo_calendar_days,
+        label_end_field=args.label_end_field,
     )
     train = lgb.Dataset(x[train_idx], label=y[train_idx], feature_name=names)
     validation = lgb.Dataset(x[validation_idx], label=y[validation_idx], reference=train, feature_name=names)

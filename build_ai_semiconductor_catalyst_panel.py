@@ -55,6 +55,27 @@ def unique_index(rows: Iterable[Mapping[str, Any]]) -> dict[tuple[str, str], Map
     return result
 
 
+def combine_base_options_calls(
+    base_rows: Iterable[Mapping[str, Any]],
+    option_rows: Iterable[Mapping[str, Any]],
+    call_rows: Iterable[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    base, options, calls = unique_index(base_rows), unique_index(option_rows), unique_index(call_rows)
+    missing_base, missing_calls = set(options) - set(base), set(options) - set(calls)
+    if missing_base or missing_calls:
+        raise ValueError(
+            f"options require exact base/call matches; missing base={len(missing_base)}, calls={len(missing_calls)}"
+        )
+    output = []
+    for key in sorted(options, key=lambda value: (value[1], value[0])):
+        row, option, call = dict(base[key]), options[key], calls[key]
+        row.update(option)
+        row.update({f"model_option_{name[7:]}": value for name, value in option.items() if name.startswith("option_")})
+        row.update({f"model_call_{name[5:]}": value for name, value in call.items() if name.startswith("call_")})
+        output.append(row)
+    return output
+
+
 def analyst_action_from_title(title: str, symbol: str) -> int:
     """Return +1/-1 only for an explicit, target-specific rating action."""
     aliases = ALIASES.get(symbol.upper(), (symbol.upper(),))
@@ -182,6 +203,8 @@ def build_panel(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--combined-panel", type=Path, required=True)
+    parser.add_argument("--options", type=Path)
+    parser.add_argument("--call-history", type=Path)
     parser.add_argument("--premarket", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--news-root", type=Path, required=True)
@@ -192,9 +215,14 @@ def main() -> None:
         line.strip().upper() for line in args.symbols_file.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     }
-    rows = build_panel(
-        read_jsonl(args.combined_panel), read_jsonl(args.premarket), symbols, args.news_root, args.daily_root
-    )
+    combined = read_jsonl(args.combined_panel)
+    if bool(args.options) != bool(args.call_history):
+        raise ValueError("--options and --call-history must be supplied together")
+    if args.options:
+        combined = combine_base_options_calls(
+            combined, read_jsonl(args.options), read_jsonl(args.call_history)
+        )
+    rows = build_panel(combined, read_jsonl(args.premarket), symbols, args.news_root, args.daily_root)
     if len({row["market_date"] for row in rows}) < 30:
         raise ValueError("fewer than 30 labelled market dates; refusing to build")
     args.output.parent.mkdir(parents=True, exist_ok=True)

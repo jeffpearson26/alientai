@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from build_ai_semiconductor_catalyst_panel import (
     analyst_action_from_title,
     analyst_proxy_features,
+    combine_base_options_calls,
     executable_label,
 )
 from evaluate_ai_semiconductor_ablations import basket_metrics
@@ -60,6 +61,12 @@ class CatalystPanelTests(unittest.TestCase):
         ])
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["as_of_utc"], "2026-01-05T21:00:00+00:00")
+
+    def test_option_join_requires_exact_call_history(self):
+        base = [{"symbol": "NVDA", "market_date": "2026-01-05"}]
+        options = [{"symbol": "NVDA", "market_date": "2026-01-05", "option_call_volume": 10}]
+        with self.assertRaisesRegex(ValueError, "missing base=0, calls=1"):
+            combine_base_options_calls(base, options, [])
 
 
 if __name__ == "__main__":

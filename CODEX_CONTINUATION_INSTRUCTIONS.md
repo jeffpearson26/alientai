@@ -518,3 +518,15 @@ Recent relevant commits:
 ## Communication with Jeff
 
 Jeff is not a programmer and benefits from concrete, short instructions. Lead with the result. If he must run something, provide one PowerShell block at a time and say exactly where to paste it. Prefer doing safe in-scope work directly. Explain failures plainly. Never imply that a research result guarantees profit.
+# 2026-07-31 AI/Semiconductor catalyst checkpoint
+
+- Alpha Vantage event-news archive:
+  `D:\AlientAI\Data\AlphaVantage_2026\ai_semiconductor_event_news_full_20260730`
+  is complete: 1,694 completed, 0 unavailable, 0 failed.
+- Full Alpha Vantage daily archive:
+  `D:\AlientAI\Data\AlphaVantage_2026\ai_semiconductor_daily_full_20260730`
+  contains all 17 requested symbols.
+- Reproducible report: `AI_SEMICONDUCTOR_CATALYST_REPORT_20260731.md`.
+- Do not integrate any of these models into `engine.py` or paper trading.
+- Do not select a new score fraction using the held-out partition beginning
+  2026-06-04. Use a new frozen prospective period for further confirmation.

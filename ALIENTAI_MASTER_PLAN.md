@@ -559,3 +559,14 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-29: Added and ran `score_alpha_vantage_nasdaq_snapshot.py` after acquiring same-source Alpha Vantage QQQ daily history. It scored all 202 model-symbol combinations for the two frozen Schwab-trained 101-stock Nasdaq models against the complete Alpha Vantage July-29 panel, explicitly as a source-shift diagnostic. Both models rank NBIS first and put NBIS/MU/WDC/CRWV in their top five. These are current research rankings only: this snapshot cannot determine model quality, modify the Schwab prospective journal, or authorize paper/live orders. Future outcomes from a single frozen source are still required.
 - 2026-07-30: Jeff directed Alpha Vantage to be the default source for all future data work. This changes no existing Schwab-based artifact: frozen studies must remain source-isolated rather than being completed or re-scored with Alpha Vantage data. New collectors, panels, and experiments must identify Alpha Vantage provenance explicitly; do not begin a new Schwab download without a later explicit direction.
 - 2026-07-30: At Jeff's explicit direction, formally started the separate forward-only journal for the frozen 80-security Nasdaq champion. The Schwab access token was refreshed through the existing refresh-token flow, and the append-only daily refresher added 92 completed rows across all 80 frozen symbols with zero failures. A new tested `--max-candle-date` gate excluded any later in-progress candle. The first source-consistent observation uses stored archive date 2026-07-29 / actual market session 2026-07-30 and records PLTR as the sole score above the already locked `0.15986412677273237` cutoff. The fingerprinted observation is pending for its five-session close outcome, explicitly non-executing, and does not change the model, cutoff, paper account, engine settings, or live-trading state.
+# Verified AI/Semiconductor catalyst study (2026-07-31)
+
+- Completed 1,694/1,694 Alpha Vantage historical news windows with zero failures.
+- Built a 17-symbol, 125-date, executable five-session panel using next-open entry,
+  fifth-close exit, and 0.25% round-trip cost.
+- Compared technical, premarket, unusual-call, and analyst-action-proxy ablations
+  on purged chronological splits.
+- Only the technical+premarket validation-selected top-10% basket stayed slightly
+  positive on held-out data (+0.50% mean net across 28 rows). This is preliminary
+  and is not authorized for paper trading.
+- Full evidence: `AI_SEMICONDUCTOR_CATALYST_REPORT_20260731.md`.
