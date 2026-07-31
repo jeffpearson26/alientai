@@ -593,3 +593,14 @@ Done when: This remains an ongoing standard for all phases.
 - Technical+premarket was close behind at +0.62% mean daily net.
 - Freeze both for prospective comparison; do not authorize execution from this
   small test. See `AI_SEMICONDUCTOR_60MIN_REPORT_20260731.md`.
+
+## Prospective intraday program
+
+- All six frozen 20/60-minute models now have an append-only prospective testing
+  workflow.
+- Weekday 09:26 ET phase records candidates using prior-session technical/call
+  data and current premarket data through 09:25 ET.
+- Weekday 11:26 ET phase records exact 20/60-minute Alpha Vantage outcomes.
+- Frozen daily fractions: 20m technical 20%, 20m premarket 10%, 20m calls 10%;
+  60m technical 50%, 60m premarket 10%, and 60m calls 10%.
+- This workflow never places orders and must remain isolated from `engine.py`.

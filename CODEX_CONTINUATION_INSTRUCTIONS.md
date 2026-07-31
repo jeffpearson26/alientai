@@ -544,3 +544,13 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
   prior-close technical + 09:25 premarket + prior-day unusual-call features and
   a validation-frozen daily top-10% policy. It has only 20 held-out dates and is
   research-only. Preserve the 09:30-open to 10:25-bar-close timing contract.
+- Active automation `score-alientai-frozen-intraday-models` runs weekdays at
+  06:26 and 08:26 Pacific. The first phase scores all six frozen 20/60-minute
+  models after the 09:25 ET premarket cutoff; the second appends exact Alpha
+  Vantage outcomes after both horizons finish.
+- Prospective selections:
+  `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
+- Prospective outcomes:
+  `data_v2\rcef_research\ai_semiconductor_intraday_prospective_outcomes.jsonl`.
+- Keep the journal and outcome ledger append-only and model-specific. Never
+  substitute another price source or use current-day close/call features.
