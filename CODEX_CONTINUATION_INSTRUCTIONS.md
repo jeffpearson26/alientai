@@ -534,3 +534,8 @@ Jeff is not a programmer and benefits from concrete, short instructions. Lead wi
   `data_v2\rcef_research\ai_semiconductor_premarket_prospective_journal.jsonl`.
   The first 2026-07-30 entries are AVGO and ORCL, both pending and non-executing.
   Do not evaluate them before the fifth subsequent market-session close.
+- A separate 20-minute study is documented in
+  `AI_SEMICONDUCTOR_20MIN_REPORT_20260731.md`. Its leading frozen research policy
+  is technical + 09:25 premarket, daily top 10%, entry 09:30 open, exit 09:45
+  bar close, with 0.25% cost. It has only 20 held-out dates and is not authorized
+  for paper/live execution. Never use same-day closing technical or call data.

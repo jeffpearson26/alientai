@@ -570,3 +570,15 @@ Done when: This remains an ongoing standard for all phases.
   positive on held-out data (+0.50% mean net across 28 rows). This is preliminary
   and is not authorized for paper trading.
 - Full evidence: `AI_SEMICONDUCTOR_CATALYST_REPORT_20260731.md`.
+
+## Twenty-minute follow-up
+
+- Built a leakage-safe 09:30-open to 09:45-bar-close target using Alpha Vantage
+  five-minute data and 0.25% round-trip cost.
+- Shifted all technical and unusual-call inputs to the immediately preceding
+  session; only 09:25 premarket fields come from the current morning.
+- The technical+premarket validation-selected daily top-10% policy produced
+  +0.52% mean daily net across 20 held-out dates, 70% positive days, +10.62%
+  compounded return, and -4.56% max drawdown.
+- This is promising but too small for paper-trading authorization. Freeze and
+  gather prospective evidence. See `AI_SEMICONDUCTOR_20MIN_REPORT_20260731.md`.
