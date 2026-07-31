@@ -620,3 +620,19 @@ Done when: This remains an ongoing standard for all phases.
   tests continue. Do not substitute last prices, end-of-day chains, or
   retrospective contract selection. Start option capture only after a genuine
   time-stamped bid/ask source passes the validator.
+- 2026-07-31: Added and directly validated
+  `capture_schwab_shadow_calls.py` as the approved real-time quote adapter for
+  the research-only call shadow layer. A refreshed Schwab token returned a
+  genuine NVDA chain with 100 contracts across five expiration groups and all
+  required bid/ask, delta, open-interest, volume, and Greek fields. The frozen
+  selector chose the liquid 2026-08-21 190 call in the validation probe
+  (delta 0.677, 1.98% spread, open interest 18,604). This probe is not a
+  signal or journal entry. The adapter prices entries at ask and exits at bid,
+  remains append-only, and has no execution path.
+- 2026-07-31: The first six-model prospective morning run failed closed for a
+  valid source-timing reason. A fresh 17/17 Alpha Vantage intraday download at
+  09:29 ET still ended at July 30 19:55 ET; an explicit
+  `entitlement=realtime` request confirmed the current key is not entitled to
+  real-time US stock data. Therefore no July-31 stock signals or option entries
+  were journaled. Do not fill the 09:25 Alpha Vantage premarket requirement
+  with Schwab data without an explicit, source-separated protocol decision.

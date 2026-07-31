@@ -576,3 +576,18 @@ for intraday fills, or select a contract after observing the outcome. The
 existing stock-model prospective automation remains active. Option capture can
 start without code changes once a genuine real-time bid/ask entitlement or a
 separately approved source passes the same validator.
+
+Schwab is now that validated option-quote source:
+`capture_schwab_shadow_calls.py` reads the existing refreshed `token.json`,
+normalizes the genuine Schwab chain, applies the identical frozen selector, and
+maintains separate append-only entry/outcome ledgers. A July-31 NVDA probe
+returned 100 real contracts and selected an eligible contract, but it was not
+journaled because it was not attached to a valid frozen stock signal.
+
+The July-31 06:26 stock-scoring phase did not produce observations. The fresh
+Alpha Vantage monthly five-minute archive remained one session behind and an
+explicit real-time entitlement probe was denied. Preserve the fail-closed
+result: no option contract may be selected without the predeclared 09:25 stock
+signal. Do not silently replace Alpha Vantage premarket inputs with Schwab;
+that would be a new, source-separated experiment requiring an explicit
+decision and validation.
