@@ -36,9 +36,18 @@ def read_existing(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def append_only(existing: list[dict[str, str]], recent: list[dict[str, str]]) -> list[dict[str, str]]:
+def append_only(
+    existing: list[dict[str, str]],
+    recent: list[dict[str, str]],
+    max_candle_date: str = "",
+) -> list[dict[str, str]]:
     newest = max((str(row.get("date") or "") for row in existing), default="")
-    additions = [row for row in recent if str(row.get("date") or "") > newest]
+    additions = [
+        row
+        for row in recent
+        if str(row.get("date") or "") > newest
+        and (not max_candle_date or str(row.get("date") or "") <= max_candle_date)
+    ]
     return existing + sorted(additions, key=lambda row: str(row.get("date") or ""))
 
 
@@ -98,6 +107,11 @@ def main() -> None:
     parser.add_argument("--delay", type=float, default=0.20)
     parser.add_argument("--max-symbols", type=int, default=0)
     parser.add_argument("--only-before-date", default="", help="Resume only existing files older than YYYY-MM-DD.")
+    parser.add_argument(
+        "--max-candle-date",
+        default="",
+        help="Append candles only through YYYY-MM-DD, excluding an in-progress market day.",
+    )
     parser.add_argument("--apply", action="store_true", help="Write new rows; without this, perform a remote dry run.")
     args = parser.parse_args()
     symbols = read_symbols(args.symbols_file)
@@ -111,7 +125,11 @@ def main() -> None:
         try:
             existing = read_existing(path)
             schwab_symbol, candles = fetch_recent(symbol)
-            merged = append_only(existing, normalize(symbol, schwab_symbol, candles))
+            merged = append_only(
+                existing,
+                normalize(symbol, schwab_symbol, candles),
+                max_candle_date=args.max_candle_date,
+            )
             added = len(merged) - len(existing)
             if args.apply and added:
                 write_rows(path, merged)
@@ -130,6 +148,7 @@ def main() -> None:
     report = {"status": "complete", "research_only": True, "execution_enabled": False,
               "apply": args.apply, "symbols": len(symbols), "new_rows": additions,
               "only_before_date": args.only_before_date or None,
+              "max_candle_date": args.max_candle_date or None,
               "failures": failures, "results": results}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "sp500_daily_incremental_refresh_summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

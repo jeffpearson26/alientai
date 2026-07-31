@@ -16,6 +16,14 @@ class IncrementalDailyRefreshTests(unittest.TestCase):
     def test_does_not_append_stale_data(self):
         self.assertEqual([{"date": "2026-07-22"}], append_only([{"date": "2026-07-22"}], [{"date": "2026-07-21"}]))
 
+    def test_max_candle_date_excludes_in_progress_day(self):
+        existing = [{"date": "2026-07-27"}]
+        recent = [{"date": "2026-07-28"}, {"date": "2026-07-29"}, {"date": "2026-07-30"}]
+        self.assertEqual(
+            [{"date": "2026-07-27"}, {"date": "2026-07-28"}, {"date": "2026-07-29"}],
+            append_only(existing, recent, max_candle_date="2026-07-29"),
+        )
+
     def test_selects_only_existing_stale_histories(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)

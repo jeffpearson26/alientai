@@ -499,6 +499,12 @@ Jeff requested an alternate source while the Schwab panel lagged. `download_alph
 
 `score_alpha_vantage_nasdaq_snapshot.py` is the explicit source-shift diagnostic for that panel. After acquiring QQQ from the same Alpha Vantage endpoint, it scored both frozen Schwab-trained complete-101 Nasdaq models across all 101 July-29 rows (202 observations) without writing an order, journal entry, or Schwab artifact. Both models rank NBIS first; the baseline top five are NBIS/MU/WDC/TER/CRWV and the QQQ-relative top five are NBIS/WDC/MU/CRWV/SNDK. The output remains under the Alpha Vantage archive and declares `execution_decision: AVOID`. Do not call these scores a model comparison or use them to pick a paper/live trade: they only demonstrate current model agreement under a changed data source.
 
+## Frozen Nasdaq-80 champion prospective journal (July 30)
+
+`journal_nasdaq80_champion.py` is now the formal append-only, non-executing prospective path for model `nasdaq100_technical_clone_v1`. Its manifest freezes the exact model, training report, 80-symbol file, five-session close outcome contract, maximum five candidates, and score cutoff `0.15986412677273237`. It refuses stale data, fingerprints all frozen artifacts, deduplicates by model/date/symbol, labels score rank as not probability, and writes `execution_decision: AVOID`.
+
+The first valid run followed an explicit Schwab refresh requested by Jeff. `refresh_sp500_daily_incremental.py` now has a tested `--max-candle-date` safety gate, and the refresh appended 92 completed rows across all 80 symbols with zero failures. The common stored archive date is 2026-07-29, which maps to actual market session 2026-07-30 under the legacy Schwab date convention. One observation, PLTR, cleared the frozen cutoff and is pending in `data_v2\rcef_research\nasdaq80_champion_prospective\journal.jsonl`; the immutable contract is in the adjacent `frozen_manifest.json`. Do not score the outcome until five later sessions exist, backfill earlier dates, alter the cutoff, convert the score to a probability, or use the observation to place an order.
+
 Recent relevant commits:
 
 - `0c88e0c` Build leakage-safe matched premarket features
