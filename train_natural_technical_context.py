@@ -106,6 +106,7 @@ def main() -> None:
     parser.add_argument("--embargo-calendar-days", type=int, default=12)
     parser.add_argument("--num-boost-round", type=int, default=800)
     parser.add_argument("--early-stopping-rounds", type=int, default=60)
+    parser.add_argument("--min-data-in-leaf", type=int, default=100)
     parser.add_argument("--include-prefix", action="append", default=[], help="Additional approved point-in-time feature prefix.")
     args = parser.parse_args()
 
@@ -120,7 +121,7 @@ def main() -> None:
     validation = lgb.Dataset(x[validation_idx], label=y[validation_idx], reference=train, feature_name=names)
     model = lgb.train(
         {"objective": "binary", "metric": ["binary_logloss", "auc"], "learning_rate": 0.025,
-         "num_leaves": 31, "min_data_in_leaf": 100, "feature_fraction": 0.85,
+         "num_leaves": 31, "min_data_in_leaf": args.min_data_in_leaf, "feature_fraction": 0.85,
          "lambda_l1": 2.0, "lambda_l2": 8.0, "verbosity": -1, "seed": 42, "force_col_wise": True},
         train, num_boost_round=args.num_boost_round, valid_sets=[validation], valid_names=["validation"],
         callbacks=[lgb.early_stopping(args.early_stopping_rounds), lgb.log_evaluation(50)],

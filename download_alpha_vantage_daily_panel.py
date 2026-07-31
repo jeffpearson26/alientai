@@ -16,9 +16,9 @@ from download_alpha_vantage_option_panel import read_symbols
 ROOT = Path(__file__).resolve().parent
 
 
-def fetch(symbol: str, api_key: str) -> dict:
+def fetch(symbol: str, api_key: str, outputsize: str = "compact") -> dict:
     response = get_alpha_vantage_response(
-        {"function": "TIME_SERIES_DAILY", "symbol": symbol, "outputsize": "compact"},
+        {"function": "TIME_SERIES_DAILY", "symbol": symbol, "outputsize": outputsize},
         api_key,
         timeout=90,
     )
@@ -34,6 +34,7 @@ def main() -> None:
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--delay-seconds", type=float, default=0.75)
+    parser.add_argument("--outputsize", choices=("compact", "full"), default="compact")
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
     api_key = str(os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
@@ -47,7 +48,7 @@ def main() -> None:
             completed.append(symbol)
             continue
         try:
-            payload = fetch(symbol, api_key)
+            payload = fetch(symbol, api_key, args.outputsize)
             temporary = path.with_suffix(".json.tmp")
             temporary.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
             temporary.replace(path)
