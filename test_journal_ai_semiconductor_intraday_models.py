@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -103,7 +104,22 @@ class IntradayJournalTests(unittest.TestCase):
             "symbol": "NVDA", "rank": 1, "model_score": 0.5, "horizon_minutes": 60,
         }
         with tempfile.TemporaryDirectory() as directory:
-            self.assertEqual(completed_outcomes([observation], Path(directory)), [])
+            archive = Path(directory)
+            (archive / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "status": "complete",
+                        "mode": "current",
+                        "entitlement": "realtime",
+                        "current_date": "2026-07-31",
+                        "bar_interval_minutes": 5,
+                        "timestamp_convention": "interval_start",
+                        "updated_at_utc": "2026-07-31T14:31:00+00:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(completed_outcomes([observation], archive), [])
 
 
 if __name__ == "__main__":

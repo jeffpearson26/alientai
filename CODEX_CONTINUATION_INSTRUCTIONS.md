@@ -684,6 +684,14 @@ weights.
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Prospective outcomes:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_outcomes.jsonl`.
+- `evaluate_intraday_prospective_outcomes.py` independently verifies the
+  outcome archive manifest before reading prices. It requires `status:
+  complete`, current mode, realtime entitlement, the exact decision date,
+  interval-start five-minute bars, and an archive completion time after the
+  longest requested exit candle matured. Every outcome fingerprints that
+  manifest. It rejects historical, failed, mixed-date, empty, and unsupported
+  batches rather than allowing the automation to substitute a convenient
+  source.
 - Keep the journal and outcome ledger append-only and model-specific. Never
   substitute another price source or use current-day close/call features.
 - Do not stop prospective collection when the 20-day evidence gate is reached.

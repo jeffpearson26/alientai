@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from build_ai_semiconductor_20min_panel import intraday_label
 from build_matched_premarket_features import index_month
 from download_alpha_vantage_matched_premarket import archive_path
+from evaluate_pick_competition_intraday import validate_manifest
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -19,6 +21,28 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 def completed_outcomes(
     observations: Sequence[Mapping[str, Any]], archive: Path
 ) -> list[dict[str, Any]]:
+    if not observations:
+        raise ValueError("no valid pre-entry observations exist")
+    market_dates = {str(row.get("market_date") or "") for row in observations}
+    if "" in market_dates or len(market_dates) != 1:
+        raise ValueError("outcome batch must contain one exact market date")
+    horizons = {int(row.get("horizon_minutes") or 0) for row in observations}
+    if not horizons or not horizons.issubset({20, 60}):
+        raise ValueError("outcome batch contains an unsupported horizon")
+    decision_date = next(iter(market_dates))
+    required_complete = time(10, 30) if 60 in horizons else time(9, 50)
+    manifest, manifest_hash = validate_manifest(
+        archive,
+        decision_date,
+        required_complete,
+    )
+    if (
+        str(manifest.get("mode") or "") != "current"
+        or str(manifest.get("entitlement") or "") != "realtime"
+    ):
+        raise ValueError(
+            "frozen intraday outcomes require a current realtime archive"
+        )
     output = []
     for row in observations:
         symbol, market_date = str(row["symbol"]), str(row["market_date"])
@@ -36,6 +60,10 @@ def completed_outcomes(
             "model_score": row["model_score"],
             "horizon_minutes": horizon,
             **label,
+            "source_manifest": str(archive / "manifest.json"),
+            "source_manifest_sha256": manifest_hash,
+            "source_mode": "current",
+            "source_entitlement": "realtime",
             "status": "complete",
             "research_only": True,
             "execution_decision": "AVOID",
