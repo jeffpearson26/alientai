@@ -680,6 +680,10 @@ weights.
   now fails closed for both cases. Do not remove this guard, journal a partial
   bar, use the already-known 09:30 open, or silently switch to 09:20/09:35.
   Repair requires a separately named and retrained timing contract.
+- The 2026-08-03 08:26 Pacific outcome checkpoint verified that no valid
+  pre-entry journal or outcome ledger existed. It therefore recorded
+  `SKIPPED_NO_VALID_PRE_ENTRY_JOURNAL`, attempted no outcome download, and
+  wrote no outcome. The failed provider-manifest hash remained unchanged.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Frozen six-model identity:

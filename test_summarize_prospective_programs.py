@@ -136,6 +136,13 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                         "status": "FAILED_CLOSED",
                         "provider_status": "failed_closed",
                         "journal_written": False,
+                        "outcome_checkpoint_at_utc": (
+                            "2026-08-03T15:26:32+00:00"
+                        ),
+                        "outcome_checkpoint_status": (
+                            "SKIPPED_NO_VALID_PRE_ENTRY_JOURNAL"
+                        ),
+                        "outcome_download_attempted": False,
                         "outcome_written": False,
                         "reasons": ["realtime entitlement unavailable"],
                     }
@@ -209,6 +216,11 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         intraday_gate = programs["ai_semiconductor_intraday_gate"]
         self.assertEqual(intraday_gate["status"], "FAILED_CLOSED")
         self.assertFalse(intraday_gate["journal_written"])
+        self.assertEqual(
+            intraday_gate["outcome_checkpoint_status"],
+            "SKIPPED_NO_VALID_PRE_ENTRY_JOURNAL",
+        )
+        self.assertFalse(intraday_gate["outcome_download_attempted"])
         self.assertEqual(
             intraday_gate["reasons"],
             ["realtime entitlement unavailable"],

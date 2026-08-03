@@ -267,6 +267,15 @@ def latest_intraday_gate(root: Path) -> dict[str, Any]:
         "status": payload.get("status"),
         "provider_status": payload.get("provider_status"),
         "journal_written": payload.get("journal_written"),
+        "outcome_checkpoint_at_utc": payload.get(
+            "outcome_checkpoint_at_utc"
+        ),
+        "outcome_checkpoint_status": payload.get(
+            "outcome_checkpoint_status"
+        ),
+        "outcome_download_attempted": payload.get(
+            "outcome_download_attempted"
+        ),
         "outcome_written": payload.get("outcome_written"),
         "reasons": list(payload.get("reasons") or []),
     }
