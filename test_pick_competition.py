@@ -9,8 +9,11 @@ from alientai_v2.research.pick_competition import (
     append_submission,
     build_submission,
     competition_manifest,
+    evaluate_pick_outcomes,
     load_universe,
     normalize_picks,
+    post_cost_return_pct,
+    summarize_returns,
 )
 
 
@@ -81,7 +84,55 @@ class PickCompetitionTests(unittest.TestCase):
             self.assertEqual(manifest["horizons"], ["20m", "60m", "2d", "5d", "10d", "20d"])
             self.assertFalse(manifest["execution_enabled"])
 
+    def test_post_cost_return_subtracts_frozen_cost(self):
+        self.assertAlmostEqual(post_cost_return_pct(100, 105), 4.75)
+
+    def test_outcomes_remain_pending_until_price_fact_exists(self):
+        result = evaluate_pick_outcomes(
+            symbol="NVDA",
+            entry_price=100,
+            entry_at_utc="2026-08-03T13:30:00+00:00",
+            horizon_observations={
+                "20m": {"as_of_utc": "2026-08-03T13:50:00+00:00", "price": 102},
+            },
+        )
+        self.assertEqual(result["outcomes"]["20m"]["status"], "complete")
+        self.assertEqual(result["outcomes"]["60m"]["status"], "pending")
+        self.assertAlmostEqual(result["outcomes"]["20m"]["unmanaged_net_return_pct"], 1.75)
+
+    def test_explicit_stop_applies_only_to_later_horizons(self):
+        result = evaluate_pick_outcomes(
+            symbol="NVDA",
+            entry_price=100,
+            entry_at_utc="2026-08-03T13:30:00+00:00",
+            horizon_observations={
+                "20m": {"as_of_utc": "2026-08-03T13:50:00+00:00", "price": 101},
+                "60m": {"as_of_utc": "2026-08-03T14:30:00+00:00", "price": 96},
+            },
+            stop_exit={"as_of_utc": "2026-08-03T14:00:00+00:00", "price": 94},
+        )
+        self.assertFalse(result["outcomes"]["20m"]["stop_applied"])
+        self.assertTrue(result["outcomes"]["60m"]["stop_applied"])
+        self.assertAlmostEqual(result["outcomes"]["60m"]["stop_managed_net_return_pct"], -6.25)
+
+    def test_stop_cannot_be_backdated(self):
+        with self.assertRaisesRegex(ValueError, "must occur after entry"):
+            evaluate_pick_outcomes(
+                symbol="NVDA",
+                entry_price=100,
+                entry_at_utc="2026-08-03T13:30:00+00:00",
+                horizon_observations={},
+                stop_exit={"as_of_utc": "2026-08-03T13:29:00+00:00", "price": 94},
+            )
+
+    def test_summary_reports_honest_sample_statistics(self):
+        summary = summarize_returns([2.0, -1.0, 4.0])
+        self.assertEqual(summary["sample_size"], 3)
+        self.assertAlmostEqual(summary["mean_return_pct"], 5 / 3)
+        self.assertEqual(summary["median_return_pct"], 2.0)
+        self.assertAlmostEqual(summary["win_rate_pct"], 200 / 3)
+        self.assertEqual(summary["worst_return_pct"], -1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -28,3 +28,6 @@ across that participant's submitted basket. Overall results must also report
 sample size, cumulative and mean return, median return, win rate, worst result,
 and abstentions. A single lucky round is not evidence of a durable edge.
 
+Outcome scoring accepts explicit timestamped price facts only. Missing horizons
+remain pending, and a stop exit must come from a validated intraday price path;
+it is never inferred from a later closing price.

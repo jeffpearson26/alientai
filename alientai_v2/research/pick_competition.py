@@ -6,6 +6,7 @@ import hashlib
 import json
 from datetime import date, datetime, time
 from pathlib import Path
+from statistics import median
 from typing import Any, Iterable, Mapping, Sequence
 from zoneinfo import ZoneInfo
 
@@ -150,3 +151,113 @@ def append_submission(path: Path, submission: Mapping[str, Any]) -> None:
     with path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(dict(submission), sort_keys=True) + "\n")
 
+
+def parse_aware_timestamp(value: Any, field: str) -> datetime:
+    text = str(value or "").strip().replace("Z", "+00:00")
+    if not text:
+        raise ValueError(f"{field} is required")
+    parsed = datetime.fromisoformat(text)
+    if parsed.tzinfo is None:
+        raise ValueError(f"{field} must include a timezone")
+    return parsed
+
+
+def post_cost_return_pct(
+    entry_price: Any,
+    exit_price: Any,
+    cost_pct: float = ROUND_TRIP_COST_PCT,
+) -> float:
+    entry = float(entry_price)
+    exit_value = float(exit_price)
+    cost = float(cost_pct)
+    if entry <= 0 or exit_value <= 0:
+        raise ValueError("entry and exit prices must be positive")
+    if cost < 0:
+        raise ValueError("round-trip cost cannot be negative")
+    return ((exit_value / entry) - 1.0) * 100.0 - cost
+
+
+def evaluate_pick_outcomes(
+    *,
+    symbol: str,
+    entry_price: Any,
+    entry_at_utc: Any,
+    horizon_observations: Mapping[str, Mapping[str, Any]],
+    stop_exit: Mapping[str, Any] | None = None,
+    cost_pct: float = ROUND_TRIP_COST_PCT,
+) -> dict[str, Any]:
+    """Score one pick from explicit, timestamped, point-in-time price facts."""
+
+    ticker = str(symbol or "").strip().upper()
+    if not ticker:
+        raise ValueError("symbol is required")
+    entry_time = parse_aware_timestamp(entry_at_utc, "entry_at_utc")
+    entry = float(entry_price)
+    if entry <= 0:
+        raise ValueError("entry price must be positive")
+
+    stop_time: datetime | None = None
+    stop_price: float | None = None
+    if stop_exit is not None:
+        stop_time = parse_aware_timestamp(stop_exit.get("as_of_utc"), "stop_exit.as_of_utc")
+        stop_price = float(stop_exit.get("price"))
+        if stop_time <= entry_time:
+            raise ValueError("stop exit must occur after entry")
+        if stop_price <= 0:
+            raise ValueError("stop exit price must be positive")
+
+    outcomes: dict[str, Any] = {}
+    for horizon in HORIZONS:
+        observation = horizon_observations.get(horizon)
+        if observation is None:
+            outcomes[horizon] = {"status": "pending"}
+            continue
+        observed_at = parse_aware_timestamp(observation.get("as_of_utc"), f"{horizon}.as_of_utc")
+        observed_price = float(observation.get("price"))
+        if observed_at <= entry_time:
+            raise ValueError(f"{horizon} observation must occur after entry")
+        if observed_price <= 0:
+            raise ValueError(f"{horizon} price must be positive")
+        stop_applied = stop_time is not None and stop_time <= observed_at
+        managed_exit = stop_price if stop_applied else observed_price
+        outcomes[horizon] = {
+            "status": "complete",
+            "observed_at_utc": observed_at.isoformat(),
+            "unmanaged_exit_price": observed_price,
+            "unmanaged_net_return_pct": post_cost_return_pct(entry, observed_price, cost_pct),
+            "stop_managed_exit_price": managed_exit,
+            "stop_managed_net_return_pct": post_cost_return_pct(entry, managed_exit, cost_pct),
+            "stop_applied": stop_applied,
+            "stop_exit_at_utc": stop_time.isoformat() if stop_applied else None,
+        }
+
+    return {
+        "symbol": ticker,
+        "entry_price": entry,
+        "entry_at_utc": entry_time.isoformat(),
+        "round_trip_cost_pct": float(cost_pct),
+        "outcomes": outcomes,
+        "research_only": True,
+        "execution_decision": "AVOID",
+    }
+
+
+def summarize_returns(values: Iterable[Any]) -> dict[str, Any]:
+    returns = [float(value) for value in values]
+    if not returns:
+        return {
+            "sample_size": 0,
+            "mean_return_pct": None,
+            "median_return_pct": None,
+            "win_rate_pct": None,
+            "worst_return_pct": None,
+            "best_return_pct": None,
+        }
+    return {
+        "sample_size": len(returns),
+        "mean_return_pct": sum(returns) / len(returns),
+        "median_return_pct": median(returns),
+        "win_rate_pct": sum(value > 0 for value in returns) / len(returns) * 100.0,
+        "worst_return_pct": min(returns),
+        "best_return_pct": max(returns),
+    }
