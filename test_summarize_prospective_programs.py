@@ -142,6 +142,25 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (
+                root / "ai_semiconductor_intraday_frozen_manifest.json"
+            ).write_text(
+                json.dumps(
+                    {
+                        "status": "frozen",
+                        "research_only": True,
+                        "execution_enabled": False,
+                        "universe_size": 17,
+                        "models": [
+                            {
+                                "model_id": "intraday",
+                                "model_sha256": "abc",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
             summary = build_summary(
                 root,
                 datetime(2026, 8, 3, tzinfo=timezone.utc),
@@ -193,6 +212,12 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         self.assertEqual(
             intraday_gate["reasons"],
             ["realtime entitlement unavailable"],
+        )
+        intraday = programs["ai_semiconductor_intraday"]
+        self.assertTrue(intraday["frozen_contract"]["exists"])
+        self.assertEqual(
+            intraday["frozen_contract"]["models"],
+            [{"model_id": "intraday", "model_sha256": "abc"}],
         )
 
 

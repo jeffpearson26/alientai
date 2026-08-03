@@ -41,6 +41,22 @@ OUTCOME_EVALUATION_SUMMARIES = {
     ),
 }
 
+FROZEN_MANIFESTS = {
+    "nasdaq100_five_session": (
+        "nasdaq100_prospective/frozen_manifest.json"
+    ),
+    "nasdaq80_champion": (
+        "nasdaq80_champion_prospective/frozen_manifest.json"
+    ),
+    "ai_semiconductor_five_session": (
+        "ai_semiconductor_premarket_frozen_manifest.json"
+    ),
+    "ai_semiconductor_intraday": (
+        "ai_semiconductor_intraday_frozen_manifest.json"
+    ),
+    "pick_competition": "pick_competition_manifest.json",
+}
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
@@ -165,6 +181,39 @@ def summarize_outcome_evaluation(path: Path) -> dict[str, Any]:
     }
 
 
+def summarize_frozen_manifest(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {
+            "exists": False,
+            "path": str(path),
+        }
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    models = list(payload.get("models") or [])
+    if not models and payload.get("model_id"):
+        models = [
+            {
+                "model_id": payload.get("model_id"),
+                "model_sha256": payload.get("model_sha256"),
+            }
+        ]
+    return {
+        "exists": True,
+        "path": str(path),
+        "status": payload.get("status"),
+        "research_only": payload.get("research_only"),
+        "execution_enabled": payload.get("execution_enabled"),
+        "universe_size": payload.get("universe_size"),
+        "models": [
+            {
+                "model_id": model.get("model_id"),
+                "model_sha256": model.get("model_sha256"),
+            }
+            for model in models
+            if isinstance(model, dict)
+        ],
+    }
+
+
 def latest_contextual_gate(root: Path) -> dict[str, Any]:
     paths = sorted(root.glob("contextual_options_prospective_gate_*.json"))
     if not paths:
@@ -232,6 +281,11 @@ def build_summary(root: Path, generated_at: datetime | None = None) -> dict[str,
         if evaluation_relative:
             program["evaluation"] = summarize_outcome_evaluation(
                 root / evaluation_relative
+            )
+        manifest_relative = FROZEN_MANIFESTS.get(name)
+        if manifest_relative:
+            program["frozen_contract"] = summarize_frozen_manifest(
+                root / manifest_relative
             )
         programs.append(program)
     programs.append(latest_contextual_gate(root))
