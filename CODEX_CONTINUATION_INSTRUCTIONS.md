@@ -73,6 +73,12 @@ Inspect live state rather than assuming these counts remain current. Do not repr
   `completed + unavailable == 22,918` with zero failures.
 - The broad archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026` remains intentionally paused and must not be resumed. After the stratified collector truly completes, compile its features, exact-key join them to its own `requests.jsonl`, and run the timing/coverage audit before specifying any chronological ablation.
 - The research-only prospective pick competition is frozen in `PICK_COMPETITION_RULES.md`. `record_pick_competition.py` journals zero-to-five immutable picks before 09:25 ET from the exact 101-symbol Nasdaq universe. Its pure outcome scorer requires explicit timestamped price facts, keeps missing horizons pending, subtracts 0.25% round-trip cost, and never infers a stop from a later close. It has no paper/live order path.
+- `evaluate_pick_competition_intraday.py` advances only the unmanaged 20/60
+  minute outcomes from a complete, realtime-entitled Alpha Vantage archive.
+  It requires exact entry/exit candles, waits until each exit candle is
+  complete, fingerprints the source manifest, and leaves stop-managed results
+  pending. For the 2026-08-03 round, the exact derived 18-symbol event request
+  is `data_v2\rcef_research\pick_competition_events_2026-08-03.jsonl`.
 - Claude participates through `build_claude_competition_packet.py`, which emits
   one uploadable ZIP containing instructions plus exact-universe point-in-time
   data. It whitelists underlying feature fields and excludes model scores,

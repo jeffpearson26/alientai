@@ -40,6 +40,15 @@ Outcome scoring accepts explicit timestamped price facts only. Missing horizons
 remain pending, and a stop exit must come from a validated intraday price path;
 it is never inferred from a later closing price.
 
+`evaluate_pick_competition_intraday.py` is the append-only scorer for the
+unmanaged 20/60-minute tracks. It requires an Alpha Vantage current-mode,
+realtime-entitled manifest completed after the relevant exit candle, exact
+09:30 bar opens, and exact completed 09:45/10:25 bar closes. It fingerprints
+the source manifest, deduplicates by round/participant/date/symbol/horizon, and
+computes equal-weight participant baskets. It deliberately leaves every
+stop-managed result pending until a separately validated high-resolution stop
+path exists; it never infers a stop from the candle's later low or close.
+
 ## Claude information boundary
 
 Claude receives a generated, uploadable packet containing the complete
