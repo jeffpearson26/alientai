@@ -1,7 +1,7 @@
 # AlienTAI Prospective Pick Competition
 
-This is a research-only comparison among Jeff, Codex, and frozen AlienTAI
-models. It cannot create paper or live orders.
+This is a research-only comparison among Jeff, Codex, Claude, and frozen
+AlienTAI models. It cannot create paper or live orders.
 
 ## Frozen first-round rules
 
@@ -31,3 +31,19 @@ and abstentions. A single lucky round is not evidence of a durable edge.
 Outcome scoring accepts explicit timestamped price facts only. Missing horizons
 remain pending, and a stop exit must come from a validated intraday price path;
 it is never inferred from a later closing price.
+
+## Claude information boundary
+
+Claude receives a generated, uploadable packet containing the complete
+101-symbol prior-session technical panel. The packet deliberately excludes
+AlienTAI model predictions, scores, ranks, probabilities, labels, other
+participants' selections, and future outcomes. Claude must use only the packet,
+may select zero through five tickers, and must return its ranked picks before
+the same 09:25 Eastern deadline. Its response is then recorded immutably through
+the normal competition journal.
+
+`build_claude_competition_packet.py` fails closed on incomplete or duplicate
+universe coverage and on technical data dated on or after the decision date.
+Optional premarket or call-feature families may be included only when they have
+complete exact-universe coverage and satisfy their frozen timing checks. The
+August 3 packet intentionally contains no premarket data at Jeff's direction.

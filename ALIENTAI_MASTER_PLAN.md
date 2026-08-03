@@ -123,6 +123,13 @@ Verified blockers and state on August 2:
 - Verification evidence: 13 targeted intraday/options tests passed; the seven
   involved scripts compiled; `git diff --check` passed. No settings, trading
   state, model artifact, or engine code changed.
+- Claude is now an external participant in the prospective pick competition.
+  `build_claude_competition_packet.py` creates a single uploadable ZIP from an
+  exact complete-universe, prior-session panel while excluding model outputs,
+  other participants' picks, labels, and outcomes. The August 3 packet contains
+  all 101 symbols and only July 31 prior-close technical evidence; Jeff
+  explicitly excluded premarket data. Claude's response must still be frozen
+  before the normal deadline and scored under the identical rules.
 
 ## Ordered master roadmap
 
