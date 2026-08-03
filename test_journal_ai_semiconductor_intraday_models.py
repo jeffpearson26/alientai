@@ -3,12 +3,46 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from journal_ai_semiconductor_intraday_models import append_unique, merge_inputs
+from journal_ai_semiconductor_intraday_models import (
+    MODEL_CONFIGS,
+    append_unique,
+    ensure_frozen_manifest,
+    frozen_model_specs,
+    merge_inputs,
+)
 from build_prospective_call_features import target_features
 from evaluate_intraday_prospective_outcomes import completed_outcomes
 
 
 class IntradayJournalTests(unittest.TestCase):
+    def test_model_contract_can_freeze_before_session_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for _, _, _, directory_name in MODEL_CONFIGS:
+                model_dir = root / directory_name
+                model_dir.mkdir()
+                (
+                    model_dir / "natural_technical_context_classifier.txt"
+                ).write_text("model", encoding="utf-8")
+                (
+                    model_dir / "natural_technical_context_report.json"
+                ).write_text("{}", encoding="utf-8")
+            models = frozen_model_specs(root, 17)
+            manifest = root / "frozen_manifest.json"
+            payload = {
+                "status": "frozen",
+                "research_only": True,
+                "execution_enabled": False,
+                "models": models,
+            }
+            ensure_frozen_manifest(manifest, payload)
+            ensure_frozen_manifest(manifest, payload)
+            self.assertEqual(
+                json.loads(manifest.read_text(encoding="utf-8")),
+                payload,
+            )
+            self.assertEqual(len(models), 6)
+
     def test_merge_rejects_completed_0925_bar_at_frozen_0930_entry(self):
         tech = [{"symbol": "NVDA", "market_date": "2026-07-30", "technical_rsi_2": 10}]
         pm = [{

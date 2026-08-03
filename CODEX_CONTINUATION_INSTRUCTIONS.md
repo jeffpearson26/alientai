@@ -682,6 +682,13 @@ weights.
   Repair requires a separately named and retrained timing contract.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
+- Frozen six-model identity:
+  `data_v2\rcef_research\ai_semiconductor_intraday_frozen_manifest.json`.
+  `journal_ai_semiconductor_intraday_models.py` writes or verifies this
+  manifest before reading session inputs, so a missing or timing-invalid
+  premarket panel cannot leave the model contract undefined. Its six
+  model/report hashes were independently matched to the August 3 readiness
+  preflight.
 - Prospective outcomes:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_outcomes.jsonl`.
 - `evaluate_intraday_prospective_outcomes.py` independently verifies the

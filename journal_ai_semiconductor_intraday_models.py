@@ -135,9 +135,54 @@ def append_unique(path: Path, observations: Sequence[Mapping[str, Any]]) -> int:
     return len(additions)
 
 
+def frozen_model_specs(
+    model_root: Path,
+    universe_size: int,
+) -> list[dict[str, Any]]:
+    specs = []
+    for short_name, horizon, fraction, directory_name in MODEL_CONFIGS:
+        directory = model_root / directory_name
+        model_path = directory / "natural_technical_context_classifier.txt"
+        report_path = directory / "natural_technical_context_report.json"
+        count = max(1, math.ceil(universe_size * fraction))
+        specs.append(
+            {
+                "model_id": (
+                    f"ai_semiconductor_{short_name}_frozen_20260731"
+                ),
+                "horizon_minutes": horizon,
+                "daily_fraction": fraction,
+                "daily_candidate_count": count,
+                "model_sha256": sha256(model_path),
+                "training_report_sha256": sha256(report_path),
+            }
+        )
+    return specs
+
+
+def ensure_frozen_manifest(
+    path: Path,
+    requested_manifest: Mapping[str, Any],
+) -> None:
+    requested = dict(requested_manifest)
+    if path.exists():
+        if json.loads(path.read_text(encoding="utf-8")) != requested:
+            raise ValueError("frozen manifest mismatch")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(requested, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def score_models(rows: list[dict[str, Any]], model_root: Path, decision_date: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     observations, manifests = [], []
     now = datetime.now(timezone.utc).isoformat()
+    frozen_specs = {
+        str(spec["model_id"]): spec
+        for spec in frozen_model_specs(model_root, len(rows))
+    }
     for short_name, horizon, fraction, directory_name in MODEL_CONFIGS:
         directory = model_root / directory_name
         model_path = directory / "natural_technical_context_classifier.txt"
@@ -157,14 +202,7 @@ def score_models(rows: list[dict[str, Any]], model_root: Path, decision_date: st
         )[:count]
         model_id = f"ai_semiconductor_{short_name}_frozen_20260731"
         model_hash = sha256(model_path)
-        manifests.append({
-            "model_id": model_id,
-            "horizon_minutes": horizon,
-            "daily_fraction": fraction,
-            "daily_candidate_count": count,
-            "model_sha256": model_hash,
-            "training_report_sha256": sha256(report_path),
-        })
+        manifests.append(dict(frozen_specs[model_id]))
         for rank, row in enumerate(ranked, 1):
             observations.append({
                 "model_id": model_id,
@@ -207,27 +245,31 @@ def main() -> None:
         for line in args.symbols_file.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
-    rows = merge_inputs(
-        read_jsonl(args.technical), read_jsonl(args.premarket),
-        read_jsonl(args.call_history), args.decision_date, expected_symbols,
-    )
-    observations, models = score_models(rows, args.model_root, args.decision_date)
+    models = frozen_model_specs(args.model_root, len(expected_symbols))
     requested_manifest = {
         "status": "frozen",
         "research_only": True,
         "execution_enabled": False,
-        "universe_size": len(rows),
+        "universe_size": len(expected_symbols),
         "universe_sha256": sha256(args.symbols_file),
         "decision_time": "09:25 ET after premarket cutoff",
         "entry_reference": "09:30 ET bar open",
         "models": models,
     }
-    if args.manifest.exists():
-        if json.loads(args.manifest.read_text(encoding="utf-8")) != requested_manifest:
-            raise ValueError("frozen manifest mismatch")
-    else:
-        args.manifest.parent.mkdir(parents=True, exist_ok=True)
-        args.manifest.write_text(json.dumps(requested_manifest, indent=2) + "\n", encoding="utf-8")
+    # Freeze model identity before reading session inputs so a missing or
+    # timing-invalid session cannot leave the research contract undefined.
+    ensure_frozen_manifest(args.manifest, requested_manifest)
+    rows = merge_inputs(
+        read_jsonl(args.technical), read_jsonl(args.premarket),
+        read_jsonl(args.call_history), args.decision_date, expected_symbols,
+    )
+    observations, scored_models = score_models(
+        rows,
+        args.model_root,
+        args.decision_date,
+    )
+    if scored_models != models:
+        raise ValueError("scored model identities differ from frozen manifest")
     additions = append_unique(args.journal, observations)
     print(json.dumps({
         "status": "complete",
