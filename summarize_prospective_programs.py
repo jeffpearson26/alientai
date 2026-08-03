@@ -12,7 +12,11 @@ from typing import Any
 
 JOURNALS = {
     "nasdaq100_five_session": "nasdaq100_prospective/journal.jsonl",
+    "nasdaq100_five_session_outcomes": "nasdaq100_prospective/outcomes.jsonl",
     "nasdaq80_champion": "nasdaq80_champion_prospective/journal.jsonl",
+    "nasdaq80_champion_outcomes": (
+        "nasdaq80_champion_prospective/outcomes.jsonl"
+    ),
     "ai_semiconductor_five_session": (
         "ai_semiconductor_premarket_prospective_journal.jsonl"
     ),
@@ -23,6 +27,9 @@ JOURNALS = {
         "ai_semiconductor_intraday_prospective_outcomes.jsonl"
     ),
     "pick_competition": "pick_competition_journal.jsonl",
+    "pick_competition_intraday_outcomes": (
+        "pick_competition_intraday_outcomes.jsonl"
+    ),
 }
 
 

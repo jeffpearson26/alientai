@@ -32,6 +32,9 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         self.assertEqual(
             programs["contextual_options_five_session"]["status"], "missing"
         )
+        self.assertFalse(
+            programs["pick_competition_intraday_outcomes"]["exists"]
+        )
 
     def test_counts_models_dates_statuses_and_participants(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -62,6 +65,18 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                         "pick_count": 2,
                         "picks": ["AAA", "BBB"],
                         "status": "frozen_pending",
+                    }
+                ],
+            )
+            write_jsonl(
+                root / "pick_competition_intraday_outcomes.jsonl",
+                [
+                    {
+                        "participant": "Jeff",
+                        "decision_date": "2026-08-03",
+                        "symbol": "AAA",
+                        "horizon": "20m",
+                        "status": "complete_unmanaged",
                     }
                 ],
             )
@@ -100,6 +115,14 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
             ["AAA", "BBB"],
         )
         self.assertEqual(competition["unique_symbols"], 2)
+        competition_outcomes = programs[
+            "pick_competition_intraday_outcomes"
+        ]
+        self.assertEqual(competition_outcomes["observations"], 1)
+        self.assertEqual(
+            competition_outcomes["status_counts"],
+            {"complete_unmanaged": 1},
+        )
         contextual = programs["contextual_options_five_session"]
         self.assertEqual(contextual["completed_signals"], 5)
         self.assertEqual(contextual["distinct_decision_dates"], 1)
