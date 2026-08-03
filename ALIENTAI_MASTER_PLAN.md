@@ -103,10 +103,14 @@ Verified blockers and state on August 2:
 - Alpha Vantage July 31 historical option chains completed for all 17 symbols
   with zero unavailable or failed requests. The compiled option and
   prior-session call-feature panels each contain the same exact 17 symbols.
-- The continuous research automation remains active at 06:26 and 08:26 Pacific.
-  Its only unavoidable morning dependency is a fresh Alpha Vantage response
-  containing all 17 current-session premarket series through exactly 09:25
-  Eastern, followed by complete 09:30-10:25 bars for outcomes.
+- The continuous research automation now runs at 05:26, 06:26, 08:26, and
+  14:26 Pacific on market weekdays. It advances the frozen daily journals
+  pre-open, scores the six frozen intraday models after the 09:25 Eastern
+  cutoff, evaluates complete intraday outcomes, and advances matured daily
+  outcomes after the close. It preserves sequential cohorts indefinitely and
+  cannot retune or trade. Its only unavoidable intraday dependency is a fresh
+  Alpha Vantage response containing all 17 current-session premarket series
+  through exactly 09:25 Eastern, followed by complete 09:30-10:25 bars.
 - Four conflicting legacy Windows tasks scheduled from 06:00 through 06:31
   Pacific were disabled: Morning Research, V2 Server Start, Daily Mover
   Universe Scan, and V2 Engine Start. This preserves the research-only boundary

@@ -52,11 +52,15 @@ Inspect live state rather than assuming these counts remain current. Do not repr
   `ai_semiconductor_call_features_2026-07-31.jsonl` each contain the exact
   17-symbol frozen universe with zero missing rows. The July 31 Alpha Vantage
   option collection completed all 17 requests with zero unavailable/failed.
-  The active 06:26/08:26 Pacific automation must still fail closed unless Alpha
-  Vantage supplies all 17 current-session premarket series through exactly
-  09:25 Eastern and complete outcome bars. Four legacy 06:00-06:31 Windows
-  tasks were disabled to prevent API contention and accidental engine/server
-  startup. No settings, model, or trading state changed.
+  The active automation now runs at 05:26/06:26/08:26/14:26 Pacific on market
+  weekdays. It advances the frozen daily programs pre-open and after-close in
+  addition to the six-model intraday run, preserves append-only sequential
+  cohorts indefinitely, and must still fail closed unless each frozen source
+  and timing contract is satisfied. Alpha Vantage must supply all 17
+  current-session intraday series through exactly 09:25 Eastern and complete
+  outcome bars. Four legacy 06:00-06:31 Windows tasks were disabled to prevent
+  API contention and accidental engine/server startup. No settings, model, or
+  trading state changed.
 
 - The stratified, research-only Alpha Vantage news collector for 22,918 requests
   is currently stopped. Its verified manifest is `failed_closed` at 15,745
@@ -604,9 +608,10 @@ weights.
   a validation-frozen daily top-10% policy. It has only 20 held-out dates and is
   research-only. Preserve the 09:30-open to 10:25-bar-close timing contract.
 - Active automation `score-alientai-frozen-intraday-models` runs weekdays at
-  06:26 and 08:26 Pacific. The first phase scores all six frozen 20/60-minute
-  models after the 09:25 ET premarket cutoff; the second appends exact Alpha
-  Vantage outcomes after both horizons finish.
+  05:26, 06:26, 08:26, and 14:26 Pacific. It advances frozen daily journals
+  pre-open, scores all six frozen 20/60-minute models after the 09:25 ET
+  premarket cutoff, appends exact Alpha Vantage intraday outcomes after both
+  horizons finish, and advances matured daily outcomes after the close.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Prospective outcomes:
