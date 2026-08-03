@@ -635,6 +635,14 @@ weights.
   pre-open, scores all six frozen 20/60-minute models after the 09:25 ET
   premarket cutoff, appends exact Alpha Vantage intraday outcomes after both
   horizons finish, and advances matured daily outcomes after the close.
+- Before the 06:26 pass, run `audit_intraday_prospective_readiness.py` with the
+  exact prior-session technical panel, prior-session call-feature panel,
+  decision-date event requests, frozen 17-symbol file, and model root. The
+  audit fails closed unless all three panels contain the exact frozen universe,
+  the event cutoff is exactly 09:25 ET, every model report is research-only
+  with execution disabled, and all six model/report fingerprints can be
+  recorded. Store the dated JSON audit beside the other ignored research
+  evidence. This audit does not replace the journal's own timing checks.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Prospective outcomes:
