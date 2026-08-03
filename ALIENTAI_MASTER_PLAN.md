@@ -230,7 +230,8 @@ Planned work:
    missingness, and evaluate each feature family through chronological
    ablations. Opaque third-party scores, media recommendations, free-text
    rankings, unsupported price claims, and post-entry catalyst reactions are
-   not labels or ground truth.
+   not labels or ground truth. The complete frozen proposal is in
+   `FUTURE_AI_SEMICONDUCTOR_MULTI_HORIZON_MODEL.md`.
 
 Dependencies: Phases 2 and 3.
 
@@ -608,7 +609,10 @@ feature-family ablation order, chronological splits, and promotion gates.
   design. The narrative's rankings, opaque third-party scores, current price
   claims, and recommendations are not accepted as training labels or verified
   facts. No model, threshold, universe, collector, setting, or execution
-  behavior changed.
+  behavior changed. Jeff then supplied the underlying data-family and
+  horizon-matching logic; it is preserved in
+  `FUTURE_AI_SEMICONDUCTOR_MULTI_HORIZON_MODEL.md` as a pre-registered future
+  design with separate 1/5/20-session targets and staged ablations.
 - 2026-07-27: Added and tested an isolated multi-horizon uptrend-pullback LightGBM experiment using 135,713 cost-adjusted S&P observations from 483 local Schwab histories. The design required positive 20/63/126-session slopes and price above the 126-session average, froze model cutoffs on validation, and opened the untouched 2022-12-03+ test only once. It failed to generalize: the two-day frozen test slice averaged -0.064428% net with 48.05% wins (1,028 rows), while the five-day frozen test slice averaged -0.055000% with 47.62% wins (1,136 rows). The five-day validation gain (+0.446571%, 54.70% wins) vanished out of sample. Status remains `RESEARCH_HOLD`; do not tune this formulation on the observed test or connect it to execution.
 - 2026-07-27: Corrected the contextual unusual-call portfolio risk measurement without deleting its conservative legacy metric. The prior cohort curve compounded each exit-date average as 100% account exposure. The tested simulator now price-anchors every trade to the exact stored entry close and label-implied exit close, marks every open position to market each day, limits each new position to one of five slots and available cash, leaves unused slots in cash, never borrows, and subtracts the stated cost. Every selected trade reconciles to its stored return label with zero reported error. At the frozen top-quarter rule, all three existing chronological splits pass the capital-scaled research gate: 40% split 59 signals, +2.439161% mean net, 55.93% wins, +31.006419% portfolio return and -9.883183% drawdown; 50% split 49 signals, +2.420582%, 57.14% wins, +25.073189% portfolio return and -9.883183% drawdown; 60% split 39 signals, +1.704715%, 51.28% wins, +13.611174% portfolio return and -10.757040% drawdown. These are retrospective robustness results from an already explored archive, not authorization for paper/live trading. The next requirement is the existing frozen prospective shadow protocol.
 - 2026-07-27: Refreshed the Schwab token through its existing refresh-token flow and append-only added exactly one newer candle to each of 483 local S&P histories, with zero provider failures and no historical rewrites. Re-evaluated the frozen July-21 five-candidate pilot from Schwab only: each candidate now has two later sessions, so all five remain pending and the prospective gate remains `RESEARCH_HOLD` with zero completed outcomes. Do not aggregate the interim returns or backdate a new prospective payload; three additional later sessions are still required for this pilot.

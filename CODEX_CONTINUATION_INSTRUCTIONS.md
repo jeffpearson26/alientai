@@ -550,6 +550,13 @@ opaque AI scores, unsupported price targets, or post-entry information. This
 design is deferred and research-only; it does not alter any active model,
 prospective journal, paper setting, or execution path.
 
+The detailed feature contract, horizon-specific hypotheses, leakage controls,
+ablation order, evaluation metrics, and promotion boundary are frozen in
+`FUTURE_AI_SEMICONDUCTOR_MULTI_HORIZON_MODEL.md`. Use that document rather than
+reconstructing the design from chat. Jeff's named recommendations remain
+hypothesis context only and must never become labels or preferential ticker
+weights.
+
 # 2026-07-31 AI/Semiconductor catalyst checkpoint
 
 - Alpha Vantage event-news archive:
