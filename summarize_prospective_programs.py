@@ -32,6 +32,15 @@ JOURNALS = {
     ),
 }
 
+OUTCOME_EVALUATION_SUMMARIES = {
+    "nasdaq100_five_session_outcomes": (
+        "nasdaq100_prospective/outcome_summary.json"
+    ),
+    "nasdaq80_champion_outcomes": (
+        "nasdaq80_champion_prospective/outcome_summary.json"
+    ),
+}
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
@@ -130,6 +139,32 @@ def summarize_journal(
     return result
 
 
+def summarize_outcome_evaluation(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {
+            "exists": False,
+            "path": str(path),
+            "complete_records": 0,
+            "pending_records": 0,
+            "pending_status_counts": {},
+        }
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    records = list(payload.get("records") or [])
+    pending = list(payload.get("pending") or [])
+    pending_statuses = Counter(
+        str(row.get("status") or "unspecified")
+        for row in pending
+        if isinstance(row, dict)
+    )
+    return {
+        "exists": True,
+        "path": str(path),
+        "complete_records": len(records),
+        "pending_records": len(pending),
+        "pending_status_counts": dict(sorted(pending_statuses.items())),
+    }
+
+
 def latest_contextual_gate(root: Path) -> dict[str, Any]:
     paths = sorted(root.glob("contextual_options_prospective_gate_*.json"))
     if not paths:
@@ -192,7 +227,13 @@ def build_summary(root: Path, generated_at: datetime | None = None) -> dict[str,
     programs = []
     for name, relative in JOURNALS.items():
         path = root / relative
-        programs.append(summarize_journal(name, path, load_jsonl(path)))
+        program = summarize_journal(name, path, load_jsonl(path))
+        evaluation_relative = OUTCOME_EVALUATION_SUMMARIES.get(name)
+        if evaluation_relative:
+            program["evaluation"] = summarize_outcome_evaluation(
+                root / evaluation_relative
+            )
+        programs.append(program)
     programs.append(latest_contextual_gate(root))
     programs.append(latest_intraday_gate(root))
     return {

@@ -70,6 +70,22 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                     }
                 ],
             )
+            (
+                root / "nasdaq100_prospective/outcome_summary.json"
+            ).write_text(
+                json.dumps(
+                    {
+                        "records": [{"symbol": "AAA"}],
+                        "pending": [
+                            {
+                                "symbol": "BBB",
+                                "status": "pending_candle_coverage",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
             write_jsonl(
                 root / "pick_competition_journal.jsonl",
                 [
@@ -139,6 +155,20 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         nasdaq_outcomes = programs["nasdaq100_five_session_outcomes"]
         self.assertEqual(nasdaq_outcomes["unique_dates"], 1)
         self.assertEqual(nasdaq_outcomes["latest_date"], "2026-08-03")
+        self.assertEqual(
+            nasdaq_outcomes["evaluation"],
+            {
+                "exists": True,
+                "path": str(
+                    root / "nasdaq100_prospective/outcome_summary.json"
+                ),
+                "complete_records": 1,
+                "pending_records": 1,
+                "pending_status_counts": {
+                    "pending_candle_coverage": 1
+                },
+            },
+        )
         competition = programs["pick_competition"]
         self.assertEqual(
             competition["participants"]["Jeff"]["latest_picks"],
