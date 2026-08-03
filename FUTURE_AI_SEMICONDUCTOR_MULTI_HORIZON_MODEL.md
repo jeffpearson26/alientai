@@ -1,11 +1,12 @@
 # Future AI/Semiconductor Multi-Horizon Catalyst Model
 
-Status: `DEFERRED_RESEARCH_DESIGN`
+Status: `PARTIAL_V1_BUILT_RESEARCH_ONLY`
 
-This document preserves Jeff's August 3 model hypothesis. It does not train a
-model, select a security, create an order, or alter an active prospective
-study. Activation remains blocked while the August 2 priority prospective
-programs have sparse evidence.
+This document preserves Jeff's August 3 model hypothesis. A partial V1 was
+built on August 3 using only the feature families with defensible historical
+point-in-time coverage. Its results and explicit missing families are recorded
+in `AI_SEMICONDUCTOR_MULTI_HORIZON_CATALYST_REPORT_20260803.md`. It does not
+select a security, create an order, or alter an active prospective study.
 
 ## Objective
 

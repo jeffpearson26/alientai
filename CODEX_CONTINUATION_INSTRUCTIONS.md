@@ -624,6 +624,19 @@ reconstructing the design from chat. Jeff's named recommendations remain
 hypothesis context only and must never become labels or preferential ticker
 weights.
 
+On 2026-08-03 Jeff explicitly activated this design. Partial V1 is complete:
+`build_ai_semiconductor_multi_horizon_panel.py` produced 1,694 point-in-time
+rows with separate 1/5/20-session labels, and
+`train_ai_semiconductor_multi_horizon_catalyst.py` ran fifteen nested,
+chronological, validation-locked ablations. Full results are in
+`AI_SEMICONDUCTOR_MULTI_HORIZON_CATALYST_REPORT_20260803.md`. Preserve the
+one- and five-session technical+premarket candidates without retuning. Do not
+claim that unusual calls, the analyst proxy, or short interest helped in this
+run, and reject the negative 20-session build. Missing historical
+fundamentals/guidance, catalyst-calendar, structured analyst, general-news, and
+industry-demand families remain separate future data work. No engine,
+settings, paper, or live-trading change is authorized.
+
 # 2026-07-31 AI/Semiconductor catalyst checkpoint
 
 - Alpha Vantage event-news archive:
