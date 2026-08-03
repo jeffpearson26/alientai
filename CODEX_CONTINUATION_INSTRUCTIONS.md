@@ -643,6 +643,15 @@ weights.
   with execution disabled, and all six model/report fingerprints can be
   recorded. Store the dated JSON audit beside the other ignored research
   evidence. This audit does not replace the journal's own timing checks.
+- Current-session 09:25 and 10:25 snapshots must use
+  `download_alpha_vantage_matched_premarket.py --entitlement realtime
+  --current-date YYYY-MM-DD`. The historical/default mode deliberately supplies
+  no entitlement and, when a month is specified, can lag by a completed
+  session; it is therefore forbidden for a same-session prospective decision.
+  Realtime mode omits `month`, freezes its date and entitlement in the
+  resumable manifest, refuses to run before the event cutoff, and must use a
+  separate dated output directory for the later outcome snapshot. Fail closed
+  if the account lacks realtime entitlement or exact bars are unavailable.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Prospective outcomes:
