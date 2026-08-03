@@ -46,7 +46,27 @@ Inspect live state rather than assuming these counts remain current. Do not repr
 
 ### Current runtime handoff (August 2)
 
-- One stratified, research-only Alpha Vantage news collector is active for 22,918 requests across 48 deterministic dates at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_stratified_48_20260730`. It was safely resumed on August 2 after two interrupted runs left stale manifest status. The latest controlled resume began from 11,246 completed, zero unavailable, and zero failed after verifying no matching Python process and more than 900 GB free on D:. Do not trust the status string alone: completion requires `completed + unavailable == 22,918` and zero failed requests. The visible launcher/worker Python pair is one process tree, not duplicate collectors. Do not start a duplicate collector or make competing Alpha Vantage quote calls while it runs.
+- August 3 morning preflight is complete for every input that can exist before
+  the live session. `ai_semiconductor_technical_2026-07-31.jsonl`,
+  `ai_semiconductor_option_features_2026-07-31.jsonl`, and
+  `ai_semiconductor_call_features_2026-07-31.jsonl` each contain the exact
+  17-symbol frozen universe with zero missing rows. The July 31 Alpha Vantage
+  option collection completed all 17 requests with zero unavailable/failed.
+  The active 06:26/08:26 Pacific automation must still fail closed unless Alpha
+  Vantage supplies all 17 current-session premarket series through exactly
+  09:25 Eastern and complete outcome bars. Four legacy 06:00-06:31 Windows
+  tasks were disabled to prevent API contention and accidental engine/server
+  startup. No settings, model, or trading state changed.
+
+- The stratified, research-only Alpha Vantage news collector for 22,918 requests
+  is currently stopped. Its verified manifest is `failed_closed` at 15,745
+  completed, 3 unavailable, and 1 failed request
+  (`AZO|2026-04-27T20:00:00+00:00`) after a credential-redacted
+  `ChunkedEncodingError`; no matching Python process exists. It is not required
+  by the August 3 six-model intraday run. Do not restart it before that run or
+  blindly resume it: first inspect the manifest/logs, preserve the completed
+  keys, verify no duplicate, and treat completion only as
+  `completed + unavailable == 22,918` with zero failures.
 - The broad archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026` remains intentionally paused and must not be resumed. After the stratified collector truly completes, compile its features, exact-key join them to its own `requests.jsonl`, and run the timing/coverage audit before specifying any chronological ablation.
 - The research-only prospective pick competition is frozen in `PICK_COMPETITION_RULES.md`. `record_pick_competition.py` journals zero-to-five immutable picks before 09:25 ET from the exact 101-symbol Nasdaq universe. Its pure outcome scorer requires explicit timestamped price facts, keeps missing horizons pending, subtracts 0.25% round-trip cost, and never infers a stop from a later close. It has no paper/live order path.
 - No Uvicorn/Python application server is currently listening on port 8010. The preserved settings still have stock paper trading enabled and option paper buying disabled. Do not restart casually: first perform the read-only restart review in the master plan, preserve positions and limits, verify stale payloads remain `AVOID`, start through the loopback-only launcher, and retain an immediate rollback path. Do not change `data_v2/v2_settings.json`.

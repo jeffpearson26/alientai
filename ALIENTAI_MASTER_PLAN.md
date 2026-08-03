@@ -95,6 +95,31 @@ Verified blockers and state on August 2:
   restart the server until the restart boundary checks enabled engines, payload
   freshness, positions, limits, and rollback behavior.
 
+### August 3 intraday prospective readiness
+
+- The prior-session inputs for the six frozen AI/semiconductor intraday models
+  are prepared for the August 3 decision date. The July 31 technical panel has
+  all 17 frozen-universe symbols with zero missing rows.
+- Alpha Vantage July 31 historical option chains completed for all 17 symbols
+  with zero unavailable or failed requests. The compiled option and
+  prior-session call-feature panels each contain the same exact 17 symbols.
+- The continuous research automation remains active at 06:26 and 08:26 Pacific.
+  Its only unavoidable morning dependency is a fresh Alpha Vantage response
+  containing all 17 current-session premarket series through exactly 09:25
+  Eastern, followed by complete 09:30-10:25 bars for outcomes.
+- Four conflicting legacy Windows tasks scheduled from 06:00 through 06:31
+  Pacific were disabled: Morning Research, V2 Server Start, Daily Mover
+  Universe Scan, and V2 Engine Start. This preserves the research-only boundary
+  and prevents API contention or an accidental engine restart.
+- The separate stratified-news collector is stopped fail-closed at 15,745
+  completed, 3 unavailable, and 1 failed request
+  (`AZO|2026-04-27T20:00:00+00:00`) after a redacted `ChunkedEncodingError`.
+  It is not a dependency of the August 3 six-model intraday run. Do not restart
+  it before the morning run or without first rechecking its manifest and logs.
+- Verification evidence: 13 targeted intraday/options tests passed; the seven
+  involved scripts compiled; `git diff --check` passed. No settings, trading
+  state, model artifact, or engine code changed.
+
 ## Ordered master roadmap
 
 ### Phase 0 - Governance, continuity, and safety
