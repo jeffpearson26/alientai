@@ -58,6 +58,7 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
   - untracked `overnight_training_queue_summary.json`
 - AlienTAI application and engine launch processes were running when this plan was created. Live state must always be rechecked.
 - Data-source policy (Jeff direction, 2026-07-30): use Alpha Vantage as the default source for all new collection, feature construction, and research experiments. Existing Schwab-based artifacts, including frozen prospective studies, remain source-isolated and must finish or remain pending against their original Schwab archive; never splice Alpha Vantage candles into them.
+- 2026-08-03: Jeff explicitly approved a separate Schwab late-entry exception for the 17-symbol AI/semiconductor intraday experiment after Alpha Vantage realtime and delayed entitlements failed. Schwab supplied all 17 extended-hours histories. The executable contract waits for the 09:25 candle to complete, scores from 09:30 through 09:34:59 ET, enters at 09:35, and exits the 60-minute horizon at the 10:30 bar close. Validation-only fraction selection advanced the 60-minute premarket and calls variants to future-only research; their untouched tests were respectively 56 trades / 51.79% wins / +0.389522% mean and 28 trades / 57.14% wins / +0.632541% mean after 0.25% cost. This is promising but small-sample research, not execution authorization. The original Alpha Vantage-frozen study and competition remain unchanged.
 
 ### August 2 verified priority reset
 

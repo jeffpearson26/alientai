@@ -193,7 +193,7 @@ def read_symbols(path: Path, limit: int = 0) -> List[str]:
     for chunk in raw.replace("\n", ",").replace("\r", ",").split(","):
         symbol = chunk.strip().upper()
 
-        if not symbol:
+        if not symbol or symbol.startswith("#"):
             continue
 
         # Keep simple stock/ETF symbols. Skip weird blank/header rows.

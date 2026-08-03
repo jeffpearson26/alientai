@@ -742,3 +742,11 @@ result: no option contract may be selected without the predeclared 09:25 stock
 signal. Do not silently replace Alpha Vantage premarket inputs with Schwab;
 that would be a new, source-separated experiment requiring an explicit
 decision and validation.
+
+Jeff explicitly authorized that new source-separated experiment on 2026-08-03.
+`AI_SEMICONDUCTOR_LATE_ENTRY_SCHWAB_REPORT_20260803.md` is its controlling
+record. It uses a completed Schwab 09:25 interval-start candle, scores only
+from 09:30 through 09:34:59 ET, enters at the 09:35 bar open, and exits at the
+10:30 bar close observable at 10:35. Only the frozen 60-minute premarket and
+calls variants advance to future-only research. Never backfill August 3,
+replace an existing Alpha Vantage-frozen result, or create an order.
