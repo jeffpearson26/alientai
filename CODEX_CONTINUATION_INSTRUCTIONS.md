@@ -637,6 +637,17 @@ fundamentals/guidance, catalyst-calendar, structured analyst, general-news, and
 industry-demand families remain separate future data work. No engine,
 settings, paper, or live-trading change is authorized.
 
+Jeff then clarified the exact narrative logic he intended. Use
+`AI_SEMICONDUCTOR_NARRATIVE_FEATURE_CONTRACT.md` and
+`alientai_v2/research/ai_semiconductor_narrative_features.py` for that
+extension. The thesis is accelerating fundamentals/guidance plus a pullback
+inside an intact trend plus role-specific AI demand plus a horizon-aligned
+known catalyst. The source narrative's named picks, prices, media lists, and
+opaque scores are expressly excluded. Do not train the full extension until
+the required timestamped fundamentals, estimates, catalyst calendar, analyst,
+and vintage industry-demand records exist with adequate chronological
+coverage.
+
 # 2026-07-31 AI/Semiconductor catalyst checkpoint
 
 - Alpha Vantage event-news archive:

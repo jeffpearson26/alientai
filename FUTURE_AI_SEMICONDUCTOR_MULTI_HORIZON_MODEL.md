@@ -7,6 +7,8 @@ built on August 3 using only the feature families with defensible historical
 point-in-time coverage. Its results and explicit missing families are recorded
 in `AI_SEMICONDUCTOR_MULTI_HORIZON_CATALYST_REPORT_20260803.md`. It does not
 select a security, create an order, or alter an active prospective study.
+The exact external ranking narrative Jeff meant is normalized—without its
+named picks or opaque scores—in `AI_SEMICONDUCTOR_NARRATIVE_FEATURE_CONTRACT.md`.
 
 ## Objective
 
