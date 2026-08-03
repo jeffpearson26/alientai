@@ -141,6 +141,12 @@ Verified blockers and state on August 2:
   dates, models, statuses, symbols, completed contextual outcomes, and gate
   failures without scoring, selecting, retuning, or trading. Use it at each
   operational handoff so sparse evidence cannot be mistaken for validation.
+- `build_prospective_event_requests.py` now creates the exact 17-symbol request
+  list for each frozen intraday decision date and refuses any timestamp other
+  than 09:25 Eastern on that date. It is research-only request preparation; it
+  cannot fetch data, score a model, or trade. The August 3 request list is
+  prepared before the live cutoff so the provider call need not construct
+  ad-hoc event metadata during the time-sensitive run.
 
 ## Ordered master roadmap
 
