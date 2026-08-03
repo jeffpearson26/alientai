@@ -551,6 +551,15 @@ The same basket audit was safely reproduced on six prior Nasdaq artifacts whose 
 
 `journal_nasdaq_score_baskets.py` is the forward-only companion study for score-percentile bins. It reuses only the two frozen complete-101 Nasdaq artifacts, computes each model's validation-score boundaries at 0/50/60/70/80/90/100, and appends all 101 scores per model for a fresh complete daily universe. It records model/report fingerprints, the score percentile basket, same-day score rank (not a probability), and `execution_decision: AVOID`; it cannot place paper or live orders. It refuses a panel older than one calendar day. As of July 29, a dry run scored 202 rows but made no output directory, manifest, or journal write because the newest common local session was July 27 (two calendar days old). When the next Schwab refresh makes a fresh complete common date available, run this journal once; never backfill July 27 after its date has been observed.
 
+`evaluate_nasdaq_prospective_outcomes.py` is the append-only outcome path for
+the frozen Nasdaq journals. It reads the same
+`data_v2\sp500_daily_schwab_max_history` source, verifies each recorded entry
+close has not changed, translates the legacy stored date to the actual session,
+requires the fifth later stored candle, subtracts the frozen 0.25% cost, and
+fingerprints each source file. Before the 2026-08-03 close, all four July-27
+Nasdaq-101 observations correctly remain `pending_candle_coverage`; refresh the
+frozen Schwab source after the close before evaluating them.
+
 Jeff requested an alternate source while the Schwab panel lagged. `download_alpha_vantage_daily_panel.py` completed an independent 101/101 compact-daily archive, zero failures, at `D:\AlientAI\Data\AlphaVantage_2026\nasdaq100_score_baskets_daily_20260729`; all 101 share common daily coverage through July 29. `build_alpha_vantage_daily_technical_panel.py` produced its 101-row, zero-missing July-29 panel in that same folder. This archive is explicitly source-separated and cannot extend, evaluate, or replace the Schwab-only prospective journal. Use it only as current coverage backup unless a separately tested source-consistency protocol is approved.
 
 `score_alpha_vantage_nasdaq_snapshot.py` is the explicit source-shift diagnostic for that panel. After acquiring QQQ from the same Alpha Vantage endpoint, it scored both frozen Schwab-trained complete-101 Nasdaq models across all 101 July-29 rows (202 observations) without writing an order, journal entry, or Schwab artifact. Both models rank NBIS first; the baseline top five are NBIS/MU/WDC/TER/CRWV and the QQQ-relative top five are NBIS/WDC/MU/CRWV/SNDK. The output remains under the Alpha Vantage archive and declares `execution_decision: AVOID`. Do not call these scores a model comparison or use them to pick a paper/live trade: they only demonstrate current model agreement under a changed data source.
