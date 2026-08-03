@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-07-30 Pacific time
+Updated: 2026-08-02 Pacific time
 
 ## Mission
 
@@ -44,9 +44,11 @@ Verified on 2026-07-21 after the master queue completed:
 
 Inspect live state rather than assuming these counts remain current. Do not reproduce the sensitive legacy log line.
 
-### Current runtime handoff (July 30)
+### Current runtime handoff (August 2)
 
-- One stratified, research-only Alpha Vantage news collector is active for 22,918 requests across 48 deterministic dates at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_stratified_48_20260730`. Its manifest was still `running` with 1,803 completed, zero unavailable, and zero failed at the last check. Do not start a duplicate collector or make competing Alpha Vantage quote calls while it runs.
+- One stratified, research-only Alpha Vantage news collector is active for 22,918 requests across 48 deterministic dates at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_stratified_48_20260730`. It was safely resumed on August 2 after its manifest had been marked complete at an incomplete 9,800 requests. Do not trust the status string alone: completion requires `completed + unavailable == 22,918` and zero failed requests. Do not start a duplicate collector or make competing Alpha Vantage quote calls while it runs.
+- The broad archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_event_news_2026` remains intentionally paused and must not be resumed. After the stratified collector truly completes, compile its features, exact-key join them to its own `requests.jsonl`, and run the timing/coverage audit before specifying any chronological ablation.
+- The research-only prospective pick competition is frozen in `PICK_COMPETITION_RULES.md`. `record_pick_competition.py` journals zero-to-five immutable picks before 09:25 ET from the exact 101-symbol Nasdaq universe. Its pure outcome scorer requires explicit timestamped price facts, keeps missing horizons pending, subtracts 0.25% round-trip cost, and never infers a stop from a later close. It has no paper/live order path.
 - The currently running Uvicorn process is still the pre-change build bound to `0.0.0.0:8010`. Its paper engine remains enabled with five existing positions, but its last scan failed because the old Schwab refresh token is expired. Preserve those positions and do not change `data_v2/v2_settings.json`.
 - Schwab was reauthorized on July 30 for the local daily research path. The frozen July-21 contextual-options pilot now has all five later sessions through July 28 and is complete: 5 signals, 1 date, 80.00% post-cost wins, +1.894382% mean net return, +3.080338% median, and -13.815280% worst trade. This is not enough evidence to promote: the fixed prospective gate remains `RESEARCH_HOLD` for minimum sample/date diversity and fifth-percentile tail. Do not tune from these five outcomes or change paper settings.
 - A July-30 fixed historical holdout check used an early-2026 calibration boundary and a later-2026 holdout for the already specified unusual-call plus top-5% technical-context rule. The later holdout contained 94 signals across 41 exit dates and showed +1.482190% post-cost mean, +0.847123% median, and 54.2553% wins, but its legacy full-notional cohort drawdown was -25.957771%. It remains research-only and must not select a new threshold; the result is support for continuing the prospective journal, not a promotion.
