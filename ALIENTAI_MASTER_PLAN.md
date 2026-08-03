@@ -135,6 +135,12 @@ Verified blockers and state on August 2:
   request or infer additional daily Jeff selections and do not revise the
   basket using later information. Preserve this asymmetry explicitly in
   reporting rather than describing the fixed basket as daily reselection.
+- `summarize_prospective_programs.py` now produces one read-only status artifact
+  across every frozen journal, the contextual-options gate, and all competition
+  participants. It reports missing ledgers explicitly and counts observations,
+  dates, models, statuses, symbols, completed contextual outcomes, and gate
+  failures without scoring, selecting, retuning, or trading. Use it at each
+  operational handoff so sparse evidence cannot be mistaken for validation.
 
 ## Ordered master roadmap
 
