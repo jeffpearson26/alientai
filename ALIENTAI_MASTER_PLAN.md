@@ -219,6 +219,18 @@ Planned work:
 6. Add a point-in-time lead-lag feature table. Test whether an abnormal move in one symbol adds information about another symbol at 1, 2, 3, 5, or 10 trading-day lags beyond the target's own history, broad market, sector, and known catalyst context.
 7. Preserve source provenance, availability timestamps, missingness indicators, and schema versions.
 8. Add tests for duplicate keys, row loss, timestamp leakage, unintended future joins, and invalid lead-lag look-ahead.
+9. Preserve a deferred AI/semiconductor multi-horizon catalyst design for
+   separate 1-, 5-, and 20-session targets. Candidate inputs are point-in-time
+   technical momentum/pullback/volatility and relative strength; premarket gap,
+   relative volume, and directional pressure through 09:25 ET; known earnings
+   proximity; publicly timestamped earnings/guidance, estimate revisions,
+   analyst actions, and news; broad/sector regime; and structured
+   supply-chain, memory, foundry, networking, and hyperscaler-capex context.
+   Use only facts available before the decision cutoff, retain explicit
+   missingness, and evaluate each feature family through chronological
+   ablations. Opaque third-party scores, media recommendations, free-text
+   rankings, unsupported price claims, and post-entry catalyst reactions are
+   not labels or ground truth.
 
 Dependencies: Phases 2 and 3.
 
@@ -461,6 +473,11 @@ monitor is not itself permission to create new paper orders.
 11. `COMPLETE 2026-07-23`: `audit_matched_catalyst_panel.py` verified the full matched catalyst panel has 18,326 unique keys, 13,473 unique symbol/date observations, no duplicate keys, no malformed/as-of-date-mismatched rows, and no news published after its recorded cutoff. It remains matched-case research only; 113 rows have no available option-chain detail and must retain missingness.
 12. Audit labels, feature availability, slippage, and cost assumptions before feature-family joins.
 13. After the data audit, create the two new research feature families: public unusual-options positioning around known catalysts, and point-in-time cross-symbol lead-lag relationships.
+14. `DEFERRED 2026-08-03`: retain the AI/semiconductor 1/5/20-session
+multi-horizon catalyst design in Phase 4, but do not train it while the three
+August 2 priority prospective programs remain sparse. Before any future run,
+freeze the universe, point-in-time cutoff, entry/exit contract, costs,
+feature-family ablation order, chronological splits, and promotion gates.
 
 ## Current blockers and decisions needed
 
@@ -585,6 +602,13 @@ monitor is not itself permission to create new paper orders.
   interrupted stratified-news collector was safely resumed, and application
   restart remains gated because the preserved paper setting is enabled while
   the server is currently stopped.
+- 2026-08-03: Jeff supplied an external AI/semiconductor ranking narrative and
+  asked that its logic be considered for a future model. The viable hypothesis
+  was preserved as a deferred, leakage-safe 1/5/20-session catalyst-context
+  design. The narrative's rankings, opaque third-party scores, current price
+  claims, and recommendations are not accepted as training labels or verified
+  facts. No model, threshold, universe, collector, setting, or execution
+  behavior changed.
 - 2026-07-27: Added and tested an isolated multi-horizon uptrend-pullback LightGBM experiment using 135,713 cost-adjusted S&P observations from 483 local Schwab histories. The design required positive 20/63/126-session slopes and price above the 126-session average, froze model cutoffs on validation, and opened the untouched 2022-12-03+ test only once. It failed to generalize: the two-day frozen test slice averaged -0.064428% net with 48.05% wins (1,028 rows), while the five-day frozen test slice averaged -0.055000% with 47.62% wins (1,136 rows). The five-day validation gain (+0.446571%, 54.70% wins) vanished out of sample. Status remains `RESEARCH_HOLD`; do not tune this formulation on the observed test or connect it to execution.
 - 2026-07-27: Corrected the contextual unusual-call portfolio risk measurement without deleting its conservative legacy metric. The prior cohort curve compounded each exit-date average as 100% account exposure. The tested simulator now price-anchors every trade to the exact stored entry close and label-implied exit close, marks every open position to market each day, limits each new position to one of five slots and available cash, leaves unused slots in cash, never borrows, and subtracts the stated cost. Every selected trade reconciles to its stored return label with zero reported error. At the frozen top-quarter rule, all three existing chronological splits pass the capital-scaled research gate: 40% split 59 signals, +2.439161% mean net, 55.93% wins, +31.006419% portfolio return and -9.883183% drawdown; 50% split 49 signals, +2.420582%, 57.14% wins, +25.073189% portfolio return and -9.883183% drawdown; 60% split 39 signals, +1.704715%, 51.28% wins, +13.611174% portfolio return and -10.757040% drawdown. These are retrospective robustness results from an already explored archive, not authorization for paper/live trading. The next requirement is the existing frozen prospective shadow protocol.
 - 2026-07-27: Refreshed the Schwab token through its existing refresh-token flow and append-only added exactly one newer candle to each of 483 local S&P histories, with zero provider failures and no historical rewrites. Re-evaluated the frozen July-21 five-candidate pilot from Schwab only: each candidate now has two later sessions, so all five remain pending and the prospective gate remains `RESEARCH_HOLD` with zero completed outcomes. Do not aggregate the interim returns or backdate a new prospective payload; three additional later sessions are still required for this pilot.

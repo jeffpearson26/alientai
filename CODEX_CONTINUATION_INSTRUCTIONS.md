@@ -521,6 +521,35 @@ Recent relevant commits:
 ## Communication with Jeff
 
 Jeff is not a programmer and benefits from concrete, short instructions. Lead with the result. If he must run something, provide one PowerShell block at a time and say exactly where to paste it. Prefer doing safe in-scope work directly. Explain failures plainly. Never imply that a research result guarantees profit.
+
+## Deferred AI/semiconductor multi-horizon catalyst design (August 3)
+
+Jeff asked to preserve the useful logic from an external AI/semiconductor
+ranking narrative for a future model. Treat the narrative only as hypothesis
+input, not as verified market data, a training label, or a recommendation.
+Several cited prices and opaque third-party rankings were unsupported or
+non-reproducible.
+
+If this design is activated after the current prospective priorities mature,
+pre-register separate 1-, 5-, and 20-session targets and use only
+point-in-time inputs available before the decision cutoff:
+
+- technical momentum, pullback, volatility, liquidity, and relative strength;
+- premarket gap, relative volume, and directional pressure through 09:25 ET;
+- known earnings proximity without using the later earnings reaction;
+- publicly timestamped earnings/guidance, estimate revisions, analyst actions,
+  and news;
+- broad-market and semiconductor-sector regime;
+- structured memory, foundry, networking, supply-chain, and hyperscaler-capex
+  context when provenance and historical availability can be verified.
+
+Require exact availability timestamps, explicit missingness, chronological
+embargoed splits, validation-frozen thresholds, realistic costs, and staged
+feature-family ablations. Do not use media picks, free-text recommendations,
+opaque AI scores, unsupported price targets, or post-entry information. This
+design is deferred and research-only; it does not alter any active model,
+prospective journal, paper setting, or execution path.
+
 # 2026-07-31 AI/Semiconductor catalyst checkpoint
 
 - Alpha Vantage event-news archive:
