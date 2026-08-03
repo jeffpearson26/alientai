@@ -23,6 +23,7 @@ HORIZON_BARS = {
     "20m": ("09:45:00", time(9, 50)),
     "60m": ("10:25:00", time(10, 30)),
 }
+STOP_LOSS_PCT = -5.0
 
 
 def sha256(path: Path) -> str:
@@ -51,6 +52,92 @@ def read_symbol_month(
         str(row.get("timestamp") or ""): row
         for row in rows
         if str(row.get("timestamp") or "").startswith(decision_date)
+    }
+
+
+def stop_managed_exit(
+    *,
+    rows: Mapping[str, Mapping[str, str]],
+    decision_date: str,
+    entry_price: float,
+    exit_bar_time: str,
+    unmanaged_exit_price: float,
+) -> dict[str, Any]:
+    threshold = entry_price * (1.0 + STOP_LOSS_PCT / 100.0)
+    entry_stamp = f"{decision_date} 09:30:00"
+    exit_stamp = f"{decision_date} {exit_bar_time}"
+    path = sorted(
+        (
+            (timestamp, row)
+            for timestamp, row in rows.items()
+            if entry_stamp <= timestamp <= exit_stamp
+        ),
+        key=lambda item: item[0],
+    )
+    expected = []
+    cursor = datetime.strptime(entry_stamp, "%Y-%m-%d %H:%M:%S")
+    final = datetime.strptime(exit_stamp, "%Y-%m-%d %H:%M:%S")
+    while cursor <= final:
+        expected.append(cursor.strftime("%Y-%m-%d %H:%M:%S"))
+        cursor += timedelta(minutes=5)
+    if [timestamp for timestamp, _ in path] != expected:
+        raise ValueError("stop path lacks exact entry-to-exit candle coverage")
+    for index, (timestamp, row) in enumerate(path):
+        bar_open = float(row["open"])
+        bar_low = float(row["low"])
+        if bar_open <= threshold:
+            observed = datetime.strptime(
+                timestamp, "%Y-%m-%d %H:%M:%S"
+            ).replace(tzinfo=EASTERN)
+            return {
+                "stop_applied": True,
+                "stop_managed_exit_price": bar_open,
+                "stop_managed_exit_at_utc": observed.astimezone(
+                    timezone.utc
+                ).isoformat(),
+                "stop_fill_rule": "observed_bar_open_gap",
+            }
+        if bar_low <= threshold:
+            if index + 1 < len(path):
+                next_timestamp, next_row = path[index + 1]
+                observed = datetime.strptime(
+                    next_timestamp, "%Y-%m-%d %H:%M:%S"
+                ).replace(tzinfo=EASTERN)
+                return {
+                    "stop_applied": True,
+                    "stop_managed_exit_price": float(next_row["open"]),
+                    "stop_managed_exit_at_utc": observed.astimezone(
+                        timezone.utc
+                    ).isoformat(),
+                    "stop_fill_rule": (
+                        "next_bar_open_after_completed_bar_crossing"
+                    ),
+                }
+            observed = (
+                datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+                .replace(tzinfo=EASTERN)
+                + timedelta(minutes=5)
+            )
+            return {
+                "stop_applied": True,
+                "stop_managed_exit_price": unmanaged_exit_price,
+                "stop_managed_exit_at_utc": observed.astimezone(
+                    timezone.utc
+                ).isoformat(),
+                "stop_fill_rule": "horizon_close_after_final_bar_crossing",
+            }
+    exit_observed = (
+        datetime.strptime(exit_stamp, "%Y-%m-%d %H:%M:%S")
+        .replace(tzinfo=EASTERN)
+        + timedelta(minutes=5)
+    )
+    return {
+        "stop_applied": False,
+        "stop_managed_exit_price": unmanaged_exit_price,
+        "stop_managed_exit_at_utc": exit_observed.astimezone(
+            timezone.utc
+        ).isoformat(),
+        "stop_fill_rule": "not_triggered",
     }
 
 
@@ -120,7 +207,7 @@ def build_outcomes(
             if str(symbol).strip()
         }
     )
-    prices: dict[str, tuple[float, float]] = {}
+    prices: dict[str, tuple[float, float, dict[str, Any]]] = {}
     for symbol in symbols:
         rows = read_symbol_month(archive, symbol, decision_date)
         entry = rows.get(f"{decision_date} 09:30:00")
@@ -133,7 +220,14 @@ def build_outcomes(
         exit_price = float(exit_row["close"])
         if entry_price <= 0 or exit_price <= 0:
             raise ValueError(f"invalid exact price for {symbol}")
-        prices[symbol] = (entry_price, exit_price)
+        managed = stop_managed_exit(
+            rows=rows,
+            decision_date=decision_date,
+            entry_price=entry_price,
+            exit_bar_time=exit_bar_time,
+            unmanaged_exit_price=exit_price,
+        )
+        prices[symbol] = (entry_price, exit_price, managed)
 
     exit_start = datetime.fromisoformat(
         f"{decision_date}T{exit_bar_time}"
@@ -146,7 +240,7 @@ def build_outcomes(
     for submission in selected:
         for symbol_value in submission.get("picks") or []:
             symbol = str(symbol_value).strip().upper()
-            entry_price, exit_price = prices[symbol]
+            entry_price, exit_price, managed = prices[symbol]
             output.append(
                 {
                     "round_id": submission["round_id"],
@@ -163,9 +257,19 @@ def build_outcomes(
                     "unmanaged_net_return_pct": post_cost_return_pct(
                         entry_price, exit_price
                     ),
-                    "stop_managed_status": (
-                        "pending_validated_high_resolution_stop_path"
+                    "stop_managed_exit_price": managed[
+                        "stop_managed_exit_price"
+                    ],
+                    "stop_managed_exit_at_utc": managed[
+                        "stop_managed_exit_at_utc"
+                    ],
+                    "stop_managed_net_return_pct": post_cost_return_pct(
+                        entry_price,
+                        managed["stop_managed_exit_price"],
                     ),
+                    "stop_applied": managed["stop_applied"],
+                    "stop_fill_rule": managed["stop_fill_rule"],
+                    "stop_managed_status": "complete_5minute_observable",
                     "source": (
                         "Alpha Vantage TIME_SERIES_INTRADAY "
                         f"{'realtime' if mode == 'current' else 'historical'}"
@@ -211,23 +315,39 @@ def append_unique(path: Path, outcomes: Iterable[Mapping[str, Any]]) -> int:
 
 
 def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
-    grouped: dict[tuple[str, str], list[float]] = defaultdict(list)
+    grouped: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
     for row in rows:
         if str(row.get("status")) != "complete_unmanaged":
             continue
         grouped[(str(row["participant"]), str(row["horizon"]))].append(
-            float(row["unmanaged_net_return_pct"])
+            (
+                float(row["unmanaged_net_return_pct"]),
+                float(row["stop_managed_net_return_pct"]),
+            )
         )
     records = []
-    for (participant, horizon), values in sorted(grouped.items()):
+    for (participant, horizon), pairs in sorted(grouped.items()):
+        unmanaged = [pair[0] for pair in pairs]
+        managed = [pair[1] for pair in pairs]
         records.append(
             {
                 "participant": participant,
                 "horizon": horizon,
-                "picks": len(values),
-                "equal_weight_basket_net_return_pct": sum(values) / len(values),
-                "median_pick_net_return_pct": median(values),
-                "winning_picks": sum(value > 0 for value in values),
+                "picks": len(pairs),
+                "unmanaged_equal_weight_basket_net_return_pct": (
+                    sum(unmanaged) / len(unmanaged)
+                ),
+                "unmanaged_median_pick_net_return_pct": median(unmanaged),
+                "unmanaged_winning_picks": sum(
+                    value > 0 for value in unmanaged
+                ),
+                "stop_managed_equal_weight_basket_net_return_pct": (
+                    sum(managed) / len(managed)
+                ),
+                "stop_managed_median_pick_net_return_pct": median(managed),
+                "stop_managed_winning_picks": sum(
+                    value > 0 for value in managed
+                ),
             }
         )
     return {

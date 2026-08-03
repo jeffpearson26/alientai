@@ -5,6 +5,7 @@ import gzip
 import json
 import tempfile
 import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from download_alpha_vantage_matched_premarket import archive_path
@@ -42,36 +43,24 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                 fieldnames=("timestamp", "open", "high", "low", "close", "volume"),
             )
             writer.writeheader()
-            writer.writerow(
-                {
-                    "timestamp": "2026-08-03 09:30:00",
-                    "open": 100,
-                    "high": 102,
-                    "low": 99,
-                    "close": 101,
-                    "volume": 10,
-                }
-            )
-            writer.writerow(
-                {
-                    "timestamp": "2026-08-03 09:45:00",
-                    "open": 101,
-                    "high": 103,
-                    "low": 100,
-                    "close": 102,
-                    "volume": 10,
-                }
-            )
-            writer.writerow(
-                {
-                    "timestamp": "2026-08-03 10:25:00",
-                    "open": 102,
-                    "high": 104,
-                    "low": 101,
-                    "close": 103,
-                    "volume": 10,
-                }
-            )
+            cursor = datetime(2026, 8, 3, 9, 30)
+            final = datetime(2026, 8, 3, 10, 25)
+            while cursor <= final:
+                stamp = cursor.strftime("%Y-%m-%d %H:%M:%S")
+                close = 102 if stamp.endswith("09:45:00") else 101
+                if stamp.endswith("10:25:00"):
+                    close = 103
+                writer.writerow(
+                    {
+                        "timestamp": stamp,
+                        "open": 100,
+                        "high": max(102, close),
+                        "low": 99,
+                        "close": close,
+                        "volume": 10,
+                    }
+                )
+                cursor += timedelta(minutes=5)
         return archive
 
     def submission(self) -> dict:
@@ -98,8 +87,10 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
         self.assertAlmostEqual(rows[0]["unmanaged_net_return_pct"], 2.75)
         self.assertEqual(
             rows[0]["stop_managed_status"],
-            "pending_validated_high_resolution_stop_path",
+            "complete_5minute_observable",
         )
+        self.assertFalse(rows[0]["stop_applied"])
+        self.assertAlmostEqual(rows[0]["stop_managed_net_return_pct"], 2.75)
 
     def test_refuses_snapshot_before_exit_candle_matures(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -139,6 +130,7 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                 "symbol": "AAA",
                 "horizon": "20m",
                 "unmanaged_net_return_pct": 1.0,
+                "stop_managed_net_return_pct": 0.5,
                 "status": "complete_unmanaged",
             },
             {
@@ -148,6 +140,7 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                 "symbol": "BBB",
                 "horizon": "20m",
                 "unmanaged_net_return_pct": -0.5,
+                "stop_managed_net_return_pct": -0.25,
                 "status": "complete_unmanaged",
             },
         ]
@@ -161,7 +154,48 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
         record = payload["records"][0]
         self.assertEqual(record["picks"], 2)
         self.assertAlmostEqual(
-            record["equal_weight_basket_net_return_pct"], 0.25
+            record["unmanaged_equal_weight_basket_net_return_pct"], 0.25
+        )
+        self.assertAlmostEqual(
+            record["stop_managed_equal_weight_basket_net_return_pct"], 0.125
+        )
+
+    def test_intrabar_stop_crossing_uses_next_bar_open(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = self.make_archive(
+                root, "2026-08-03T14:31:00+00:00"
+            )
+            path = archive_path(archive, "AAA", "2026-08")
+            with gzip.open(
+                path, "rt", encoding="utf-8", newline=""
+            ) as handle:
+                rows = list(csv.DictReader(handle))
+            by_timestamp = {row["timestamp"]: row for row in rows}
+            by_timestamp["2026-08-03 09:35:00"].update(
+                {"open": "99", "high": "100", "low": "94", "close": "96"}
+            )
+            by_timestamp["2026-08-03 09:40:00"].update(
+                {"open": "93", "high": "95", "low": "92", "close": "94"}
+            )
+            with gzip.open(
+                path, "wt", encoding="utf-8", newline=""
+            ) as handle:
+                writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
+                writer.writeheader()
+                writer.writerows(rows)
+            outcomes = build_outcomes(
+                submissions=[self.submission()],
+                archive=archive,
+                decision_date="2026-08-03",
+                horizon="20m",
+            )
+        row = outcomes[0]
+        self.assertTrue(row["stop_applied"])
+        self.assertEqual(row["stop_managed_exit_price"], 93)
+        self.assertEqual(
+            row["stop_fill_rule"],
+            "next_bar_open_after_completed_bar_crossing",
         )
 
 

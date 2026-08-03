@@ -41,13 +41,21 @@ remain pending, and a stop exit must come from a validated intraday price path;
 it is never inferred from a later closing price.
 
 `evaluate_pick_competition_intraday.py` is the append-only scorer for the
-unmanaged 20/60-minute tracks. It requires an Alpha Vantage current-mode,
-realtime-entitled manifest completed after the relevant exit candle, exact
-09:30 bar opens, and exact completed 09:45/10:25 bar closes. It fingerprints
-the source manifest, deduplicates by round/participant/date/symbol/horizon, and
-computes equal-weight participant baskets. It deliberately leaves every
-stop-managed result pending until a separately validated high-resolution stop
-path exists; it never infers a stop from the candle's later low or close.
+20/60-minute tracks. It accepts either a complete Alpha Vantage historical
+archive or a current-mode, realtime-entitled archive completed after the
+relevant exit candle. It requires exact 09:30 bar opens, exact completed
+09:45/10:25 bar closes, and every five-minute bar from entry through exit. It
+fingerprints the source manifest, deduplicates by
+round/participant/date/symbol/horizon, and computes equal-weight participant
+baskets.
+
+The stop-managed path is frozen before outcomes are observed. A gap through the
+-5% threshold exits at that observed bar open. A threshold crossing inside a
+completed five-minute bar exits at the next bar's observed open. A crossing in
+the final horizon bar uses the already-frozen horizon close because no later
+bar belongs to that horizon. If any required bar is missing, the scorer fails
+closed. It reports unmanaged and stop-managed results separately and never
+assumes an unobservable fill at the theoretical stop price.
 
 ## Claude information boundary
 
