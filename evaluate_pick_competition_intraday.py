@@ -275,7 +275,7 @@ def build_outcomes(
                         f"{'realtime' if mode == 'current' else 'historical'}"
                     ),
                     "source_manifest_sha256": manifest_hash,
-                    "status": "complete_unmanaged",
+                    "status": "complete_intraday_paths",
                     "research_only": True,
                     "execution_decision": "AVOID",
                 }
@@ -317,7 +317,10 @@ def append_unique(path: Path, outcomes: Iterable[Mapping[str, Any]]) -> int:
 def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
     grouped: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
     for row in rows:
-        if str(row.get("status")) != "complete_unmanaged":
+        if str(row.get("status")) not in {
+            "complete_intraday_paths",
+            "complete_unmanaged",
+        }:
             continue
         grouped[(str(row["participant"]), str(row["horizon"]))].append(
             (

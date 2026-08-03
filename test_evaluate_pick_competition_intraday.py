@@ -131,7 +131,7 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                 "horizon": "20m",
                 "unmanaged_net_return_pct": 1.0,
                 "stop_managed_net_return_pct": 0.5,
-                "status": "complete_unmanaged",
+                "status": "complete_intraday_paths",
             },
             {
                 "round_id": "r1",
@@ -141,7 +141,7 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                 "horizon": "20m",
                 "unmanaged_net_return_pct": -0.5,
                 "stop_managed_net_return_pct": -0.25,
-                "status": "complete_unmanaged",
+                "status": "complete_intraday_paths",
             },
         ]
         with tempfile.TemporaryDirectory() as directory:
