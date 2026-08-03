@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import gzip
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from download_alpha_vantage_matched_premarket import (
-    archive_path, ensure_free_space, event_requests, run, unavailable_response,
+    archive_path, ensure_free_space, event_requests, fetch_current, run,
+    run_current, unavailable_response, validate_current_request,
 )
 
 
@@ -63,6 +65,78 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
 
     def test_rate_limit_is_not_unavailable(self):
         self.assertFalse(unavailable_response("Minute-level rate limit exceed."))
+
+    def test_current_request_requires_exact_date_and_completed_cutoff(self):
+        rows = [
+            {
+                "symbol": "IBM",
+                "market_date": "2026-08-03",
+                "as_of_utc": "2026-08-03T13:25:00+00:00",
+            }
+        ]
+        validate_current_request(
+            rows,
+            "2026-08-03",
+            datetime(2026, 8, 3, 13, 26, tzinfo=timezone.utc),
+        )
+        with self.assertRaisesRegex(ValueError, "earlier than"):
+            validate_current_request(
+                rows,
+                "2026-08-03",
+                datetime(2026, 8, 3, 13, 24, tzinfo=timezone.utc),
+            )
+
+    def test_current_fetch_uses_entitlement_and_omits_month(self):
+        response = type(
+            "Response",
+            (),
+            {"content": CSV, "json": lambda self: {}},
+        )()
+        with patch(
+            "download_alpha_vantage_matched_premarket.get_alpha_vantage_response",
+            return_value=response,
+        ) as request:
+            content = fetch_current("IBM", "secret", "realtime")
+        params = request.call_args.args[0]
+        self.assertEqual(content, CSV)
+        self.assertEqual(params["entitlement"], "realtime")
+        self.assertNotIn("month", params)
+
+    def test_current_archive_freezes_date_and_entitlement(self):
+        with TemporaryDirectory() as directory:
+            output = Path(directory)
+            with patch(
+                "download_alpha_vantage_matched_premarket.fetch_current",
+                return_value=CSV,
+            ) as fetch:
+                first = run_current(
+                    ["IBM"],
+                    "2026-08-03",
+                    "secret",
+                    output,
+                    "realtime",
+                    delay=0,
+                )
+                second = run_current(
+                    ["IBM"],
+                    "2026-08-03",
+                    "secret",
+                    output,
+                    "realtime",
+                    delay=0,
+                )
+            with self.assertRaisesRegex(ValueError, "manifest contract mismatch"):
+                run_current(
+                    ["IBM"],
+                    "2026-08-03",
+                    "secret",
+                    output,
+                    "delayed",
+                    delay=0,
+                )
+        self.assertEqual(fetch.call_count, 1)
+        self.assertEqual(first["status"], "complete")
+        self.assertEqual(second["status"], "complete")
 
 
 if __name__ == "__main__":
