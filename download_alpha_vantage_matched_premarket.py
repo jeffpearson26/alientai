@@ -233,6 +233,12 @@ def run_current(
             print(f"DONE {request_id}: {len(content)} bytes", flush=True)
         except (ValueError, RuntimeError) as exc:
             if "lacks intraday data" not in str(exc) and not unavailable_response(exc):
+                manifest["status"] = "failed_closed"
+                manifest["failed"].append(
+                    {"request": request_id, "error": safe_error(exc, api_key)}
+                )
+                manifest["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
+                atomic_json(manifest_path, manifest)
                 raise
             manifest["unavailable"].append(request_id)
             unavailable.add(request_id)
@@ -301,6 +307,12 @@ def run(
             print(f"DONE {request_id}: {len(content)} bytes", flush=True)
         except (ValueError, RuntimeError) as exc:
             if "lacks intraday data" not in str(exc) and not unavailable_response(exc):
+                manifest["status"] = "failed_closed"
+                manifest["failed"].append(
+                    {"request": request_id, "error": safe_error(exc, api_key)}
+                )
+                manifest["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
+                atomic_json(manifest_path, manifest)
                 raise
             manifest["unavailable"].append(request_id)
             unavailable.add(request_id)

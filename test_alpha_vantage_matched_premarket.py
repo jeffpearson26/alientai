@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -65,6 +66,29 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
 
     def test_rate_limit_is_not_unavailable(self):
         self.assertFalse(unavailable_response("Minute-level rate limit exceed."))
+
+    def test_actionable_runtime_failure_is_persisted_fail_closed(self):
+        with TemporaryDirectory() as directory:
+            output = Path(directory)
+            with patch(
+                "download_alpha_vantage_matched_premarket.fetch_current",
+                side_effect=RuntimeError("not entitled to realtime data"),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "not entitled"):
+                    run_current(
+                        ["IBM"],
+                        "2026-08-03",
+                        "secret",
+                        output,
+                        "realtime",
+                        delay=0,
+                    )
+            manifest = json.loads(
+                (output / "manifest.json").read_text(encoding="utf-8")
+            )
+        self.assertEqual(manifest["status"], "failed_closed")
+        self.assertEqual(len(manifest["failed"]), 1)
+        self.assertNotIn("secret", json.dumps(manifest))
 
     def test_current_request_requires_exact_date_and_completed_cutoff(self):
         rows = [
