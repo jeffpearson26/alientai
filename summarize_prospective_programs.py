@@ -160,12 +160,36 @@ def latest_contextual_gate(root: Path) -> dict[str, Any]:
     }
 
 
+def latest_intraday_gate(root: Path) -> dict[str, Any]:
+    paths = sorted(root.glob("ai_semiconductor_intraday_gate_*.json"))
+    if not paths:
+        return {
+            "program": "ai_semiconductor_intraday_gate",
+            "exists": False,
+            "status": "missing",
+        }
+    path = paths[-1]
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "program": "ai_semiconductor_intraday_gate",
+        "exists": True,
+        "path": str(path),
+        "decision_date": payload.get("decision_date"),
+        "status": payload.get("status"),
+        "provider_status": payload.get("provider_status"),
+        "journal_written": payload.get("journal_written"),
+        "outcome_written": payload.get("outcome_written"),
+        "reasons": list(payload.get("reasons") or []),
+    }
+
+
 def build_summary(root: Path, generated_at: datetime | None = None) -> dict[str, Any]:
     programs = []
     for name, relative in JOURNALS.items():
         path = root / relative
         programs.append(summarize_journal(name, path, load_jsonl(path)))
     programs.append(latest_contextual_gate(root))
+    programs.append(latest_intraday_gate(root))
     return {
         "schema_version": 1,
         "research_only": True,

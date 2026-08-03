@@ -32,6 +32,9 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         self.assertEqual(
             programs["contextual_options_five_session"]["status"], "missing"
         )
+        self.assertEqual(
+            programs["ai_semiconductor_intraday_gate"]["status"], "missing"
+        )
         self.assertFalse(
             programs["pick_competition_intraday_outcomes"]["exists"]
         )
@@ -99,6 +102,19 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (root / "ai_semiconductor_intraday_gate_2026-08-03.json").write_text(
+                json.dumps(
+                    {
+                        "decision_date": "2026-08-03",
+                        "status": "FAILED_CLOSED",
+                        "provider_status": "failed_closed",
+                        "journal_written": False,
+                        "outcome_written": False,
+                        "reasons": ["realtime entitlement unavailable"],
+                    }
+                ),
+                encoding="utf-8",
+            )
             summary = build_summary(
                 root,
                 datetime(2026, 8, 3, tzinfo=timezone.utc),
@@ -127,6 +143,13 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         self.assertEqual(contextual["completed_signals"], 5)
         self.assertEqual(contextual["distinct_decision_dates"], 1)
         self.assertEqual(contextual["failure_reasons"], ["minimum sample"])
+        intraday_gate = programs["ai_semiconductor_intraday_gate"]
+        self.assertEqual(intraday_gate["status"], "FAILED_CLOSED")
+        self.assertFalse(intraday_gate["journal_written"])
+        self.assertEqual(
+            intraday_gate["reasons"],
+            ["realtime entitlement unavailable"],
+        )
 
 
 if __name__ == "__main__":
