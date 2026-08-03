@@ -750,3 +750,12 @@ from 09:30 through 09:34:59 ET, enters at the 09:35 bar open, and exits at the
 10:30 bar close observable at 10:35. Only the frozen 60-minute premarket and
 calls variants advance to future-only research. Never backfill August 3,
 replace an existing Alpha Vantage-frozen result, or create an order.
+
+`LARGE_CAP_AI_INFRASTRUCTURE_5_QQQ_CLONE_REPORT_20260803.md` controls the
+separate NVDA/AVGO/AMD/MU/AMAT QQQ-relative five-session clone. It uses the
+unchanged source panel, features, labels, chronology, embargo, and 0.25% cost.
+The model stopped at one iteration; the tie-expansion guard locked the 20%
+validation policy. Its strong observed test must be compared prospectively
+against the frozen equal-weight five-stock control because that simple control
+was stronger during validation. Never retune from the observed test or enable
+execution.

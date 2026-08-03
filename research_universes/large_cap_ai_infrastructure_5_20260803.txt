@@ -1,0 +1,6 @@
+# Frozen five-stock large-cap AI semiconductor infrastructure challenger.
+NVDA
+AVGO
+AMD
+MU
+AMAT

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from datetime import date
 from pathlib import Path
 from statistics import mean, median
@@ -61,17 +62,21 @@ def select_validation_fraction(
     minimum_net_win_rate_pct: float = 50.0,
     max_open_positions: int = 5,
     label_field: str = "label_forward_return_5d_pct",
+    maximum_tie_expansion_ratio: float = 1.5,
 ) -> tuple[float, float, list[dict[str, Any]]]:
     scores = np.asarray([float(row["technical_context_score"]) for row in validation])
     candidates = []
     for fraction in fractions:
         cutoff = float(np.quantile(scores, 1.0 - fraction))
         raw_selected = [row for row in validation if float(row["technical_context_score"]) >= cutoff]
+        intended_signals = max(1, math.ceil(len(validation) * fraction))
         selected = capacity_limited(raw_selected, max_open_positions)
         metrics = trade_metrics(selected, cost_pct, label_field)
         candidates.append({
             "fraction": fraction, "cutoff": cutoff,
+            "intended_signals": intended_signals,
             "candidates_before_capacity": len(raw_selected),
+            "tie_expansion_ratio": round(len(raw_selected) / intended_signals, 6),
             **metrics,
         })
     eligible = [
@@ -83,6 +88,7 @@ def select_validation_fraction(
         and row["mean_net_return_pct"] > minimum_mean_net_return_pct
         and row["median_net_return_pct"] > minimum_median_net_return_pct
         and row["net_win_rate_pct"] >= minimum_net_win_rate_pct
+        and row["tie_expansion_ratio"] <= maximum_tie_expansion_ratio
     ]
     if not eligible:
         raise ValueError("no validation fraction meets the locked quality gates")
@@ -104,6 +110,7 @@ def main() -> None:
     parser.add_argument("--minimum-mean-net-return-pct", type=float, default=0.0)
     parser.add_argument("--minimum-median-net-return-pct", type=float, default=0.0)
     parser.add_argument("--minimum-net-win-rate-pct", type=float, default=50.0)
+    parser.add_argument("--maximum-tie-expansion-ratio", type=float, default=1.5)
     args = parser.parse_args()
 
     report = json.loads(args.training_report.read_text(encoding="utf-8"))
@@ -123,6 +130,7 @@ def main() -> None:
         validation, args.fractions, args.minimum_validation_signals, args.round_trip_cost_pct,
         args.minimum_mean_net_return_pct, args.minimum_median_net_return_pct,
         args.minimum_net_win_rate_pct, args.max_open_positions, label_field,
+        args.maximum_tie_expansion_ratio,
     )
     test_candidates = [row for row in test if float(row["technical_context_score"]) >= cutoff]
     selected = capacity_limited(test_candidates, args.max_open_positions)
@@ -148,6 +156,7 @@ def main() -> None:
             "minimum_mean_net_return_pct": args.minimum_mean_net_return_pct,
             "minimum_median_net_return_pct": args.minimum_median_net_return_pct,
             "minimum_net_win_rate_pct": args.minimum_net_win_rate_pct,
+            "maximum_tie_expansion_ratio": args.maximum_tie_expansion_ratio,
         },
         "validation_diagnostics": diagnostics,
         "selected_fraction": fraction,
