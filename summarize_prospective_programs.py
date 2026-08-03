@@ -50,7 +50,12 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def observation_date(row: dict[str, Any]) -> str | None:
-    for key in ("decision_date", "market_session_date", "market_date"):
+    for key in (
+        "decision_date",
+        "market_session_date",
+        "entry_session_date",
+        "market_date",
+    ):
         value = str(row.get(key) or "").strip()
         if value:
             return value

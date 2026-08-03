@@ -60,6 +60,17 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
                 ],
             )
             write_jsonl(
+                root / "nasdaq100_prospective/outcomes.jsonl",
+                [
+                    {
+                        "model_id": "baseline",
+                        "entry_session_date": "2026-08-03",
+                        "status": "complete",
+                        "symbol": "AAA",
+                    }
+                ],
+            )
+            write_jsonl(
                 root / "pick_competition_journal.jsonl",
                 [
                     {
@@ -125,6 +136,9 @@ class ProspectiveProgramSummaryTests(unittest.TestCase):
         self.assertEqual(nasdaq["unique_dates"], 1)
         self.assertEqual(nasdaq["model_counts"], {"baseline": 2})
         self.assertEqual(nasdaq["status_counts"], {"pending": 2})
+        nasdaq_outcomes = programs["nasdaq100_five_session_outcomes"]
+        self.assertEqual(nasdaq_outcomes["unique_dates"], 1)
+        self.assertEqual(nasdaq_outcomes["latest_date"], "2026-08-03")
         competition = programs["pick_competition"]
         self.assertEqual(
             competition["participants"]["Jeff"]["latest_picks"],
