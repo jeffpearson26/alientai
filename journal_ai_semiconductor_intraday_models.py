@@ -6,9 +6,10 @@ import argparse
 import hashlib
 import json
 import math
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+from zoneinfo import ZoneInfo
 
 import lightgbm as lgb
 import numpy as np
@@ -81,6 +82,31 @@ def merge_inputs(
             raise ValueError(f"fresh 09:25 premarket bar unavailable for {symbol}")
         if int(pm.get("premarket_bar_count") or 0) <= 0:
             raise ValueError(f"premarket bar count unavailable for {symbol}")
+        if str(pm.get("premarket_archive_mode") or "") != "current":
+            raise ValueError(f"premarket snapshot is not current-mode data for {symbol}")
+        if str(pm.get("premarket_entitlement") or "") != "realtime":
+            raise ValueError(f"premarket snapshot is not realtime-entitled for {symbol}")
+        if str(pm.get("premarket_timestamp_convention") or "") != "interval_start":
+            raise ValueError(f"premarket timestamp convention is unverified for {symbol}")
+        if int(pm.get("premarket_bar_interval_minutes") or 0) != 5:
+            raise ValueError(f"premarket bar interval is not five minutes for {symbol}")
+        observed_text = str(pm.get("premarket_snapshot_updated_at_utc") or "")
+        observed = datetime.fromisoformat(observed_text)
+        if observed.tzinfo is None or observed.utcoffset() is None:
+            raise ValueError(f"premarket snapshot timestamp is invalid for {symbol}")
+        eastern = ZoneInfo("America/New_York")
+        interval_start = datetime.combine(
+            decision, time(9, 25), tzinfo=eastern
+        )
+        interval_complete = interval_start + timedelta(minutes=5)
+        entry_time = datetime.combine(decision, time(9, 30), tzinfo=eastern)
+        if observed.astimezone(eastern) < interval_complete:
+            raise ValueError(f"09:25 premarket candle is incomplete for {symbol}")
+        if interval_complete >= entry_time:
+            raise ValueError(
+                "completed 09:25 candle is not observable before the frozen "
+                f"09:30 entry for {symbol}"
+            )
         output.append({
             **tech,
             **{f"model_{name}": value for name, value in pm.items() if name.startswith("premarket_")},

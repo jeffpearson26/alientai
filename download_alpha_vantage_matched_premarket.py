@@ -188,6 +188,8 @@ def run_current(
         "mode": "current",
         "entitlement": entitlement,
         "current_date": current_date,
+        "bar_interval_minutes": 5,
+        "timestamp_convention": "interval_start",
         "completed": [],
         "unavailable": [],
         "failed": [],
@@ -196,12 +198,20 @@ def run_current(
         previous = json.loads(manifest_path.read_text(encoding="utf-8"))
         frozen = {
             key: previous.get(key)
-            for key in ("mode", "entitlement", "current_date")
+            for key in (
+                "mode",
+                "entitlement",
+                "current_date",
+                "bar_interval_minutes",
+                "timestamp_convention",
+            )
         }
         expected = {
             "mode": "current",
             "entitlement": entitlement,
             "current_date": current_date,
+            "bar_interval_minutes": 5,
+            "timestamp_convention": "interval_start",
         }
         if frozen != expected:
             raise ValueError("current snapshot manifest contract mismatch")

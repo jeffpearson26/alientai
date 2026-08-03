@@ -58,8 +58,25 @@ def event_context(path_text: str, market_date: str) -> List[Dict[str, str]]:
     return context
 
 
+def archive_metadata(archive: Path) -> Dict[str, Any]:
+    manifest_path = archive / "manifest.json"
+    if not manifest_path.exists():
+        return {}
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest, dict):
+        raise ValueError("archive manifest must be a JSON object")
+    return {
+        "premarket_archive_mode": manifest.get("mode") or "historical",
+        "premarket_entitlement": manifest.get("entitlement") or "historical",
+        "premarket_snapshot_updated_at_utc": manifest.get("updated_at_utc"),
+        "premarket_bar_interval_minutes": manifest.get("bar_interval_minutes"),
+        "premarket_timestamp_convention": manifest.get("timestamp_convention"),
+    }
+
+
 def build_rows(events: List[Dict[str, Any]], archive: Path) -> List[Dict[str, Any]]:
     output = []
+    metadata = archive_metadata(archive)
     for event in events:
         symbol = str(event.get("symbol") or "").strip().upper()
         market_date = str(event.get("market_date") or "").strip()
@@ -76,6 +93,7 @@ def build_rows(events: List[Dict[str, Any]], archive: Path) -> List[Dict[str, An
             row.update(build_premarket_features(candles, market_date))
         else:
             row["premarket_available"] = False
+        row.update(metadata)
         output.append(row)
     return output
 

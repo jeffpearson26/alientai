@@ -137,6 +137,8 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
         self.assertEqual(fetch.call_count, 1)
         self.assertEqual(first["status"], "complete")
         self.assertEqual(second["status"], "complete")
+        self.assertEqual(first["timestamp_convention"], "interval_start")
+        self.assertEqual(first["bar_interval_minutes"], 5)
 
 
 if __name__ == "__main__":

@@ -652,6 +652,14 @@ weights.
   resumable manifest, refuses to run before the event cutoff, and must use a
   separate dated output directory for the later outcome snapshot. Fail closed
   if the account lacks realtime entitlement or exact bars are unavailable.
+- The point-in-time audit in
+  `AI_SEMICONDUCTOR_INTRADAY_TIMING_AUDIT_20260803.md` established that Alpha
+  Vantage five-minute timestamps are interval starts. Consequently, the 09:25
+  candle is partial at the scheduled 09:26 scoring pass and becomes complete
+  only at the frozen 09:30 entry. `journal_ai_semiconductor_intraday_models.py`
+  now fails closed for both cases. Do not remove this guard, journal a partial
+  bar, use the already-known 09:30 open, or silently switch to 09:20/09:35.
+  Repair requires a separately named and retrained timing contract.
 - Prospective selections:
   `data_v2\rcef_research\ai_semiconductor_intraday_prospective_journal.jsonl`.
 - Prospective outcomes:

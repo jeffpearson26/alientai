@@ -8,7 +8,7 @@ from evaluate_intraday_prospective_outcomes import completed_outcomes
 
 
 class IntradayJournalTests(unittest.TestCase):
-    def test_merge_enforces_prior_and_current_timing(self):
+    def test_merge_rejects_completed_0925_bar_at_frozen_0930_entry(self):
         tech = [{"symbol": "NVDA", "market_date": "2026-07-30", "technical_rsi_2": 10}]
         pm = [{
             "symbol": "NVDA",
@@ -18,12 +18,34 @@ class IntradayJournalTests(unittest.TestCase):
             "premarket_last_timestamp_et": "2026-07-31 09:25:00",
             "premarket_bar_count": 66,
             "premarket_gap_pct": 1,
+            "premarket_archive_mode": "current",
+            "premarket_entitlement": "realtime",
+            "premarket_snapshot_updated_at_utc": "2026-07-31T13:30:01+00:00",
+            "premarket_bar_interval_minutes": 5,
+            "premarket_timestamp_convention": "interval_start",
         }]
         calls = [{"symbol": "NVDA", "market_date": "2026-07-30", "call_volume_unusual": False}]
-        result = merge_inputs(tech, pm, calls, "2026-07-31", ["NVDA"])
-        self.assertEqual(result[0]["technical_rsi_2"], 10)
-        self.assertEqual(result[0]["model_premarket_gap_pct"], 1)
-        self.assertEqual(result[0]["model_call_volume_unusual"], False)
+        with self.assertRaisesRegex(ValueError, "not observable before"):
+            merge_inputs(tech, pm, calls, "2026-07-31", ["NVDA"])
+
+    def test_merge_rejects_partial_0925_realtime_bar(self):
+        tech = [{"symbol": "NVDA", "market_date": "2026-07-30"}]
+        calls = [{"symbol": "NVDA", "market_date": "2026-07-30"}]
+        pm = [{
+            "symbol": "NVDA",
+            "market_date": "2026-07-31",
+            "premarket_available": True,
+            "premarket_cutoff_et": "09:25",
+            "premarket_last_timestamp_et": "2026-07-31 09:25:00",
+            "premarket_bar_count": 66,
+            "premarket_archive_mode": "current",
+            "premarket_entitlement": "realtime",
+            "premarket_snapshot_updated_at_utc": "2026-07-31T13:26:00+00:00",
+            "premarket_bar_interval_minutes": 5,
+            "premarket_timestamp_convention": "interval_start",
+        }]
+        with self.assertRaisesRegex(ValueError, "candle is incomplete"):
+            merge_inputs(tech, pm, calls, "2026-07-31", ["NVDA"])
 
     def test_merge_rejects_same_day_close_features(self):
         row = {"symbol": "NVDA", "market_date": "2026-07-31"}
