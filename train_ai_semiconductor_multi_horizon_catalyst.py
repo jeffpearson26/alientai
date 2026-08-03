@@ -31,8 +31,29 @@ STAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("technical_premarket", (
         "technical_", "return_", "realized_volatility_", "model_premarket_",
     )),
+    ("technical_premarket_earnings", (
+        "technical_", "return_", "realized_volatility_", "model_premarket_",
+        "narrative_earnings_", "narrative_fund_",
+    )),
+    ("technical_premarket_earnings_news", (
+        "technical_", "return_", "realized_volatility_", "model_premarket_",
+        "narrative_earnings_", "narrative_fund_", "narrative_news_",
+    )),
     ("technical_premarket_calls", (
         "technical_", "return_", "realized_volatility_", "model_premarket_", "model_call_",
+    )),
+    ("technical_premarket_earnings_calls", (
+        "technical_", "return_", "realized_volatility_", "model_premarket_",
+        "narrative_earnings_", "narrative_fund_", "model_call_",
+    )),
+    ("technical_premarket_earnings_news_calls", (
+        "technical_", "return_", "realized_volatility_", "model_premarket_",
+        "narrative_earnings_", "narrative_fund_", "narrative_news_", "model_call_",
+    )),
+    ("technical_premarket_earnings_calls_analyst", (
+        "technical_", "return_", "realized_volatility_", "model_premarket_",
+        "narrative_earnings_", "narrative_fund_", "model_call_",
+        "model_analyst_proxy_",
     )),
     ("technical_premarket_calls_analyst", (
         "technical_", "return_", "realized_volatility_", "model_premarket_", "model_call_",

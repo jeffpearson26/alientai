@@ -20,6 +20,9 @@ JOURNALS = {
     "ai_semiconductor_five_session": (
         "ai_semiconductor_premarket_prospective_journal.jsonl"
     ),
+    "ai_semiconductor_narrative_one_session": (
+        "ai_semiconductor_narrative_1d_prospective/journal.jsonl"
+    ),
     "ai_semiconductor_intraday": (
         "ai_semiconductor_intraday_prospective_journal.jsonl"
     ),
@@ -50,6 +53,9 @@ FROZEN_MANIFESTS = {
     ),
     "ai_semiconductor_five_session": (
         "ai_semiconductor_premarket_frozen_manifest.json"
+    ),
+    "ai_semiconductor_narrative_one_session": (
+        "ai_semiconductor_narrative_1d_prospective/frozen_manifest.json"
     ),
     "ai_semiconductor_intraday": (
         "ai_semiconductor_intraday_frozen_manifest.json"

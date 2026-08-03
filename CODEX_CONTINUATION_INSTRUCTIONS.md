@@ -648,6 +648,29 @@ the required timestamped fundamentals, estimates, catalyst calendar, analyst,
 and vintage industry-demand records exist with adequate chronological
 coverage.
 
+The 2026-08-03 source audit then found two complete eligible families already
+on disk. `build_ai_semiconductor_earnings_context.py` attaches only events
+whose `available_at_utc` is at or before the decision cutoff;
+`build_ai_semiconductor_news_context.py` attaches deduplicated target-specific
+1/5/14-day news aggregates published by the cutoff. Both cover all 1,694 rows.
+The exploratory one-day technical+premarket+earnings result improved to
++0.747626% mean and 62.16% wins across 37 selections; earnings hurt five days,
+broader news did not beat the simpler candidates, and all 20-day variants
+remained negative. The test was already observed, so do not retune. Current
+snapshot estimates/statements/calendar remain ineligible for historical
+backfill. See `AI_SEMICONDUCTOR_NARRATIVE_DATA_AUDIT_20260803.md`.
+
+The one-day technical+premarket+earnings artifact is now immutable under
+`data_v2/rcef_research/ai_semiconductor_narrative_1d_prospective/frozen_manifest.json`.
+Use `journal_ai_semiconductor_narrative_model.py` only for genuinely future,
+complete 17-symbol panels before the next-session open; append to that
+directory's `journal.jsonl`. Use
+`evaluate_ai_semiconductor_narrative_outcomes.py` only after the exact
+same-session close matures, writing append-only outcomes and summary there.
+Never backfill August 3, change the top-10%/maximum-two policy, or substitute a
+different source. The program is included in the existing weekday automation
+and remains research-only.
+
 # 2026-07-31 AI/Semiconductor catalyst checkpoint
 
 - Alpha Vantage event-news archive:

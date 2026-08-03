@@ -85,3 +85,17 @@ candidates. Do not retune them on the now-observed test. The defensible next
 step is to freeze their exact artifacts and compare them prospectively on
 future dates while separately building the missing timestamped feature
 archives. No result authorizes an order.
+
+## Event-time earnings and news follow-up
+
+The saved archives were audited after the initial build. Event-time earnings
+and target-specific Alpha Vantage news have full 1,694-row coverage and were
+added through paired point-in-time ablations. Earnings modestly improved the
+one-session technical+premarket test from +0.665156% mean and 59.46% wins to
++0.747626% mean and 62.16% wins across 37 selections. It materially worsened
+the five-session candidate. Broader news features did not improve the best
+one- or five-session variants, and no 20-session variant became positive.
+
+Because the historical test had already been observed, the earnings result is
+exploratory and must be checked prospectively. Full source eligibility and
+results: `AI_SEMICONDUCTOR_NARRATIVE_DATA_AUDIT_20260803.md`.
