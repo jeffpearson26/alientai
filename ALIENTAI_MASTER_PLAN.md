@@ -130,6 +130,11 @@ Verified blockers and state on August 2:
   all 101 symbols and only July 31 prior-close technical evidence; Jeff
   explicitly excluded premarket data. Claude's response must still be frozen
   before the normal deadline and scored under the identical rules.
+- Jeff's five competition picks (`MU`, `AVGO`, `AMD`, `MRVL`, and `NVDA`) are
+  now a single precommitted standing basket for the full competition. Do not
+  request or infer additional daily Jeff selections and do not revise the
+  basket using later information. Preserve this asymmetry explicitly in
+  reporting rather than describing the fixed basket as daily reselection.
 
 ## Ordered master roadmap
 

@@ -84,6 +84,23 @@ class PickCompetitionTests(unittest.TestCase):
             self.assertEqual(manifest["horizons"], ["20m", "60m", "2d", "5d", "10d", "20d"])
             self.assertFalse(manifest["execution_enabled"])
 
+    def test_jeff_standing_entry_is_frozen_and_in_universe(self):
+        root = Path(__file__).resolve().parent
+        contract = json.loads(
+            (root / "pick_competition_standing_entries.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entry = contract["standing_entries"][0]
+        universe = load_universe(root / "nasdaq100_2026-06_symbols.txt")
+        self.assertEqual(entry["participant"], "Jeff")
+        self.assertEqual(
+            normalize_picks(entry["picks"], universe),
+            ("MU", "AVGO", "AMD", "MRVL", "NVDA"),
+        )
+        self.assertEqual(entry["policy"], "fixed_for_entire_competition")
+        self.assertFalse(entry["reselection_allowed"])
+
     def test_post_cost_return_subtracts_frozen_cost(self):
         self.assertAlmostEqual(post_cost_return_pct(100, 105), 4.75)
 

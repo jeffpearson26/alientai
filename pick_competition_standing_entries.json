@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "research_only": true,
+  "execution_enabled": false,
+  "competition": "AlienTAI Prospective Pick Competition",
+  "standing_entries": [
+    {
+      "participant": "Jeff",
+      "effective_decision_date": "2026-08-03",
+      "picks": [
+        "MU",
+        "AVGO",
+        "AMD",
+        "MRVL",
+        "NVDA"
+      ],
+      "policy": "fixed_for_entire_competition",
+      "reselection_allowed": false
+    }
+  ]
+}

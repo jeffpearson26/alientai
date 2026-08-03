@@ -81,6 +81,11 @@ Inspect live state rather than assuming these counts remain current. Do not repr
   July 31 prior-close technical evidence; Jeff explicitly requested no
   premarket data. Record Claude's returned zero-to-five picks immutably before
   the normal deadline through `record_pick_competition.py`.
+- Jeff will submit no additional competition picks. His fixed standing basket
+  for the entire competition is `MU`, `AVGO`, `AMD`, `MRVL`, and `NVDA`, as
+  preserved in `pick_competition_standing_entries.json` and the August 3
+  journal row. Never request a replacement or describe subsequent evaluation
+  as daily reselection; report it as one precommitted standing basket.
 - No Uvicorn/Python application server is currently listening on port 8010. The preserved settings still have stock paper trading enabled and option paper buying disabled. Do not restart casually: first perform the read-only restart review in the master plan, preserve positions and limits, verify stale payloads remain `AVOID`, start through the loopback-only launcher, and retain an immediate rollback path. Do not change `data_v2/v2_settings.json`.
 - Schwab was reauthorized on July 30 for the local daily research path. The frozen July-21 contextual-options pilot now has all five later sessions through July 28 and is complete: 5 signals, 1 date, 80.00% post-cost wins, +1.894382% mean net return, +3.080338% median, and -13.815280% worst trade. This is not enough evidence to promote: the fixed prospective gate remains `RESEARCH_HOLD` for minimum sample/date diversity and fifth-percentile tail. Do not tune from these five outcomes or change paper settings.
 - A July-30 fixed historical holdout check used an early-2026 calibration boundary and a later-2026 holdout for the already specified unusual-call plus top-5% technical-context rule. The later holdout contained 94 signals across 41 exit dates and showed +1.482190% post-cost mean, +0.847123% median, and 54.2553% wins, but its legacy full-notional cohort drawdown was -25.957771%. It remains research-only and must not select a new threshold; the result is support for continuing the prospective journal, not a promotion.

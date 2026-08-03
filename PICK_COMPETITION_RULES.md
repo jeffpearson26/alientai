@@ -16,6 +16,14 @@ AlienTAI models. It cannot create paper or live orders.
 - No forced selection: zero picks is an abstention, not a win or loss.
 - No revision: one participant/date submission is immutable once journaled.
 
+Jeff has elected a stricter standing-entry rule for himself. His August 3
+selection of `MU`, `AVGO`, `AMD`, `MRVL`, and `NVDA` is frozen for the entire
+competition. He will not make additional daily selections and the basket cannot
+be revised using later information. The standing instruction is preserved in
+`pick_competition_standing_entries.json`. Evaluation must identify it as one
+precommitted standing basket rather than implying that Jeff reconsidered the
+stocks each morning.
+
 Each pick is evaluated on two separate tracks:
 
 1. Unmanaged: hold through each fixed horizon.
