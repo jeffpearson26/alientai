@@ -1,6 +1,6 @@
 # AlienTAI Dynamic Master Plan
 
-Last updated: 2026-07-26 Pacific time
+Last updated: 2026-08-02 Pacific time
 
 ## Purpose and authority
 
@@ -58,6 +58,42 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
   - untracked `overnight_training_queue_summary.json`
 - AlienTAI application and engine launch processes were running when this plan was created. Live state must always be rechecked.
 - Data-source policy (Jeff direction, 2026-07-30): use Alpha Vantage as the default source for all new collection, feature construction, and research experiments. Existing Schwab-based artifacts, including frozen prospective studies, remain source-isolated and must finish or remain pending against their original Schwab archive; never splice Alpha Vantage candles into them.
+
+### August 2 verified priority reset
+
+The project has produced many useful historical diagnostics. Further model
+proliferation is now lower value than collecting honest forward evidence.
+Until the next roadmap review, active predictive work is limited to:
+
+1. the frozen Nasdaq five-session prospective comparison;
+2. the six frozen AI/semiconductor 20- and 60-minute prospective models; and
+3. the frozen five-session technical-context plus unusual-call study.
+
+Do not start another model family merely because these journals need time.
+Complete the deterministic stratified-news archive and its exact-key timing
+audit in parallel, then run only its already specified chronological ablation.
+
+Verified blockers and state on August 2:
+
+- The full repository test suite passes: 611 tests, zero failures.
+- The stratified news request list contains 22,918 exact keys. Its prior process
+  was interrupted at 11,246 completed, zero unavailable, and zero failed while
+  its manifest incorrectly remained `running`. It was controlled-resumed after
+  confirming no matching Python process and adequate external-drive space.
+- Alpha Vantage previously failed the current-session 09:25 ET requirement
+  because the account returned delayed intraday data. Faster Internet does not
+  remove this entitlement/timing blocker. Every morning run must verify
+  freshness and fail closed rather than substitute or estimate.
+- Prospective evidence remains sparse: four pending complete-101 Nasdaq
+  observations, one pending frozen-80 observation, two pending
+  AI/semiconductor five-day observations, five completed contextual-options
+  observations from one date, and no completed six-model intraday cohort.
+- No model is eligible for paper promotion. Historical results may prioritize
+  forward tests but may not replace the frozen prospective gate.
+- The local application server is stopped. `paper_trading_enabled` remains true
+  in the preserved settings file, while options paper buying is false. Do not
+  restart the server until the restart boundary checks enabled engines, payload
+  freshness, positions, limits, and rollback behavior.
 
 ## Ordered master roadmap
 
@@ -292,7 +328,7 @@ Done when: A selector specification and frozen evaluation report demonstrate hon
 
 ### Phase 8 - Run prospective shadow ranking and journaling
 
-Status: `PLANNED`
+Status: `ACTIVE`
 
 Planned work:
 
@@ -386,6 +422,26 @@ Planned work:
 Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
+
+00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
+three priority programs listed in the August 2 reset. Preserve model hashes,
+universes, thresholds, costs, source identity, and timing. Do not retune after
+observing outcomes and do not start additional variants while the journals are
+sparse.
+00a. Before every AI/semiconductor intraday morning run, require a fresh
+Alpha Vantage response containing all 17 symbols through exactly the permitted
+09:25 ET cutoff. If the source is delayed, incomplete, or not entitled, record
+the failure and stop. Do not fill the gap from Schwab without a separately
+frozen source-specific protocol.
+00b. Controlled-resume the 22,918-key stratified news archive only when no
+matching collector exists. Completion requires completed plus unavailable to
+equal 22,918 with zero failures, regardless of the manifest status string.
+After genuine completion, compile, exact-key join, timing-audit, and run only
+the predeclared chronological ablation.
+00c. Keep port 8010 stopped until a read-only restart review confirms exact
+enabled engines, current positions, daily limits, stale-payload rejection,
+loopback binding, control authorization, and a rollback plan. Starting the
+monitor is not itself permission to create new paper orders.
 
 0. `ACTIVE 2026-07-30`: Run a separate, research-only headline-news ablation without changing the frozen contextual-options study or any paper/live setting. Use a deterministic 48-date, complete-natural-universe sample from the existing January-July 2026 FINRA/options panel; collect point-in-time news only for that sample, validate timestamp coverage, then compare identical technical/options baselines with and without news using chronological partitions and validation-frozen selection. The earlier 2,131-request news archive is too early-period-concentrated for this test. Do not mix the result with the frozen prospective study or promote it to trading.
 0a. For new work, prefer Alpha Vantage raw archives and record the source in every report. Schwab is retained only for its existing source-isolated frozen studies and historical artifacts; do not begin new Schwab downloads or use Schwab data as a fallback without a new explicit direction from Jeff.
@@ -522,6 +578,13 @@ Done when: This remains an ongoing standard for all phases.
 - 2026-07-22: Jeff confirmed the desired direction: build toward calibrated, rare high-quality stock-movement research candidates using staged point-in-time feature ablations, strict cost/tail/drawdown gates, and prospective shadow validation rather than a high-volume prediction system.
 - 2026-07-26: Jeff directed AlienTAI to formalize the proposed five-day selective-catalyst strategy. The architecture was added as an isolated future challenger and fail-closed policy contract, while the already-frozen contextual-options prospective study remains unchanged and controlling.
 - 2026-07-26: Jeff directed adding premarket movers to the selective challenger. Support and leakage/coverage gates were implemented, but retraining is blocked until a point-in-time natural-universe premarket table replaces the biased, 7.5%-overlap matched-study file.
+- 2026-08-02: Jeff directed completion of the evidence-review recommendations.
+  The roadmap now limits active predictive work to the frozen Nasdaq five-day,
+  AI/semiconductor intraday, and contextual unusual-call prospective programs.
+  New variants are deferred while prospective samples remain sparse. The
+  interrupted stratified-news collector was safely resumed, and application
+  restart remains gated because the preserved paper setting is enabled while
+  the server is currently stopped.
 - 2026-07-27: Added and tested an isolated multi-horizon uptrend-pullback LightGBM experiment using 135,713 cost-adjusted S&P observations from 483 local Schwab histories. The design required positive 20/63/126-session slopes and price above the 126-session average, froze model cutoffs on validation, and opened the untouched 2022-12-03+ test only once. It failed to generalize: the two-day frozen test slice averaged -0.064428% net with 48.05% wins (1,028 rows), while the five-day frozen test slice averaged -0.055000% with 47.62% wins (1,136 rows). The five-day validation gain (+0.446571%, 54.70% wins) vanished out of sample. Status remains `RESEARCH_HOLD`; do not tune this formulation on the observed test or connect it to execution.
 - 2026-07-27: Corrected the contextual unusual-call portfolio risk measurement without deleting its conservative legacy metric. The prior cohort curve compounded each exit-date average as 100% account exposure. The tested simulator now price-anchors every trade to the exact stored entry close and label-implied exit close, marks every open position to market each day, limits each new position to one of five slots and available cash, leaves unused slots in cash, never borrows, and subtracts the stated cost. Every selected trade reconciles to its stored return label with zero reported error. At the frozen top-quarter rule, all three existing chronological splits pass the capital-scaled research gate: 40% split 59 signals, +2.439161% mean net, 55.93% wins, +31.006419% portfolio return and -9.883183% drawdown; 50% split 49 signals, +2.420582%, 57.14% wins, +25.073189% portfolio return and -9.883183% drawdown; 60% split 39 signals, +1.704715%, 51.28% wins, +13.611174% portfolio return and -10.757040% drawdown. These are retrospective robustness results from an already explored archive, not authorization for paper/live trading. The next requirement is the existing frozen prospective shadow protocol.
 - 2026-07-27: Refreshed the Schwab token through its existing refresh-token flow and append-only added exactly one newer candle to each of 483 local S&P histories, with zero provider failures and no historical rewrites. Re-evaluated the frozen July-21 five-candidate pilot from Schwab only: each candidate now has two later sessions, so all five remain pending and the prospective gate remains `RESEARCH_HOLD` with zero completed outcomes. Do not aggregate the interim returns or backdate a new prospective payload; three additional later sessions are still required for this pilot.

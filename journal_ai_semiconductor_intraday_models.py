@@ -51,10 +51,21 @@ def merge_inputs(
     premarket_rows: Sequence[Mapping[str, Any]],
     call_rows: Sequence[Mapping[str, Any]],
     decision_date: str,
+    expected_symbols: Sequence[str] | None = None,
 ) -> list[dict[str, Any]]:
     technical, premarket, calls = by_symbol(technical_rows), by_symbol(premarket_rows), by_symbol(call_rows)
     if set(technical) != set(premarket) or set(technical) != set(calls):
         raise ValueError("technical, premarket, and call symbols must match exactly")
+    if expected_symbols is not None:
+        expected = {str(symbol or "").strip().upper() for symbol in expected_symbols}
+        if not expected or "" in expected or len(expected) != len(expected_symbols):
+            raise ValueError("expected universe contains a blank or duplicate symbol")
+        if set(technical) != expected:
+            missing = sorted(expected.difference(technical))
+            extra = sorted(set(technical).difference(expected))
+            raise ValueError(
+                f"input universe does not match frozen symbols; missing={missing}, extra={extra}"
+            )
     decision = date.fromisoformat(decision_date)
     output = []
     for symbol in sorted(technical):
@@ -64,6 +75,12 @@ def merge_inputs(
             raise ValueError(f"technical/call rows must share a prior market date for {symbol}")
         if str(pm.get("market_date") or "") != decision_date or pm.get("premarket_available") is not True:
             raise ValueError(f"current 09:25 premarket row unavailable for {symbol}")
+        if str(pm.get("premarket_cutoff_et") or "") != "09:25":
+            raise ValueError(f"premarket cutoff mismatch for {symbol}")
+        if str(pm.get("premarket_last_timestamp_et") or "") != f"{decision_date} 09:25:00":
+            raise ValueError(f"fresh 09:25 premarket bar unavailable for {symbol}")
+        if int(pm.get("premarket_bar_count") or 0) <= 0:
+            raise ValueError(f"premarket bar count unavailable for {symbol}")
         output.append({
             **tech,
             **{f"model_{name}": value for name, value in pm.items() if name.startswith("premarket_")},
@@ -153,10 +170,20 @@ def main() -> None:
     parser.add_argument("--decision-date", required=True)
     parser.add_argument("--journal", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument(
+        "--symbols-file",
+        type=Path,
+        default=Path("research_universes/ai_semiconductor_screen_2026.txt"),
+    )
     args = parser.parse_args()
+    expected_symbols = [
+        line.strip().upper()
+        for line in args.symbols_file.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
     rows = merge_inputs(
         read_jsonl(args.technical), read_jsonl(args.premarket),
-        read_jsonl(args.call_history), args.decision_date,
+        read_jsonl(args.call_history), args.decision_date, expected_symbols,
     )
     observations, models = score_models(rows, args.model_root, args.decision_date)
     requested_manifest = {
@@ -164,6 +191,7 @@ def main() -> None:
         "research_only": True,
         "execution_enabled": False,
         "universe_size": len(rows),
+        "universe_sha256": sha256(args.symbols_file),
         "decision_time": "09:25 ET after premarket cutoff",
         "entry_reference": "09:30 ET bar open",
         "models": models,
