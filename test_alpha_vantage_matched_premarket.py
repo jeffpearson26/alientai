@@ -40,6 +40,8 @@ class AlphaVantageMatchedPremarketTests(unittest.TestCase):
         self.assertEqual(content, CSV)
         self.assertEqual(first["status"], "complete")
         self.assertEqual(second["status"], "complete")
+        self.assertEqual(first["mode"], "historical")
+        self.assertEqual(first["entitlement"], "historical")
 
     def test_all_role_accepts_natural_universe_rows_without_study_role(self):
         rows = [{"symbol": "IBM", "market_date": "2024-01-02", "future_market_date": "2024-01-09"}]

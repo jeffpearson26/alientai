@@ -16,18 +16,21 @@ from evaluate_pick_competition_intraday import (
 
 
 class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
-    def make_archive(self, root: Path, updated: str) -> Path:
+    def make_archive(
+        self, root: Path, updated: str, *, mode: str = "current"
+    ) -> Path:
         archive = root / "archive"
         archive.mkdir()
         manifest = {
             "status": "complete",
-            "mode": "current",
-            "entitlement": "realtime",
-            "current_date": "2026-08-03",
+            "mode": mode,
+            "entitlement": "realtime" if mode == "current" else "historical",
             "bar_interval_minutes": 5,
             "timestamp_convention": "interval_start",
             "updated_at_utc": updated,
         }
+        if mode == "current":
+            manifest["current_date"] = "2026-08-03"
         (archive / "manifest.json").write_text(
             json.dumps(manifest), encoding="utf-8"
         )
@@ -110,6 +113,22 @@ class PickCompetitionIntradayOutcomeTests(unittest.TestCase):
                     decision_date="2026-08-03",
                     horizon="60m",
                 )
+
+    def test_accepts_completed_historical_archive_for_frozen_picks(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            archive = self.make_archive(
+                Path(directory),
+                "2026-08-04T02:00:00+00:00",
+                mode="historical",
+            )
+            rows = build_outcomes(
+                submissions=[self.submission()],
+                archive=archive,
+                decision_date="2026-08-03",
+                horizon="20m",
+            )
+        self.assertEqual(rows[0]["unmanaged_exit_price"], 102)
+        self.assertTrue(rows[0]["source"].endswith("historical"))
 
     def test_append_is_idempotent_and_summary_is_equal_weighted(self) -> None:
         rows = [

@@ -287,7 +287,16 @@ def run(
     minimum_free_gb: float = 0.0,
 ) -> Dict[str, Any]:
     manifest_path = output / "manifest.json"
-    manifest = {"status": "running", "completed": [], "unavailable": [], "failed": []}
+    manifest = {
+        "status": "running",
+        "mode": "historical",
+        "entitlement": "historical",
+        "bar_interval_minutes": 5,
+        "timestamp_convention": "interval_start",
+        "completed": [],
+        "unavailable": [],
+        "failed": [],
+    }
     if manifest_path.exists():
         previous = json.loads(manifest_path.read_text(encoding="utf-8"))
         for field in ("completed", "unavailable"):

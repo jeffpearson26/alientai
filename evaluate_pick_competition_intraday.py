@@ -63,15 +63,21 @@ def validate_manifest(
     manifest = json.loads(path.read_text(encoding="utf-8"))
     expected = {
         "status": "complete",
-        "mode": "current",
-        "entitlement": "realtime",
-        "current_date": decision_date,
         "bar_interval_minutes": 5,
         "timestamp_convention": "interval_start",
     }
     for key, value in expected.items():
         if manifest.get(key) != value:
-            raise ValueError(f"realtime archive manifest mismatch for {key}")
+            raise ValueError(f"Alpha Vantage archive manifest mismatch for {key}")
+    mode = str(manifest.get("mode") or "")
+    entitlement = str(manifest.get("entitlement") or "")
+    if (mode, entitlement) not in {
+        ("current", "realtime"),
+        ("historical", "historical"),
+    }:
+        raise ValueError("Alpha Vantage archive freshness contract is invalid")
+    if mode == "current" and manifest.get("current_date") != decision_date:
+        raise ValueError("realtime archive current-date mismatch")
     observed = datetime.fromisoformat(str(manifest.get("updated_at_utc") or ""))
     if observed.tzinfo is None or observed.utcoffset() is None:
         raise ValueError("archive completion timestamp must be timezone-aware")
@@ -81,7 +87,7 @@ def validate_manifest(
         tzinfo=EASTERN,
     )
     if observed.astimezone(EASTERN) < required:
-        raise ValueError("realtime archive completed before the exit candle matured")
+        raise ValueError("Alpha Vantage archive completed before the exit candle matured")
     return manifest, sha256(path)
 
 
@@ -95,9 +101,10 @@ def build_outcomes(
     if horizon not in HORIZON_BARS:
         raise ValueError("intraday horizon must be 20m or 60m")
     exit_bar_time, required_complete = HORIZON_BARS[horizon]
-    _, manifest_hash = validate_manifest(
+    manifest, manifest_hash = validate_manifest(
         archive, decision_date, required_complete
     )
+    mode = str(manifest["mode"])
     selected = [
         dict(row)
         for row in submissions
@@ -159,7 +166,10 @@ def build_outcomes(
                     "stop_managed_status": (
                         "pending_validated_high_resolution_stop_path"
                     ),
-                    "source": "Alpha Vantage TIME_SERIES_INTRADAY realtime",
+                    "source": (
+                        "Alpha Vantage TIME_SERIES_INTRADAY "
+                        f"{'realtime' if mode == 'current' else 'historical'}"
+                    ),
                     "source_manifest_sha256": manifest_hash,
                     "status": "complete_unmanaged",
                     "research_only": True,
