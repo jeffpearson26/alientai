@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "research_only": true,
+  "models": [
+    {
+      "model_id": "contextual_technical_unusual_calls_5d",
+      "display_name": "Technical context + unusual calls",
+      "requirements": [
+        "schwab_sp500_daily",
+        "contextual_technical_panel",
+        "alpha_full_universe_option_chains",
+        "call_history_10",
+        "five_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "nasdaq101_baseline_5d",
+      "display_name": "Nasdaq-101 baseline",
+      "requirements": [
+        "schwab_nasdaq101_daily",
+        "qqq_daily",
+        "nasdaq_frozen_artifacts",
+        "five_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "nasdaq101_qqq_relative_5d",
+      "display_name": "Nasdaq-101 QQQ-relative",
+      "requirements": [
+        "schwab_nasdaq101_daily",
+        "qqq_daily",
+        "nasdaq_frozen_artifacts",
+        "five_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "nasdaq80_champion_5d",
+      "display_name": "Nasdaq-80 champion",
+      "requirements": [
+        "schwab_nasdaq80_daily",
+        "nasdaq80_frozen_artifacts",
+        "five_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "ai_semiconductor_technical_premarket_5d",
+      "display_name": "AI/semiconductor technical + premarket",
+      "requirements": [
+        "alpha_ai17_daily",
+        "alpha_ai17_premarket_0925",
+        "ai17_frozen_artifacts",
+        "five_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "ai_semiconductor_narrative_earnings_1d",
+      "display_name": "AI/semiconductor narrative earnings",
+      "requirements": [
+        "alpha_ai17_daily",
+        "alpha_ai17_premarket_0925",
+        "timestamped_earnings_events",
+        "narrative_frozen_artifacts",
+        "one_session_daily_outcomes"
+      ]
+    },
+    {
+      "model_id": "ai_semiconductor_intraday_alpha_20m_60m",
+      "display_name": "Original Alpha AI/semiconductor intraday models",
+      "requirements": [
+        "alpha_ai17_prior_daily",
+        "alpha_ai17_prior_calls",
+        "alpha_ai17_realtime_premarket_0925",
+        "alpha_ai17_exact_intraday_outcomes",
+        "alpha_intraday_frozen_artifacts"
+      ]
+    },
+    {
+      "model_id": "ai_semiconductor_late_schwab_60m",
+      "display_name": "Schwab 09:35 late-entry models",
+      "requirements": [
+        "alpha_ai17_prior_daily",
+        "alpha_ai17_prior_calls",
+        "call_history_10",
+        "schwab_ai17_0925_snapshot",
+        "schwab_ai17_1030_outcomes",
+        "schwab_late_frozen_artifacts"
+      ]
+    },
+    {
+      "model_id": "defined_risk_options_model",
+      "display_name": "Defined-risk options model (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "alpha_ai17_daily",
+        "point_in_time_option_selection_chains",
+        "later_option_entry_chains",
+        "later_option_exit_chains",
+        "option_quotes_liquidity_and_fees",
+        "purged_option_training_labels"
+      ]
+    },
+    {
+      "model_id": "rolling_anytime_20m",
+      "display_name": "Any-time rolling 20-minute model (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "adjusted_five_minute_archive",
+        "rolling_archive_supplement_9",
+        "market_and_sector_context",
+        "purged_rolling_20m_labels"
+      ]
+    }
+  ],
+  "requirements": {
+    "schwab_sp500_daily": {
+      "data_type": "Daily OHLCV",
+      "source": "Schwab",
+      "timing_contract": "Completed regular sessions only; source-pure",
+      "kind": "directory",
+      "path": "data_v2/sp500_daily_schwab_max_history"
+    },
+    "contextual_technical_panel": {
+      "data_type": "Point-in-time technical features",
+      "source": "Schwab daily candles",
+      "timing_contract": "Complete same-day universe before selection",
+      "kind": "glob",
+      "path": "data_v2/rcef_research/daily_technical_panel_*.jsonl"
+    },
+    "alpha_full_universe_option_chains": {
+      "data_type": "Full-universe historical option chains",
+      "source": "Alpha Vantage",
+      "timing_contract": "Nonempty exact-date chains; empty chains are unavailable",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/contextual_options_prospective_*/manifest.json",
+      "required_completed": 496
+    },
+    "call_history_10": {
+      "data_type": "Lagged call-activity history",
+      "source": "Same provider as the observation",
+      "timing_contract": "At least ten prior observations per symbol",
+      "kind": "jsonl_glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_call_features_*.jsonl",
+      "required_rows": 17,
+      "availability_field": "call_activity_history_count",
+      "minimum_value": 10
+    },
+    "five_session_daily_outcomes": {
+      "data_type": "Five-session future daily OHLCV",
+      "source": "Frozen model source",
+      "timing_contract": "Evaluate only after fifth later close",
+      "kind": "logical"
+    },
+    "one_session_daily_outcomes": {
+      "data_type": "One-session future daily OHLCV",
+      "source": "Alpha Vantage",
+      "timing_contract": "Evaluate only after exact next-session close",
+      "kind": "logical"
+    },
+    "schwab_nasdaq101_daily": {
+      "data_type": "Daily OHLCV for 101-symbol universe",
+      "source": "Schwab",
+      "timing_contract": "Latest common completed session; never splice providers",
+      "kind": "daily_csv_universe",
+      "path": "data_v2/sp500_daily_schwab_max_history",
+      "symbols_file": "nasdaq100_2026-06_symbols.txt",
+      "include_symbols": ["QQQ"],
+      "expected_session": "latest_completed",
+      "session_date_offset_days": 1
+    },
+    "qqq_daily": {
+      "data_type": "QQQ benchmark daily OHLCV",
+      "source": "Schwab",
+      "timing_contract": "Same completed session as Nasdaq universe",
+      "kind": "file",
+      "path": "data_v2/sp500_daily_schwab_max_history/QQQ_schwab_1d_max.csv"
+    },
+    "nasdaq_frozen_artifacts": {
+      "data_type": "Frozen model/report/manifest hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes must match before every observation",
+      "kind": "file",
+      "path": "data_v2/rcef_research/nasdaq100_prospective/frozen_manifest.json"
+    },
+    "schwab_nasdaq80_daily": {
+      "data_type": "Daily OHLCV for frozen 80-symbol universe",
+      "source": "Schwab",
+      "timing_contract": "Latest common completed session",
+      "kind": "daily_csv_universe",
+      "path": "data_v2/sp500_daily_schwab_max_history",
+      "symbols_file": "nasdaq100_trained_80_symbols.txt",
+      "expected_session": "latest_completed",
+      "session_date_offset_days": 1
+    },
+    "nasdaq80_frozen_artifacts": {
+      "data_type": "Frozen model/report/universe hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes must match before every observation",
+      "kind": "file",
+      "path": "data_v2/rcef_research/nasdaq80_champion_prospective/frozen_manifest.json"
+    },
+    "alpha_ai17_daily": {
+      "data_type": "Daily OHLCV for frozen 17-symbol universe",
+      "source": "Alpha Vantage",
+      "timing_contract": "Complete decision-session close before next-open selection",
+      "kind": "jsonl_glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_technical_*.jsonl",
+      "required_rows": 17,
+      "date_field": "market_date",
+      "expected_session": "latest_completed"
+    },
+    "alpha_ai17_prior_daily": {
+      "data_type": "Prior-session technical features for 17 symbols",
+      "source": "Alpha Vantage",
+      "timing_contract": "Exact immediately preceding completed session",
+      "kind": "jsonl_glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_technical_*.jsonl",
+      "required_rows": 17,
+      "date_field": "market_date",
+      "expected_session": "latest_completed"
+    },
+    "alpha_ai17_premarket_0925": {
+      "data_type": "Extended-hours five-minute premarket features",
+      "source": "Alpha Vantage",
+      "timing_contract": "All 17 symbols through the completed 09:25 ET interval",
+      "kind": "jsonl_glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_premarket_*.jsonl",
+      "required_rows": 17,
+      "date_field": "market_date",
+      "boolean_field": "premarket_available",
+      "expected_session": "current"
+    },
+    "timestamped_earnings_events": {
+      "data_type": "Earnings events and guidance available timestamps",
+      "source": "Alpha Vantage archived earnings data",
+      "timing_contract": "available_at_utc must be no later than decision cutoff",
+      "kind": "glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_narrative_earnings_*/panel.jsonl"
+    },
+    "ai17_frozen_artifacts": {
+      "data_type": "Frozen five-session model/report/universe hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes must match before every observation",
+      "kind": "file",
+      "path": "data_v2/rcef_research/ai_semiconductor_premarket_frozen_manifest.json"
+    },
+    "narrative_frozen_artifacts": {
+      "data_type": "Frozen narrative model/report/universe hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes must match before every observation",
+      "kind": "file",
+      "path": "data_v2/rcef_research/ai_semiconductor_narrative_1d_prospective/frozen_manifest.json"
+    },
+    "alpha_ai17_prior_calls": {
+      "data_type": "Prior-session unusual call-option features",
+      "source": "Alpha Vantage",
+      "timing_contract": "Exact prior session only; calls, not puts/sell volume",
+      "kind": "jsonl_glob",
+      "path": "data_v2/rcef_research/ai_semiconductor_call_features_*.jsonl",
+      "required_rows": 17,
+      "date_field": "market_date",
+      "expected_session": "latest_completed"
+    },
+    "alpha_ai17_realtime_premarket_0925": {
+      "data_type": "Realtime five-minute premarket candles",
+      "source": "Alpha Vantage realtime entitlement",
+      "timing_contract": "Completed 09:25 interval must be known before frozen 09:30 entry",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/ai_semiconductor_realtime_*/manifest.json",
+      "required_completed": 17
+    },
+    "alpha_ai17_exact_intraday_outcomes": {
+      "data_type": "Exact 09:30-10:25 five-minute outcome path",
+      "source": "Alpha Vantage",
+      "timing_contract": "Evaluate only after exit interval completes",
+      "kind": "logical"
+    },
+    "alpha_intraday_frozen_artifacts": {
+      "data_type": "Six frozen intraday model/report hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes and 09:30 timing contract must match",
+      "kind": "file",
+      "path": "data_v2/rcef_research/ai_semiconductor_intraday_frozen_manifest.json"
+    },
+    "schwab_ai17_0925_snapshot": {
+      "data_type": "Current-session extended-hours five-minute snapshot",
+      "source": "Schwab",
+      "timing_contract": "All exact 09:25 interval-start candles captured 09:30-09:34:59 ET",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/Schwab_2026/ai_semiconductor_late_*/manifest.json",
+      "required_completed": 17
+    },
+    "schwab_ai17_1030_outcomes": {
+      "data_type": "Exact 09:35-entry through 10:30-bar outcome path",
+      "source": "Schwab",
+      "timing_contract": "Fresh capture at or after 10:35 ET",
+      "kind": "logical"
+    },
+    "schwab_late_frozen_artifacts": {
+      "data_type": "Frozen Schwab late-entry model/report hashes",
+      "source": "Local immutable artifacts",
+      "timing_contract": "Hashes and 09:35 timing contract must match",
+      "kind": "file",
+      "path": "data_v2/rcef_research/ai_semiconductor_late_intraday_schwab_frozen_manifest.json"
+    },
+    "point_in_time_option_selection_chains": {
+      "data_type": "Option chain observable at selection",
+      "source": "Alpha Vantage archive",
+      "timing_contract": "Selection snapshot strictly before entry snapshot",
+      "kind": "directory",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/historical_options_natural_sp500_2026"
+    },
+    "later_option_entry_chains": {
+      "data_type": "Executable option quotes at simulated entry",
+      "source": "Alpha Vantage archive",
+      "timing_contract": "Distinct later snapshot; buy at ask/sell at bid",
+      "kind": "logical"
+    },
+    "later_option_exit_chains": {
+      "data_type": "Matching-contract option quotes at simulated exit",
+      "source": "Alpha Vantage archive",
+      "timing_contract": "Exact contract IDs and later exit snapshot",
+      "kind": "logical"
+    },
+    "option_quotes_liquidity_and_fees": {
+      "data_type": "Bid/ask, volume, open interest, IV and fees",
+      "source": "Archived option chains",
+      "timing_contract": "No marks/lasts substituted for executable fills",
+      "kind": "logical"
+    },
+    "purged_option_training_labels": {
+      "data_type": "Direction and absolute-move option labels",
+      "source": "Exact compiled option outcomes",
+      "timing_contract": "Purged chronological train/validation/test",
+      "kind": "logical"
+    },
+    "adjusted_five_minute_archive": {
+      "data_type": "Adjusted five-minute intraday candles",
+      "source": "Alpha Vantage",
+      "timing_contract": "Audited complete archive; interval-start timestamps",
+      "kind": "file",
+      "path": "data_v2/rcef_research/rolling_20m_nasdaq101_adjusted_archive_audit_20260804.json"
+    },
+    "rolling_archive_supplement_9": {
+      "data_type": "Nine-symbol AI/data-center intraday supplement",
+      "source": "Alpha Vantage",
+      "timing_contract": "Separate manifest and exact coverage audit",
+      "kind": "directory",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_ai_data_center_supplement_202001_202607"
+    },
+    "market_and_sector_context": {
+      "data_type": "QQQ/SPY/semiconductor market context",
+      "source": "Same source and timestamp as rolling observation",
+      "timing_contract": "Available at each arbitrary decision timestamp",
+      "kind": "logical"
+    },
+    "purged_rolling_20m_labels": {
+      "data_type": "Any-time 20-minute forward labels",
+      "source": "Audited five-minute archive",
+      "timing_contract": "No opening-only assumption; purged chronological splits",
+      "kind": "logical"
+    }
+  }
+}

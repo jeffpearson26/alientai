@@ -3,7 +3,12 @@ from unittest.mock import patch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from refresh_sp500_daily_incremental import append_only, fetch_recent, symbols_before_date
+from refresh_sp500_daily_incremental import (
+    append_only,
+    fetch_recent,
+    stored_candle_date_for_session,
+    symbols_before_date,
+)
 
 
 class IncrementalDailyRefreshTests(unittest.TestCase):
@@ -38,6 +43,11 @@ class IncrementalDailyRefreshTests(unittest.TestCase):
         self.assertEqual(
             [{"date": "2026-07-27"}, {"date": "2026-07-28"}, {"date": "2026-07-29"}],
             append_only(existing, recent, max_candle_date="2026-07-29"),
+        )
+
+    def test_session_date_translates_to_prior_pacific_storage_key(self):
+        self.assertEqual(
+            "2026-08-03", stored_candle_date_for_session("2026-08-04")
         )
 
     def test_selects_only_existing_stale_histories(self):

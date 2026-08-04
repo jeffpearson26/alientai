@@ -31,6 +31,37 @@ Never print, commit, paste, or otherwise expose API keys, tokens, OAuth codes, b
 
 ## Current live state
 
+### Promising-model data inventory (August 4)
+
+`promising_model_data_requirements.json` is the living registry of every data
+family required by each promising frozen model and the two active development
+candidates. Run `update_promising_model_data_inventory.py` on every scheduled
+model pass. It regenerates both
+`data_v2/rcef_research/promising_model_data_inventory.json` and the
+human-readable `PROMISING_MODEL_DATA_INVENTORY.md`. A file's existence is not
+enough: the audit checks content coverage, usable-row flags, exact latest
+session where applicable, provider manifests, and frozen artifacts. Add or
+change a registry entry whenever a model or data contract changes.
+
+The August 4 audit exposed and repaired two real preparation failures. The
+17-symbol August 3 Alpha daily/technical and option/call panels are now
+complete; the corrected call build uses `natural_option_features_2026.jsonl`
+and has at least 20 prior observations per symbol rather than zero. The Schwab
+late-entry readiness audit passed, but the August 4 entry window had already
+closed and must never be backfilled. It may next attempt August 5 after exact
+August 4 after-close inputs are prepared.
+
+Schwab daily candle keys are Pacific-local and occur one calendar day before
+their associated U.S. session. Use
+`refresh_sp500_daily_incremental.py --max-session-date YYYY-MM-DD`; do not pass
+a U.S. session date through the advanced `--max-candle-date` option. An
+August 4 refresh initially admitted 125 in-progress rows under stored key
+August 3; no model consumed them. They were fingerprinted into the ignored
+quarantine evidence and removed through
+`quarantine_incomplete_schwab_daily_rows.py`. The completed August 3 common
+Nasdaq coverage remains intact. After the August 4 close, refresh through
+`--max-session-date 2026-08-04` to append final rows.
+
 Verified on 2026-07-21 after the master queue completed:
 
 - No Alpha Vantage master queue or child collector is running. Do not restart it without first inspecting the completed manifests and deciding on a new, separately scoped collection.

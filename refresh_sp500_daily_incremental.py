@@ -9,6 +9,7 @@ import argparse
 import csv
 import json
 import time
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,11 @@ from download_sp500_daily_schwab_max import (
 
 
 FIELDS = ("symbol", "schwab_symbol", "date", "datetime", "open", "high", "low", "close", "volume")
+
+
+def stored_candle_date_for_session(session_date: str) -> str:
+    """Translate a U.S. session date to Schwab's local Pacific daily-candle key."""
+    return (date.fromisoformat(session_date) - timedelta(days=1)).isoformat()
 
 
 def read_symbols(path: Path) -> list[str]:
@@ -114,10 +120,25 @@ def main() -> None:
     parser.add_argument(
         "--max-candle-date",
         default="",
-        help="Append candles only through YYYY-MM-DD, excluding an in-progress market day.",
+        help="Advanced: maximum stored Pacific candle key, not U.S. session date.",
+    )
+    parser.add_argument(
+        "--max-session-date",
+        default="",
+        help=(
+            "Safely append only through this completed U.S. market session. "
+            "The script converts it to Schwab's prior-Pacific-date storage key."
+        ),
     )
     parser.add_argument("--apply", action="store_true", help="Write new rows; without this, perform a remote dry run.")
     args = parser.parse_args()
+    if args.max_candle_date and args.max_session_date:
+        parser.error("--max-candle-date and --max-session-date are mutually exclusive")
+    maximum_stored_date = args.max_candle_date or (
+        stored_candle_date_for_session(args.max_session_date)
+        if args.max_session_date
+        else ""
+    )
     symbols = read_symbols(args.symbols_file)
     if args.only_before_date:
         symbols = symbols_before_date(symbols, args.output_dir, args.only_before_date)
@@ -132,7 +153,7 @@ def main() -> None:
             merged = append_only(
                 existing,
                 normalize(symbol, schwab_symbol, candles),
-                max_candle_date=args.max_candle_date,
+                max_candle_date=maximum_stored_date,
             )
             added = len(merged) - len(existing)
             if args.apply and added:
@@ -152,7 +173,8 @@ def main() -> None:
     report = {"status": "complete", "research_only": True, "execution_enabled": False,
               "apply": args.apply, "symbols": len(symbols), "new_rows": additions,
               "only_before_date": args.only_before_date or None,
-              "max_candle_date": args.max_candle_date or None,
+              "max_session_date": args.max_session_date or None,
+              "max_candle_date": maximum_stored_date or None,
               "failures": failures, "results": results}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "sp500_daily_incremental_refresh_summary.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
