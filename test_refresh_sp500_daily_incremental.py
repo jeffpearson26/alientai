@@ -1,11 +1,27 @@
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from refresh_sp500_daily_incremental import append_only, symbols_before_date
+from refresh_sp500_daily_incremental import append_only, fetch_recent, symbols_before_date
 
 
 class IncrementalDailyRefreshTests(unittest.TestCase):
+    @patch("refresh_sp500_daily_incremental.time.time", return_value=1_785_799_729.0)
+    @patch("refresh_sp500_daily_incremental.schwab_get_json")
+    def test_fetch_recent_anchors_history_to_current_time(self, get_json, _time):
+        get_json.return_value = {
+            "candles": [{"datetime": 1_785_729_600_000, "close": 251.34}]
+        }
+
+        variant, candles = fetch_recent("ADBE")
+
+        self.assertEqual("ADBE", variant)
+        self.assertEqual(1, len(candles))
+        params = get_json.call_args.args[1]
+        self.assertEqual(1_785_799_729_000, params["endDate"])
+        self.assertEqual("true", params["needPreviousClose"])
+
     def test_appends_only_dates_after_existing_latest(self):
         existing = [{"date": "2026-07-21", "close": "100"}]
         recent = [{"date": "2026-07-21", "close": "999"}, {"date": "2026-07-22", "close": "101"}]

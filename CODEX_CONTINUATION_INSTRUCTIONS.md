@@ -108,9 +108,39 @@ Inspect live state rather than assuming these counts remain current. Do not repr
   the Alpha Vantage download itself must still occur after the live cutoff and
   pass the exact freshness checks.
 - No Uvicorn/Python application server is currently listening on port 8010. The preserved settings still have stock paper trading enabled and option paper buying disabled. Do not restart casually: first perform the read-only restart review in the master plan, preserve positions and limits, verify stale payloads remain `AVOID`, start through the loopback-only launcher, and retain an immediate rollback path. Do not change `data_v2/v2_settings.json`.
+- For new research observations, Alpha Vantage is the preferred market-data
+  source. If it cannot provide a complete, timely panel, Schwab may be used as
+  an explicitly source-tagged fallback only when the entire observation uses
+  Schwab under a predeclared timing contract. Never splice Schwab data into an
+  Alpha-Vantage-frozen observation (or the reverse), and never use a fallback
+  to backfill a decision after its outcome is observable.
 - Schwab was reauthorized on July 30 for the local daily research path. The frozen July-21 contextual-options pilot now has all five later sessions through July 28 and is complete: 5 signals, 1 date, 80.00% post-cost wins, +1.894382% mean net return, +3.080338% median, and -13.815280% worst trade. This is not enough evidence to promote: the fixed prospective gate remains `RESEARCH_HOLD` for minimum sample/date diversity and fifth-percentile tail. Do not tune from these five outcomes or change paper settings.
 - A July-30 fixed historical holdout check used an early-2026 calibration boundary and a later-2026 holdout for the already specified unusual-call plus top-5% technical-context rule. The later holdout contained 94 signals across 41 exit dates and showed +1.482190% post-cost mean, +0.847123% median, and 54.2553% wins, but its legacy full-notional cohort drawdown was -25.957771%. It remains research-only and must not select a new threshold; the result is support for continuing the prospective journal, not a promotion.
 - August 2 priority is prospective evidence, not new variants. Limit active predictive work to the frozen Nasdaq five-session journals, the six frozen AI/semiconductor 20/60-minute models, and the frozen contextual technical-plus-unusual-call study. The Alpha Vantage 09:25 ET entitlement/timeliness check remains a hard blocker for the intraday program; fail closed on delayed data. The full repository discovery suite passed 611 tests.
+- On August 3 the contextual unusual-call study was found to be named in the
+  automation without a working daily input routine. This is now a fail-loud
+  operating requirement: every promising frozen program must either append a
+  valid scheduled observation or report its exact blocker immediately.
+  `build_contextual_options_prospective_payload.py` provides the missing
+  source-timestamped, complete-universe scoring/payload boundary while
+  retaining the immutable model, top-quarter rule, maximum-five policy,
+  five-session horizon, and research-only `AVOID` decision.
+- The August 3 after-close Alpha Vantage full-universe probe returned 496 HTTP
+  successes but every response contained an empty explicit "No data" chain.
+  These files and the resulting zero-signal artifacts were quarantined and do
+  not count as a prospective observation. The downloader now classifies an
+  empty `data` list as unavailable. Retry the exact August 3 request once at
+  the August 4 05:31 Pacific pre-open pass. It may count only if nonempty
+  chains are available and the payload is frozen before the next session
+  begins. If it remains unavailable, report the blocker and continue building
+  a separately source-pure Schwab call-volume history; never compare a current
+  Schwab volume with an Alpha Vantage historical baseline.
+- The local Schwab daily refresher also previously omitted `endDate`, allowing
+  Schwab to return a cached prior-session series. It now anchors each request
+  to the current instant. On August 3 it appended the completed session across
+  the full available local universe with zero failures. This correction also
+  matured the first four Nasdaq-101 five-session outcomes; use the generated
+  outcome summary without changing their frozen models.
 - The repository now contains a tested native Alpha Vantage bulk-quote replacement and a loopback/token control boundary, but those changes are not active until a controlled server restart. Wait for the news collector to finish, capture the five positions, stop only the exact Uvicorn process tree, restart through `START_ALIENTAI_V2.bat`, verify `/api` and local control behavior, make one bounded quote validation, then restore/verify the paper engine without changing its allowlist or settings.
 - Do not copy the ignored legacy quote implementation back into active code. `alientai_v2/schwab_client.py` is now only a compatibility adapter to the Alpha Vantage client.
 

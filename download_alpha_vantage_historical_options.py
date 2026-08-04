@@ -79,7 +79,7 @@ def fetch_chain(symbol: str, day: str, api_key: str) -> Dict[str, Any]:
     message = payload.get("Error Message") or payload.get("Note") or payload.get("Information")
     if message:
         raise RuntimeError(message)
-    if not isinstance(payload.get("data"), list):
+    if not isinstance(payload.get("data"), list) or not payload["data"]:
         raise ValueError("Alpha Vantage response lacks options data")
     return payload
 

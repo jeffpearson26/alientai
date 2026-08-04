@@ -71,6 +71,10 @@ def fetch_recent(symbol: str) -> tuple[str, list[dict[str, Any]]]:
                 "symbol": variant, "periodType": "month", "period": 1,
                 "frequencyType": "daily", "frequency": 1,
                 "needExtendedHoursData": "false",
+                # Without an explicit end date Schwab can return a cached
+                # period ending at the prior session.
+                "endDate": int(time.time() * 1000),
+                "needPreviousClose": "true",
             })
             candles = payload.get("candles") or []
             if candles:

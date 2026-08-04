@@ -102,6 +102,37 @@ concentrating five nominally different picks in one identical risk factor.
 - earnings-gap risk, volatility, correlation, concentration, liquidity, and
   estimated slippage.
 
+## Competitive-structure hypothesis map (August 3, 2026)
+
+Jeff supplied a contemporary narrative describing a transition from a
+GPU-only competitive framing toward full AI-platform competition across
+accelerators, memory, networking, software, rack-scale systems, custom ASICs,
+foundry capacity, and advanced packaging. Preserve it as hypothesis input
+only. Its market-share estimates, revenue figures, commitments, backlog
+claims, and product-performance statements are not verified training facts.
+
+Future point-in-time data work may derive these reproducible features when
+each value has an original publication timestamp and historical vintage:
+
+- company role: merchant accelerator, custom-ASIC co-designer, foundry,
+  HBM/memory, networking/interconnect, hyperscaler internal silicon, or
+  regional alternative;
+- AI revenue, backlog, guidance, and estimate-revision acceleration;
+- named hyperscaler capacity or multi-year purchase commitments;
+- exposure to training versus inference workloads;
+- HBM, CoWoS/advanced-packaging, leading-edge foundry, power, and networking
+  capacity constraints;
+- software/platform adoption and switching-friction indicators;
+- customer concentration and customer-insourcing/custom-silicon exposure;
+- export-control and China-market exposure;
+- relative growth in merchant accelerators versus custom silicon.
+
+Treat these primarily as 20-, 60-, and 90-session structural features. They
+must not be copied as static present-day values into earlier history, used to
+weight named stocks preferentially, or joined to a row before their public
+availability timestamp. Test each family through chronological ablation
+against the simpler technical and catalyst baselines.
+
 ## Horizon-specific hypotheses
 
 - **1 session:** emphasize current premarket state, very recent news, technical
