@@ -558,6 +558,20 @@ positioning, and risk remain primary. Never translate this narrative into
 manual ticker bonuses or assume an outcome; require timestamped historical
 features and a new pre-registered chronology.
 
+000d. `FRAMEWORK COMPLETE 2026-08-04`: Added a research-only, defined-risk
+options-volatility strategy layer for the five-session AI-semiconductor thesis.
+It can emit bullish/bearish debit spreads, defined-risk credit spreads, long
+straddles, iron condors, iron butterflies, calendars, or abstention; naked
+short options are prohibited. It compares frozen direction/absolute-move
+forecasts with implied move, IV rank, term structure, catalyst timing,
+technical confirmation, liquidity, and stack risk. Emerging inference
+specialists receive half-size hypothetical risk. An exact archive scan found
+1,262 of 1,694 panel rows with both entry/exit chains; every pair has at least
+42 matching contracts (median 2,424). The learned forecast heads and
+conservative multi-leg return compiler are still pending. Do not call the
+framework a profitable model or connect it to execution. Controlling design:
+`AI_SEMICONDUCTOR_OPTIONS_VOLATILITY_MODEL_DESIGN.md`.
+
 00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
 three priority programs listed in the August 2 reset. Preserve model hashes,
 universes, thresholds, costs, source identity, and timing. Do not retune after

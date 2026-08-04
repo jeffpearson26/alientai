@@ -937,3 +937,23 @@ memory/packaging/foundry, custom-ASIC enablers, and emerging inference
 specialists require separate peer roles and risk treatment. Do not hand-score
 favored names, treat the thesis as a label, backfill current capacity or
 valuation into history, or retune the already observed 2026 test.
+
+## Defined-risk options-volatility framework (2026-08-04)
+
+`alientai_v2\research\defined_risk_option_strategy.py` is the deterministic
+strategy layer for a future learned options model. It permits only defined-risk
+debit/credit verticals, long straddles, iron condors, iron butterflies,
+calendars, or abstention. It rejects low liquidity, blocks short-volatility
+structures through binary events, halves risk for emerging inference
+specialists, and never executes.
+
+The natural Alpha Vantage archive covers all 17 established AI/semiconductor
+symbols with 108-122 dated chains each. Of 1,694 underlying panel rows, 1,262
+have exact next-session entry and fifth-session exit chains, and every complete
+pair has matching contract IDs at exit (minimum 42, median 2,424, maximum
+11,510). Preserve the other rows as missing. Next, compile conservative
+multi-leg outcomes using ask/bid crossings and defined maximum risk, then train
+separate direction and absolute-move heads with purged chronology. Do not use
+stock returns as option returns, marks/lasts as fills, nearby dates, naked short
+structures, or CBRS backfill. Controlling design:
+`AI_SEMICONDUCTOR_OPTIONS_VOLATILITY_MODEL_DESIGN.md`.
