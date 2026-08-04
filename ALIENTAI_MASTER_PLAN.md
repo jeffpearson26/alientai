@@ -510,6 +510,17 @@ corporate actions, and regular-session continuity before building labels.
 Never connect this collection or a future model derived from it to paper/live
 trading without the normal frozen prospective promotion process.
 
+The collector stopped once at 2,537 accounted requests on a credential-safe
+Alpha Vantage HTTP 503 for MU 2022-01. After verifying no process remained,
+the manifest contained exactly one retryable failure, logs exposed no
+credential, and D: remained above its safety floor, the identical command
+resumed successfully and cleared the failure. The collector now has a tested,
+bounded four-attempt exponential retry only for sanitized HTTP/transport
+errors; schema, provider-message, and data-contract failures still fail closed.
+`audit_alpha_vantage_adjusted_intraday_archive.py` is ready to verify exact
+request coverage, unique completed/unavailable accounting, every gzip/CSV and
+stored hash/metadata, and orphan files after completion.
+
 000a. `QUEUED 2026-08-03`: Preserve the running 103-symbol archive contract and
 then collect the same 2020-01 through 2026-07 adjusted five-minute history for
 the nine-symbol AI/data-center supplement in

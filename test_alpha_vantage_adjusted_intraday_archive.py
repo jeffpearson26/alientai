@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import download_alpha_vantage_adjusted_intraday_archive as archive
+from alpha_vantage_http import AlphaVantageRequestError
 
 
 CSV = b"""timestamp,open,high,low,close,volume
@@ -98,6 +99,36 @@ class AdjustedIntradayArchiveTests(unittest.TestCase):
             manifest = json.loads((output / "manifest.json").read_text())
             self.assertEqual(manifest["status"], "complete")
             self.assertEqual(manifest["request_count"], 2)
+
+    def test_transient_http_failure_is_retried_without_duplicate_manifest_row(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder)
+            metadata = archive.validate_csv_content(CSV, "2026-07")
+            failure = AlphaVantageRequestError(
+                "Alpha Vantage request failed (HTTP 503); sensitive request details redacted."
+            )
+            with (
+                patch.object(
+                    archive,
+                    "fetch_month",
+                    side_effect=[failure, (CSV, metadata)],
+                ) as fetch,
+                patch.object(archive.time, "sleep") as sleep,
+            ):
+                result = archive.run(
+                    symbols=["AMD"],
+                    start_month="2026-07",
+                    end_month="2026-07",
+                    api_key="secret",
+                    output=output,
+                    delay_seconds=0,
+                    minimum_free_gb=0,
+                )
+            self.assertEqual(fetch.call_count, 2)
+            sleep.assert_called_once_with(2.0)
+            self.assertEqual(result["status"], "complete")
+            self.assertEqual(len(result["completed"]), 1)
+            self.assertEqual(result["failed"], [])
 
     def test_existing_manifest_contract_mismatch_fails_closed(self):
         with tempfile.TemporaryDirectory() as folder:

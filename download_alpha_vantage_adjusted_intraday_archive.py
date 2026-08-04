@@ -22,7 +22,11 @@ from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from dotenv import load_dotenv
 
-from alpha_vantage_http import get_alpha_vantage_response, redact_sensitive_text
+from alpha_vantage_http import (
+    AlphaVantageRequestError,
+    get_alpha_vantage_response,
+    redact_sensitive_text,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -215,6 +219,30 @@ def fetch_month(symbol: str, month: str, api_key: str) -> Tuple[bytes, Dict[str,
     return content, validate_csv_content(content, month)
 
 
+def fetch_month_with_retry(
+    symbol: str,
+    month: str,
+    api_key: str,
+    attempts: int = 4,
+    base_delay_seconds: float = 2.0,
+) -> Tuple[bytes, Dict[str, Any]]:
+    """Retry only credential-safe HTTP/transport failures.
+
+    Schema errors, provider information messages, and unavailable months remain
+    fail-closed because repeating them could hide a contract problem.
+    """
+    if attempts < 1:
+        raise ValueError("retry attempts must be positive")
+    for attempt in range(attempts):
+        try:
+            return fetch_month(symbol, month, api_key)
+        except AlphaVantageRequestError:
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(base_delay_seconds * (2**attempt))
+    raise AssertionError("unreachable retry state")
+
+
 def write_gzip(path: Path, content: bytes) -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -335,7 +363,7 @@ def run(
                 metadata = validate_existing(destination, month)
                 action = "ADOPTED"
             else:
-                content, metadata = fetch_month(symbol, month, api_key)
+                content, metadata = fetch_month_with_retry(symbol, month, api_key)
                 metadata["compressed_bytes"] = write_gzip(destination, content)
                 action = "DONE"
             record = {

@@ -864,6 +864,15 @@ grid, duplicate, OHLC envelope, positive-price, and nonnegative-volume checks.
 The full collector is resumable and atomically records content hashes and
 explicit unavailable/failure evidence in `manifest.json`.
 
+At 2,537 accounted requests, Alpha Vantage returned one HTTP 503 for MU
+2022-01. The collector failed closed as designed. Logs were credential-safe,
+no duplicate process existed, disk was healthy, and the identical command
+resumed from the manifest; the retry succeeded and the manifest failure
+cleared. The collector now retries only `AlphaVantageRequestError` failures up
+to four total attempts with bounded exponential delays. Never extend that
+retry to CSV validation, provider information messages, or contract
+mismatches.
+
 While it runs, never launch a duplicate adjusted-intraday collector. A stopped
 process is not enough reason to restart: first inspect the manifest and
 redacted logs, preserve completed keys, verify disk space and retryability, and
@@ -873,6 +882,13 @@ coverage, missing bars, and the exact four-bar target alignment before building
 or training a model. Keep current-month/live inference data in a separate
 source contract. Do not treat the archive itself as model evidence or authorize
 paper/live trading from it.
+
+Run `audit_alpha_vantage_adjusted_intraday_archive.py` immediately after a
+genuine complete manifest. It independently requires the immutable contract,
+zero failures, exact 8,137-key completed/unavailable coverage with no overlap,
+unique records, valid gzip CSV contents, exact stored hashes/row counts/time
+bounds/sizes, and zero orphan gzip files. Save its JSON report outside the raw
+archive. Do not begin the supplement or model panel if this audit fails.
 
 After that 8,137-request archive completes and passes its audit, run the same
 collector contract for the nine symbols in
