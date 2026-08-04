@@ -16,6 +16,11 @@ CSV = b"""timestamp,open,high,low,close,volume
 2026-07-01 09:30:00,9.8,10.1,9.7,10.0,200
 """
 
+ONE_MINUTE_CSV = b"""timestamp,open,high,low,close,volume
+2026-07-01 09:31:00,10.0,10.2,9.9,10.1,110
+2026-07-01 09:30:00,9.8,10.1,9.7,10.0,200
+"""
+
 
 class AdjustedIntradayArchiveTests(unittest.TestCase):
     def test_month_range_is_inclusive(self):
@@ -43,6 +48,12 @@ class AdjustedIntradayArchiveTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "mismatched month"):
             archive.validate_csv_content(CSV, "2026-06")
 
+    def test_one_minute_grid_is_explicit_and_cannot_pass_as_five_minute(self):
+        result = archive.validate_csv_content(ONE_MINUTE_CSV, "2026-07", "1min")
+        self.assertEqual(result["rows"], 2)
+        with self.assertRaisesRegex(ValueError, "off-grid timestamp"):
+            archive.validate_csv_content(ONE_MINUTE_CSV, "2026-07", "5min")
+
     def test_fetch_contract_requests_adjusted_extended_five_minute_csv(self):
         class Response:
             content = CSV
@@ -60,6 +71,37 @@ class AdjustedIntradayArchiveTests(unittest.TestCase):
         self.assertEqual(params["adjusted"], "true")
         self.assertEqual(params["extended_hours"], "true")
         self.assertEqual(params["datatype"], "csv")
+
+    def test_fetch_contract_requests_adjusted_extended_one_minute_csv(self):
+        class Response:
+            content = ONE_MINUTE_CSV
+
+        with patch.object(
+            archive, "get_alpha_vantage_response", return_value=Response()
+        ) as request:
+            content, metadata = archive.fetch_month(
+                "AMD",
+                "2026-07",
+                "secret",
+                "1min",
+            )
+        self.assertEqual(content, ONE_MINUTE_CSV)
+        self.assertEqual(metadata["rows"], 2)
+        self.assertEqual(request.call_args.args[0]["interval"], "1min")
+
+    def test_one_minute_manifest_has_distinct_dataset_and_interval(self):
+        contract = archive.manifest_contract(
+            ["AMD"],
+            "2026-07",
+            "2026-07",
+            interval="1min",
+            dataset_name="rolling_20m_nasdaq101_adjusted_1min",
+        )
+        self.assertEqual(contract["interval"], "1min")
+        self.assertEqual(
+            contract["dataset"],
+            "rolling_20m_nasdaq101_adjusted_1min",
+        )
 
     def test_limited_run_is_resumable_and_adopts_valid_file(self):
         with tempfile.TemporaryDirectory() as folder:

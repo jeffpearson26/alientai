@@ -32,6 +32,7 @@ from alpha_vantage_http import (
 ROOT = Path(__file__).resolve().parent
 DATASET_NAME = "rolling_20m_nasdaq101_adjusted"
 SCHEMA_VERSION = 1
+SUPPORTED_INTERVALS = {"1min": 1, "5min": 5}
 
 
 class HistoricalMonthUnavailable(ValueError):
@@ -141,7 +142,18 @@ def is_unavailable_message(message: str) -> bool:
     )
 
 
-def validate_csv_content(content: bytes, expected_month: str) -> Dict[str, Any]:
+def interval_minutes(interval: str) -> int:
+    try:
+        return SUPPORTED_INTERVALS[str(interval)]
+    except KeyError as exc:
+        raise ValueError(f"unsupported intraday interval: {interval}") from exc
+
+
+def validate_csv_content(
+    content: bytes,
+    expected_month: str,
+    interval: str = "5min",
+) -> Dict[str, Any]:
     if not content.strip():
         raise HistoricalMonthUnavailable("empty historical intraday response")
     message = provider_message(content)
@@ -156,6 +168,7 @@ def validate_csv_content(content: bytes, expected_month: str) -> Dict[str, Any]:
     if not reader.fieldnames or not required.issubset(set(reader.fieldnames)):
         raise ValueError("Alpha Vantage response lacks required intraday columns")
 
+    grid_minutes = interval_minutes(interval)
     timestamps = set()
     first_timestamp = ""
     last_timestamp = ""
@@ -165,7 +178,7 @@ def validate_csv_content(content: bytes, expected_month: str) -> Dict[str, Any]:
         timestamp = datetime.strptime(timestamp_text, "%Y-%m-%d %H:%M:%S")
         if timestamp.strftime("%Y-%m") != expected_month:
             raise ValueError("Alpha Vantage response contains a mismatched month")
-        if timestamp.minute % 5 or timestamp.second or timestamp.microsecond:
+        if timestamp.minute % grid_minutes or timestamp.second or timestamp.microsecond:
             raise ValueError("Alpha Vantage response contains an off-grid timestamp")
         if timestamp_text in timestamps:
             raise ValueError("Alpha Vantage response contains duplicate timestamps")
@@ -200,12 +213,18 @@ def validate_csv_content(content: bytes, expected_month: str) -> Dict[str, Any]:
     }
 
 
-def fetch_month(symbol: str, month: str, api_key: str) -> Tuple[bytes, Dict[str, Any]]:
+def fetch_month(
+    symbol: str,
+    month: str,
+    api_key: str,
+    interval: str = "5min",
+) -> Tuple[bytes, Dict[str, Any]]:
+    interval_minutes(interval)
     response = get_alpha_vantage_response(
         {
             "function": "TIME_SERIES_INTRADAY",
             "symbol": symbol,
-            "interval": "5min",
+            "interval": interval,
             "month": month,
             "outputsize": "full",
             "adjusted": "true",
@@ -216,13 +235,14 @@ def fetch_month(symbol: str, month: str, api_key: str) -> Tuple[bytes, Dict[str,
         timeout=180,
     )
     content = response.content
-    return content, validate_csv_content(content, month)
+    return content, validate_csv_content(content, month, interval)
 
 
 def fetch_month_with_retry(
     symbol: str,
     month: str,
     api_key: str,
+    interval: str = "5min",
     attempts: int = 4,
     base_delay_seconds: float = 2.0,
 ) -> Tuple[bytes, Dict[str, Any]]:
@@ -235,7 +255,7 @@ def fetch_month_with_retry(
         raise ValueError("retry attempts must be positive")
     for attempt in range(attempts):
         try:
-            return fetch_month(symbol, month, api_key)
+            return fetch_month(symbol, month, api_key, interval)
         except AlphaVantageRequestError:
             if attempt + 1 == attempts:
                 raise
@@ -252,10 +272,14 @@ def write_gzip(path: Path, content: bytes) -> int:
     return path.stat().st_size
 
 
-def validate_existing(path: Path, expected_month: str) -> Dict[str, Any]:
+def validate_existing(
+    path: Path,
+    expected_month: str,
+    interval: str = "5min",
+) -> Dict[str, Any]:
     with gzip.open(path, "rb") as handle:
         content = handle.read()
-    metadata = validate_csv_content(content, expected_month)
+    metadata = validate_csv_content(content, expected_month, interval)
     metadata["compressed_bytes"] = path.stat().st_size
     return metadata
 
@@ -264,15 +288,21 @@ def manifest_contract(
     symbols: Sequence[str],
     start_month: str,
     end_month: str,
+    *,
+    interval: str = "5min",
+    dataset_name: str = DATASET_NAME,
 ) -> Dict[str, Any]:
+    interval_minutes(interval)
+    if not str(dataset_name or "").strip():
+        raise ValueError("dataset name is required")
     return {
         "schema_version": SCHEMA_VERSION,
-        "dataset": DATASET_NAME,
+        "dataset": str(dataset_name).strip(),
         "research_only": True,
         "execution_enabled": False,
         "source": "alpha_vantage",
         "function": "TIME_SERIES_INTRADAY",
-        "interval": "5min",
+        "interval": interval,
         "adjusted": True,
         "extended_hours": True,
         "timestamp_timezone": "America/New_York",
@@ -329,10 +359,18 @@ def run(
     delay_seconds: float,
     minimum_free_gb: float,
     limit_requests: int = 0,
+    interval: str = "5min",
+    dataset_name: str = DATASET_NAME,
 ) -> Dict[str, Any]:
     months = month_range(start_month, end_month)
     items = request_items(symbols, months)
-    contract = manifest_contract(symbols, start_month, end_month)
+    contract = manifest_contract(
+        symbols,
+        start_month,
+        end_month,
+        interval=interval,
+        dataset_name=dataset_name,
+    )
     manifest_path = output / "manifest.json"
     manifest = load_manifest(manifest_path, contract)
 
@@ -360,10 +398,15 @@ def run(
         try:
             ensure_free_space(output, minimum_free_gb)
             if destination.exists():
-                metadata = validate_existing(destination, month)
+                metadata = validate_existing(destination, month, interval)
                 action = "ADOPTED"
             else:
-                content, metadata = fetch_month_with_retry(symbol, month, api_key)
+                content, metadata = fetch_month_with_retry(
+                    symbol,
+                    month,
+                    api_key,
+                    interval,
+                )
                 metadata["compressed_bytes"] = write_gzip(destination, content)
                 action = "DONE"
             record = {
@@ -424,6 +467,8 @@ def main() -> None:
     parser.add_argument("--start-month", default="2020-01")
     parser.add_argument("--end-month", required=True)
     parser.add_argument("--benchmarks", default="QQQ,SPY")
+    parser.add_argument("--interval", choices=sorted(SUPPORTED_INTERVALS), default="5min")
+    parser.add_argument("--dataset-name", default=DATASET_NAME)
     parser.add_argument("--delay-seconds", type=float, default=0.85)
     parser.add_argument("--minimum-free-gb", type=float, default=100.0)
     parser.add_argument("--limit-requests", type=int, default=0)
@@ -448,6 +493,8 @@ def main() -> None:
         delay_seconds=args.delay_seconds,
         minimum_free_gb=args.minimum_free_gb,
         limit_requests=args.limit_requests,
+        interval=args.interval,
+        dataset_name=args.dataset_name,
     )
     print(
         json.dumps(

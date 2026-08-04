@@ -37,9 +37,12 @@ The automatically refreshed data-family and coverage matrix is
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.
-- Any-time rolling 20-minute model: the 103-symbol adjusted five-minute archive
-  completed and passed audit; supplemental nine-symbol archive and model panel
-  remain to be completed.
+- Any-time rolling 20-minute model: Jeff refined this to one-minute resolution.
+  The 103-symbol five-minute archive remains preserved and audited; the
+  separate 8,137-request one-minute archive is actively collecting after a
+  successful AAPL pilot (21,095 rows and complete 390-bar regular sessions).
+  Panel construction, chronological training, and live-source compatibility
+  validation remain pending.
 - Five-day catalyst-momentum model: explicitly excluded from this promising
   list because its typical held-out selection lost money; status remains
   `RESEARCH_HOLD`.

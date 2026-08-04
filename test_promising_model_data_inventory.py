@@ -6,10 +6,32 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
-from update_promising_model_data_inventory import audit_jsonl, build_inventory
+from update_promising_model_data_inventory import (
+    audit_jsonl,
+    audit_manifest,
+    build_inventory,
+)
 
 
 class PromisingModelDataInventoryTests(unittest.TestCase):
+    def test_manifest_can_require_completed_plus_unavailable_accounting(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "status": "complete",
+                        "completed": [{"request": "AAA|2026-07"}],
+                        "unavailable": [{"request": "OLD|2020-01"}],
+                        "failed": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = audit_manifest(path, {"required_accounted": 2})
+            self.assertEqual(result["state"], "READY")
+            self.assertEqual(result["accounted"], 2)
+
     def test_boolean_coverage_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "panel.jsonl"

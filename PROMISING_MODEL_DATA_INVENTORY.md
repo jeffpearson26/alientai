@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-04T15:35:00.100696+00:00`
+Automatically refreshed: `2026-08-04T16:12:25.318925+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -17,7 +17,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Original Alpha AI/semiconductor intraday models | **BLOCKED** | alpha_ai17_realtime_premarket_0925 |
 | Schwab 09:35 late-entry models | **BLOCKED** | schwab_ai17_0925_snapshot |
 | Defined-risk options model (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
-| Any-time rolling 20-minute model (development) | **DEVELOPMENT_NOT_TESTING** | rolling_archive_supplement_9 |
+| Any-time rolling 20-minute model (development) | **DEVELOPMENT_NOT_TESTING** | adjusted_one_minute_archive |
 
 ## Data requirements
 
@@ -41,7 +41,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `ai17_frozen_artifacts` | Frozen five-session model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `narrative_frozen_artifacts` | Frozen narrative model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-03 | **READY** | Exact prior session only; calls, not puts/sell volume |
-| `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed required |
+| `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed and 0 accounted required |
 | `alpha_ai17_exact_intraday_outcomes` | Exact 09:30-10:25 five-minute outcome path | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
 | `alpha_intraday_frozen_artifacts` | Six frozen intraday model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:30 timing contract must match |
 | `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | — | **BLOCKED** | no file matches D:/AlientAI/Data/Schwab_2026/ai_semiconductor_late_*/manifest.json |
@@ -53,6 +53,8 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `option_quotes_liquidity_and_fees` | Bid/ask, volume, open interest, IV and fees | Archived option chains | — | **CONTRACT** | validated when each observation reaches this stage |
 | `purged_option_training_labels` | Direction and absolute-move option labels | Exact compiled option outcomes | — | **CONTRACT** | validated when each observation reaches this stage |
 | `adjusted_five_minute_archive` | Adjusted five-minute intraday candles | Alpha Vantage | — | **READY** | Audited complete archive; interval-start timestamps |
+| `adjusted_one_minute_archive` | Adjusted one-minute intraday candles | Alpha Vantage | — | **BLOCKED** | manifest status=running, completed=189, unavailable=32, failed=0; 0 completed and 8137 accounted required |
 | `rolling_archive_supplement_9` | Nine-symbol AI/data-center intraday supplement | Alpha Vantage | — | **BLOCKED** | no file matches D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_ai_data_center_supplement_202001_202607 |
 | `market_and_sector_context` | QQQ/SPY/semiconductor market context | Same source and timestamp as rolling observation | — | **CONTRACT** | validated when each observation reaches this stage |
-| `purged_rolling_20m_labels` | Any-time 20-minute forward labels | Audited five-minute archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `one_minute_live_source_compatibility` | Current-session one-minute candles and source-agreement audit | Schwab live candidate versus Alpha Vantage training archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `purged_rolling_20m_labels` | Any-time 20-minute forward labels | Audited one-minute archive | — | **CONTRACT** | validated when each observation reaches this stage |

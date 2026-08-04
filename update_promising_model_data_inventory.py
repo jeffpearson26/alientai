@@ -170,13 +170,21 @@ def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
     unavailable = len(manifest.get("unavailable") or [])
     failed = len(manifest.get("failed") or [])
     required = int(spec.get("required_completed") or 0)
-    ready = status == "complete" and failed == 0 and completed >= required
+    required_accounted = int(spec.get("required_accounted") or 0)
+    accounted = completed + unavailable
+    ready = (
+        status == "complete"
+        and failed == 0
+        and completed >= required
+        and accounted >= required_accounted
+    )
     return {
         "state": "READY" if ready else "BLOCKED",
         "latest_path": str(path),
         "manifest_status": status,
         "completed": completed,
         "unavailable": unavailable,
+        "accounted": accounted,
         "failed": failed,
         "latest_market_date": manifest.get("current_date"),
         "reason": None
@@ -184,7 +192,7 @@ def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
         else (
             f"manifest status={status}, completed={completed}, "
             f"unavailable={unavailable}, failed={failed}; "
-            f"{required} completed required"
+            f"{required} completed and {required_accounted} accounted required"
         ),
     }
 

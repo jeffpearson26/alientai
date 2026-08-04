@@ -1,6 +1,6 @@
 # AlienTAI Dynamic Master Plan
 
-Last updated: 2026-08-02 Pacific time
+Last updated: 2026-08-04 Pacific time
 
 ## Purpose and authority
 
@@ -495,6 +495,24 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `ACTIVE 2026-08-04`: Jeff refined the rolling 20-minute goal from a
+five-minute-grid model to a one-minute-resolution model that may be queried at
+any eligible regular-session minute. Preserve the already completed and audited
+five-minute archive as useful prior work, but do not claim that it satisfies
+this finer timing contract. The new, source-separated archive uses the same 101
+Nasdaq symbols plus QQQ and SPY, Alpha Vantage `TIME_SERIES_INTRADAY`,
+`interval=1min`, completed months 2020-01 through 2026-07, `adjusted=true`,
+`extended_hours=true`, and writes only to
+`D:\AlientAI\Data\AlphaVantage_2026\rolling_20m_nasdaq101_adjusted_1min_202001_202607`.
+The one-request July pilot returned 21,095 valid AAPL rows; all 22 regular
+sessions had exactly 390 one-minute bars. Train labels from the last fully
+completed minute close through the twentieth subsequent regular-session minute
+close, never across the overnight boundary. A mid-minute query must disclose
+the effective completed-minute timestamp; exact sub-minute prediction would
+require tick data. Before live research scoring, validate normalized feature
+agreement between the Alpha Vantage training archive and the selected live
+one-minute source. Research only; no engine, paper-order, or live-order path.
+
 000. `ACTIVE 2026-08-03`: Build the separate Alpha Vantage adjusted five-minute
 archive required for a true rolling 20-minute model that can be queried at
 arbitrary regular-session times. The frozen collection contract is the 101
@@ -509,6 +527,11 @@ credential-safe. After completion, audit timestamps, adjustments, missingness,
 corporate actions, and regular-session continuity before building labels.
 Never connect this collection or a future model derived from it to paper/live
 trading without the normal frozen prospective promotion process.
+
+This five-minute archive completed and passed its independent audit on
+2026-08-04. It remains preserved for five-minute-aligned diagnostics, but
+Jeff's newer one-minute-resolution contract above supersedes it as the active
+path for the any-time model.
 
 The collector stopped once at 2,537 accounted requests on a credential-safe
 Alpha Vantage HTTP 503 for MU 2022-01. After verifying no process remained,
@@ -863,3 +886,14 @@ feature-family ablation order, chronological splits, and promotion gates.
   real-time US stock data. Therefore no July-31 stock signals or option entries
   were journaled. Do not fill the 09:25 Alpha Vantage premarket requirement
   with Schwab data without an explicit, source-separated protocol decision.
+- 2026-08-04: Jeff refined the planned any-time 20-minute model from a
+  five-minute grid to one-minute resolution. The completed five-minute archive
+  remains preserved. A separate AAPL July pilot verified 21,095 valid
+  one-minute rows and all 22 complete 390-bar regular sessions. The resumable
+  8,137-request production archive was then started on D: with a distinct
+  interval/dataset manifest. Added a research-only timing contract,
+  leakage-safe one-minute feature/label core, exact QQQ/SPY compiler design,
+  rotating non-overlapping training sampler, capital-scaled validation gate,
+  and targeted tests. Live scoring remains blocked until the historical
+  archive, content audit, training, and Alpha-versus-live-source compatibility
+  audit complete. No engine, paper, or live trading path changed.

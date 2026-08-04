@@ -934,6 +934,49 @@ active archive and prior Nasdaq research. The supplemental archive must have
 its own output directory and manifest; combine only after exact contract and
 coverage validation.
 
+## One-minute any-time 20-minute successor (started 2026-08-04)
+
+Jeff explicitly refined the desired model to one-minute resolution: it must
+answer throughout the regular session rather than only at the open or on a
+five-minute grid. Preserve the completed five-minute archive and all frozen
+opening models unchanged.
+
+The new archive contract is:
+
+- collector: `download_alpha_vantage_adjusted_intraday_archive.py`
+- universe: the exact 101 rows in `nasdaq100_2026-06_symbols.txt`, plus QQQ and
+  SPY (103 unique symbols)
+- source/function: Alpha Vantage `TIME_SERIES_INTRADAY`
+- interval: one minute
+- months: completed months 2020-01 through 2026-07
+- `adjusted=true`, `extended_hours=true`
+- timestamp convention: interval start, `America/New_York`
+- dataset: `rolling_20m_nasdaq101_adjusted_1min`
+- destination:
+  `D:\AlientAI\Data\AlphaVantage_2026\rolling_20m_nasdaq101_adjusted_1min_202001_202607`
+- research only; no engine, paper-order, or live-order path
+
+The separate July AAPL pilot passed: 21,095 rows, 22 regular sessions, exactly
+390 regular-session rows on every session, zero failures. The production
+archive must remain resumable, singular, credential-safe, and separately
+audited before panel construction.
+
+The prediction contract uses only fully completed one-minute bars. A historical
+observation is keyed by the effective close of the newest completed minute and
+targets the close of the twentieth subsequent regular-session minute, with no
+overnight crossing. A mid-minute user query must report its effective
+completed-minute `as_of` timestamp and minute-resolution target; never pretend
+one-minute candles support exact sub-minute timing. Use whole market dates for
+chronological train/validation/test partitions and purge target overlap.
+
+Alpha Vantage is the historical training source. A live Schwab one-minute feed
+may be considered only after a separately recorded overlapping
+source-compatibility audit shows that normalized features and timestamp
+semantics match closely enough. Never silently splice sources or use a partial
+current minute. The first implementation remains research-only and must expose
+predicted return, direction probability, uncertainty/abstention, effective
+`as_of`, and target timestamps.
+
 ## Five-session catalyst-momentum model (2026-08-04)
 
 `train_ai_semiconductor_catalyst_momentum_5d.py` and

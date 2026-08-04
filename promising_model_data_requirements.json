@@ -104,9 +104,9 @@
       "display_name": "Any-time rolling 20-minute model (development)",
       "lifecycle": "development",
       "requirements": [
-        "adjusted_five_minute_archive",
-        "rolling_archive_supplement_9",
+        "adjusted_one_minute_archive",
         "market_and_sector_context",
+        "one_minute_live_source_compatibility",
         "purged_rolling_20m_labels"
       ]
     }
@@ -340,6 +340,14 @@
       "kind": "file",
       "path": "data_v2/rcef_research/rolling_20m_nasdaq101_adjusted_archive_audit_20260804.json"
     },
+    "adjusted_one_minute_archive": {
+      "data_type": "Adjusted one-minute intraday candles",
+      "source": "Alpha Vantage",
+      "timing_contract": "Completed monthly archive; one-minute interval-start timestamps; content audit required",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_nasdaq101_adjusted_1min_202001_202607/manifest.json",
+      "required_accounted": 8137
+    },
     "rolling_archive_supplement_9": {
       "data_type": "Nine-symbol AI/data-center intraday supplement",
       "source": "Alpha Vantage",
@@ -353,10 +361,16 @@
       "timing_contract": "Available at each arbitrary decision timestamp",
       "kind": "logical"
     },
+    "one_minute_live_source_compatibility": {
+      "data_type": "Current-session one-minute candles and source-agreement audit",
+      "source": "Schwab live candidate versus Alpha Vantage training archive",
+      "timing_contract": "Use only fully completed one-minute bars; live scoring blocked until overlapping normalized features pass a frozen source-compatibility audit",
+      "kind": "logical"
+    },
     "purged_rolling_20m_labels": {
       "data_type": "Any-time 20-minute forward labels",
-      "source": "Audited five-minute archive",
-      "timing_contract": "No opening-only assumption; purged chronological splits",
+      "source": "Audited one-minute archive",
+      "timing_contract": "Last completed minute close to the twentieth subsequent regular-session minute close; no overnight crossing; purged chronological splits",
       "kind": "logical"
     }
   }

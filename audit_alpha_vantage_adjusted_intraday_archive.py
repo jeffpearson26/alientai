@@ -39,12 +39,21 @@ def audit_archive(
     symbols: Sequence[str],
     start_month: str,
     end_month: str,
+    *,
+    interval: str = "5min",
+    dataset_name: str = "rolling_20m_nasdaq101_adjusted",
 ) -> dict[str, Any]:
     manifest_path = output / "manifest.json"
     if not manifest_path.exists():
         raise ValueError("archive manifest does not exist")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    contract = manifest_contract(symbols, start_month, end_month)
+    contract = manifest_contract(
+        symbols,
+        start_month,
+        end_month,
+        interval=interval,
+        dataset_name=dataset_name,
+    )
     for field, expected in contract.items():
         if manifest.get(field) != expected:
             raise ValueError(f"archive manifest contract mismatch: {field}")
@@ -88,7 +97,7 @@ def audit_archive(
             raise ValueError(f"relative path mismatch: {key}")
         if not path.exists():
             raise ValueError(f"completed archive file is missing: {key}")
-        metadata = validate_existing(path, month)
+        metadata = validate_existing(path, month, interval)
         for field in (
             "rows", "first_timestamp_et", "last_timestamp_et",
             "content_sha256", "uncompressed_bytes", "compressed_bytes",
@@ -139,6 +148,11 @@ def main() -> None:
     parser.add_argument("--start-month", required=True)
     parser.add_argument("--end-month", required=True)
     parser.add_argument("--benchmarks", default="QQQ,SPY")
+    parser.add_argument("--interval", choices=("1min", "5min"), default="5min")
+    parser.add_argument(
+        "--dataset-name",
+        default="rolling_20m_nasdaq101_adjusted",
+    )
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
 
@@ -148,7 +162,14 @@ def main() -> None:
         if value.strip()
     ]
     symbols = read_symbols(args.symbols_file, benchmarks)
-    report = audit_archive(args.output, symbols, args.start_month, args.end_month)
+    report = audit_archive(
+        args.output,
+        symbols,
+        args.start_month,
+        args.end_month,
+        interval=args.interval,
+        dataset_name=args.dataset_name,
+    )
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
