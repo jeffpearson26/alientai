@@ -1,6 +1,6 @@
 # Any-Time 20-Minute One-Minute Model Contract
 
-Status: active development, research only  
+Status: active development, research only
 Created: 2026-08-04
 
 ## Question
