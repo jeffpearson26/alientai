@@ -495,6 +495,21 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `ACTIVE 2026-08-03`: Build the separate Alpha Vantage adjusted five-minute
+archive required for a true rolling 20-minute model that can be queried at
+arbitrary regular-session times. The frozen collection contract is the 101
+symbols in `nasdaq100_2026-06_symbols.txt` plus QQQ and SPY, completed calendar
+months from 2020-01 through 2026-07, `TIME_SERIES_INTRADAY`, five-minute
+intervals, `adjusted=true`, and `extended_hours=true`. The full archive has
+8,137 symbol-month requests and writes only to
+`D:\AlientAI\Data\AlphaVantage_2026\rolling_20m_nasdaq101_adjusted_202001_202607`.
+The five-request live pilot completed with zero unavailable or failed requests
+and valid 04:00-19:55 ET interval-start data. Keep collection resumable and
+credential-safe. After completion, audit timestamps, adjustments, missingness,
+corporate actions, and regular-session continuity before building labels.
+Never connect this collection or a future model derived from it to paper/live
+trading without the normal frozen prospective promotion process.
+
 00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
 three priority programs listed in the August 2 reset. Preserve model hashes,
 universes, thresholds, costs, source identity, and timing. Do not retune after

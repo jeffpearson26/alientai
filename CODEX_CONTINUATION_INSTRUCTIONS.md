@@ -836,3 +836,40 @@ validation policy. Its strong observed test must be compared prospectively
 against the frozen equal-weight five-stock control because that simple control
 was stronger during validation. Never retune from the observed test or enable
 execution.
+
+## Rolling 20-minute adjusted archive (started 2026-08-03)
+
+Jeff approved collecting the Alpha Vantage candles needed for a separate model
+that predicts any eligible ticker's return over the next four five-minute bars,
+instead of only predicting a fixed interval after the market open.
+
+The immutable archive contract is:
+
+- collector: `download_alpha_vantage_adjusted_intraday_archive.py`
+- universe: the 101 exact rows in `nasdaq100_2026-06_symbols.txt`, plus QQQ and
+  SPY (103 unique symbols)
+- source/function: Alpha Vantage `TIME_SERIES_INTRADAY`
+- interval: five minutes
+- months: 2020-01 through the completed month 2026-07
+- `adjusted=true`, `extended_hours=true`
+- timestamp convention: interval start, `America/New_York`
+- destination:
+  `D:\AlientAI\Data\AlphaVantage_2026\rolling_20m_nasdaq101_adjusted_202001_202607`
+- request count: 8,137 symbol-months
+- research only, with no engine, broker, paper-order, or live-order path
+
+The separate July-2026 five-request pilot completed AAPL, ABNB, ADBE, ADI, and
+ADP with zero unavailable or failed requests. Its rows passed month, timestamp
+grid, duplicate, OHLC envelope, positive-price, and nonnegative-volume checks.
+The full collector is resumable and atomically records content hashes and
+explicit unavailable/failure evidence in `manifest.json`.
+
+While it runs, never launch a duplicate adjusted-intraday collector. A stopped
+process is not enough reason to restart: first inspect the manifest and
+redacted logs, preserve completed keys, verify disk space and retryability, and
+resume the identical command only. After completion, independently audit
+regular-session continuity, split adjustment consistency, per-symbol/month
+coverage, missing bars, and the exact four-bar target alignment before building
+or training a model. Keep current-month/live inference data in a separate
+source contract. Do not treat the archive itself as model evidence or authorize
+paper/live trading from it.
