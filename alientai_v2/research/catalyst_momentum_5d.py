@@ -3,6 +3,7 @@ from __future__ import annotations
 """Point-in-time feature contract for the five-session catalyst-momentum thesis."""
 
 from collections import defaultdict
+from math import isfinite
 from typing import Any, Mapping, Sequence
 
 from alientai_v2.features.insider_purchase_features import safe_float
@@ -12,14 +13,24 @@ def _number(row: Mapping[str, Any], name: str) -> float:
     return safe_float(row.get(name))
 
 
-def _percentile_ranks(rows: Sequence[Mapping[str, Any]], field: str) -> dict[int, float]:
-    """Cross-sectional ranks use only same-cutoff lagged inputs."""
-    ordered = sorted(
-        ((safe_float(row.get(field)), index) for index, row in enumerate(rows)),
-        key=lambda item: (item[0], item[1]),
-    )
-    denominator = max(1, len(ordered) - 1)
-    return {index: rank / denominator for rank, (_, index) in enumerate(ordered)}
+def _percentile_ranks(
+    rows: Sequence[Mapping[str, Any]], field: str
+) -> dict[int, float | None]:
+    """Rank observed same-cutoff values; missing data never becomes zero."""
+    observed: list[tuple[float, int]] = []
+    for index, row in enumerate(rows):
+        try:
+            value = float(row.get(field))
+        except (TypeError, ValueError):
+            continue
+        if isfinite(value):
+            observed.append((value, index))
+    observed.sort(key=lambda item: (item[0], item[1]))
+    denominator = max(1, len(observed) - 1)
+    ranks: dict[int, float | None] = {index: None for index in range(len(rows))}
+    for rank, (_, index) in enumerate(observed):
+        ranks[index] = rank / denominator
+    return ranks
 
 
 def engineer_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -61,9 +72,12 @@ def engineer_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
                 and macd_hist > 0.0
                 and relative_volume >= 1.20
             )
+            return20_rank = return20_ranks[local_index]
+            return60_rank = return60_ranks[local_index]
             continuation = (
                 bool(row.get("technical_ema_bullish_alignment"))
-                and return20_ranks[local_index] >= 0.70
+                and return20_rank is not None
+                and return20_rank >= 0.70
                 and macd_hist > 0.0
                 and relative_volume >= 0.90
             )
@@ -107,8 +121,10 @@ def engineer_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             technical_setup = oversold or breakout or continuation
 
             row.update({
-                "cm_technical_return20_rank": return20_ranks[local_index],
-                "cm_technical_return60_rank": return60_ranks[local_index],
+                "cm_technical_return20_rank": return20_rank,
+                "cm_technical_return60_rank": return60_rank,
+                "cm_technical_return20_available": return20_rank is not None,
+                "cm_technical_return60_available": return60_rank is not None,
                 "cm_technical_oversold_bounce": oversold,
                 "cm_technical_breakout": breakout,
                 "cm_technical_continuation": continuation,

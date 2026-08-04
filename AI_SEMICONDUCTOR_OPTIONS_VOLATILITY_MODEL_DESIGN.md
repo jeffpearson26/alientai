@@ -1,6 +1,7 @@
 # AI Semiconductor Defined-Risk Options Volatility Model
 
-Status: framework implemented; learned heads and exact multi-leg backtest pending
+Status: framework and exact point-in-time fill compiler implemented; learned
+heads and full strategy backtest pending
 Execution enabled: `false`
 
 ## Objective
@@ -97,6 +98,9 @@ they cannot use nearby dates, theoretical prices, or another provider.
 ## Required backtest contract
 
 - Make the underlying forecast before the option-entry snapshot.
+- Freeze contract identities from an earlier observable selection snapshot.
+- Require a later, distinct entry snapshot; selecting and filling from the same
+  date-only snapshot is prohibited.
 - Use the next available complete end-of-day chain for entry; never pretend an
   end-of-day chain was an opening quote.
 - Select every leg deterministically before observing its outcome.
@@ -112,9 +116,12 @@ they cannot use nearby dates, theoretical prices, or another provider.
 
 ## Next build
 
-Compile exact entry/exit contract pairs for the 17-symbol archive. Quantify
-strategy feasibility and missing-leg rates before training any strategy label.
-Then train separate direction and absolute-move heads; derive IV rank and term
-structure only from chains available by the option-entry cutoff. If exact
-multi-leg fills are too sparse, reduce the permitted set rather than substitute
-marks, last prices, or theoretical option values.
+`alientai_v2/research/exact_multileg_option_compiler.py` now enforces
+selection-available <= decision < entry < exit, exact contract identity across
+all three snapshots, ask-side purchases, bid-side sales, fees, and return on
+defined maximum risk. Compile exact candidates for the 17-symbol archive and
+quantify missing-leg rates before training any strategy label. Then train
+separate direction and absolute-move heads; derive IV rank and term structure
+only from chains available by the option-entry cutoff. If exact fills are too
+sparse, reduce the permitted set rather than substitute marks, last prices, or
+theoretical option values.

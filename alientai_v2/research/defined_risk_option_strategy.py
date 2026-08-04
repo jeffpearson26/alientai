@@ -67,7 +67,21 @@ class OptionStrategyDecision:
         return asdict(self)
 
 
-def _validate(inputs: OptionStrategyInputs) -> None:
+@dataclass(frozen=True)
+class OptionStrategyPolicy:
+    minimum_liquidity: float = 0.60
+    underpriced_move_ratio: float = 1.20
+    overpriced_move_ratio: float = 0.75
+    minimum_rich_iv_rank: float = 0.65
+    minimum_front_back_ratio: float = 1.15
+    directional_threshold: float = 0.35
+    strong_directional_threshold: float = 0.65
+    technical_confirmation_threshold: float = 0.60
+    range_threshold: float = 0.60
+    pin_threshold: float = 0.80
+
+
+def _validate(inputs: OptionStrategyInputs, policy: OptionStrategyPolicy) -> None:
     if not inputs.symbol.strip():
         raise ValueError("symbol is required")
     if inputs.stack_role not in ALLOWED_STACK_ROLES:
@@ -92,6 +106,19 @@ def _validate(inputs: OptionStrategyInputs) -> None:
         value = float(getattr(inputs, name))
         if not isfinite(value) or value <= 0:
             raise ValueError(f"{name} must be positive")
+    probability_fields = (
+        "minimum_liquidity", "minimum_rich_iv_rank", "directional_threshold",
+        "strong_directional_threshold", "technical_confirmation_threshold",
+        "range_threshold", "pin_threshold",
+    )
+    for name in probability_fields:
+        value = float(getattr(policy, name))
+        if not isfinite(value) or not 0 <= value <= 1:
+            raise ValueError(f"policy {name} must be between zero and one")
+    if not 0 < policy.overpriced_move_ratio < policy.underpriced_move_ratio:
+        raise ValueError("policy move-ratio boundaries are invalid")
+    if policy.minimum_front_back_ratio <= 0:
+        raise ValueError("policy term-structure ratio must be positive")
 
 
 def _construction(strategy: str) -> dict[str, Any]:
@@ -144,14 +171,15 @@ def _construction(strategy: str) -> dict[str, Any]:
 
 def choose_defined_risk_strategy(
     inputs: OptionStrategyInputs,
+    policy: OptionStrategyPolicy = OptionStrategyPolicy(),
 ) -> OptionStrategyDecision:
-    _validate(inputs)
+    _validate(inputs, policy)
     emerging = inputs.stack_role == "emerging_inference_specialist"
     maximum_risk = 0.50 if emerging else 1.00
     if inputs.existing_same_stack_risk_pct >= 1.5:
         maximum_risk *= 0.5
 
-    if inputs.liquidity_score < 0.60:
+    if inputs.liquidity_score < policy.minimum_liquidity:
         return OptionStrategyDecision(
             symbol=inputs.symbol,
             decision="ABSTAIN",
@@ -164,16 +192,16 @@ def choose_defined_risk_strategy(
     realized_to_implied = (
         inputs.expected_absolute_move_pct / inputs.implied_move_pct
     )
-    directional = abs(inputs.direction_score) >= 0.35
+    directional = abs(inputs.direction_score) >= policy.directional_threshold
     strongly_directional = (
-        abs(inputs.direction_score) >= 0.65
-        and inputs.technical_confirmation >= 0.60
+        abs(inputs.direction_score) >= policy.strong_directional_threshold
+        and inputs.technical_confirmation >= policy.technical_confirmation_threshold
     )
 
     strategy: str | None = None
     rationale: list[str] = []
 
-    if realized_to_implied >= 1.20:
+    if realized_to_implied >= policy.underpriced_move_ratio:
         if strongly_directional:
             strategy = (
                 "bull_call_debit_spread"
@@ -191,26 +219,26 @@ def choose_defined_risk_strategy(
                 "directional confidence is deliberately low",
             ))
     elif (
-        realized_to_implied <= 0.75
-        and inputs.iv_rank >= 0.65
+        realized_to_implied <= policy.overpriced_move_ratio
+        and inputs.iv_rank >= policy.minimum_rich_iv_rank
         and not inputs.binary_event_within_five_sessions
     ):
         if (
-            inputs.front_to_back_iv_ratio >= 1.15
-            and inputs.range_bound_confidence >= 0.60
+            inputs.front_to_back_iv_ratio >= policy.minimum_front_back_ratio
+            and inputs.range_bound_confidence >= policy.range_threshold
         ):
             strategy = "calendar_spread"
             rationale.extend((
                 "front-month volatility is rich to back-month volatility",
                 "range-bound forecast supports front decay",
             ))
-        elif inputs.range_bound_confidence >= 0.80:
+        elif inputs.range_bound_confidence >= policy.pin_threshold:
             strategy = "iron_butterfly"
             rationale.extend((
                 "implied move appears materially rich",
                 "very high pin/range confidence",
             ))
-        elif inputs.range_bound_confidence >= 0.60:
+        elif inputs.range_bound_confidence >= policy.range_threshold:
             strategy = "iron_condor"
             rationale.extend((
                 "implied move appears materially rich",

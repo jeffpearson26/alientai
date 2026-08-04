@@ -66,6 +66,16 @@ class CatalystMomentumFiveDayTests(unittest.TestCase):
         self.assertEqual(results["AAA"]["cm_technical_return20_rank"], 0.0)
         self.assertEqual(results["BBB"]["cm_technical_return20_rank"], 1.0)
 
+    def test_missing_relative_strength_is_not_ranked_as_zero(self):
+        missing = base_row("MISSING")
+        weak = base_row("WEAK")
+        missing["return_20d_lag_pct"] = None
+        weak["return_20d_lag_pct"] = -5.0
+        results = {row["symbol"]: row for row in engineer_rows([missing, weak])}
+        self.assertIsNone(results["MISSING"]["cm_technical_return20_rank"])
+        self.assertFalse(results["MISSING"]["cm_technical_return20_available"])
+        self.assertEqual(results["WEAK"]["cm_technical_return20_rank"], 0.0)
+
     def test_selection_requires_eligibility_and_respects_daily_maximum(self):
         rows = []
         for index in range(8):
@@ -78,9 +88,15 @@ class CatalystMomentumFiveDayTests(unittest.TestCase):
 
     def test_fraction_is_selected_from_validation_metrics_only(self):
         results = {
-            "0.1": {"count": 10, "mean_net_return_pct": 1.0, "win_rate": 0.6},
-            "0.2": {"count": 12, "mean_net_return_pct": 1.5, "win_rate": 0.5},
-            "0.3": {"count": 9, "mean_net_return_pct": 9.0, "win_rate": 1.0},
+            "0.1": {"count": 30, "distinct_market_dates": 10,
+                    "validation_score": 0.8, "fifth_percentile_pct": -2.0,
+                    "win_rate": 0.6},
+            "0.2": {"count": 35, "distinct_market_dates": 12,
+                    "validation_score": 1.0, "fifth_percentile_pct": -3.0,
+                    "win_rate": 0.5},
+            "0.3": {"count": 29, "distinct_market_dates": 15,
+                    "validation_score": 9.0, "fifth_percentile_pct": 4.0,
+                    "win_rate": 1.0},
         }
         self.assertEqual(choose_fraction(results), 0.2)
 

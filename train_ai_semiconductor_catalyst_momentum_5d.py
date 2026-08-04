@@ -32,6 +32,8 @@ TARGET_RETURN_PCT = 2.0
 FRACTIONS = (0.10, 0.20, 0.30, 0.50)
 MAX_DAILY_SELECTIONS = 5
 MAX_OPEN_POSITIONS = 5
+MIN_VALIDATION_SELECTIONS = 30
+MIN_VALIDATION_DATES = 10
 STAGES: tuple[tuple[str, tuple[str, ...], str], ...] = (
     (
         "technical_setup",
@@ -90,7 +92,12 @@ def _return_metrics(values: Sequence[float]) -> dict[str, Any]:
             "count": 0, "mean_net_return_pct": None, "median_net_return_pct": None,
             "win_rate": None, "target_2pct_rate": None, "large_5pct_rate": None,
             "fifth_percentile_pct": None, "worst_trade_pct": None,
+            "validation_score": None,
         }
+    standard_error = (
+        float(np.std(values, ddof=1) / np.sqrt(len(values)))
+        if len(values) > 1 else float("inf")
+    )
     return {
         "count": int(len(values)),
         "mean_net_return_pct": round(float(np.mean(values)), 6),
@@ -100,11 +107,15 @@ def _return_metrics(values: Sequence[float]) -> dict[str, Any]:
         "large_5pct_rate": round(float(np.mean(values >= 5.0)), 6),
         "fifth_percentile_pct": round(float(np.percentile(values, 5)), 6),
         "worst_trade_pct": round(float(np.min(values)), 6),
+        "validation_score": round(float(np.mean(values)) - standard_error, 6),
     }
 
 
 def metrics(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     fixed = _return_metrics([float(row[TARGET]) for row in rows])
+    fixed["distinct_market_dates"] = len(
+        {str(row.get("market_date") or "") for row in rows if row.get("market_date")}
+    )
     time_stop_values = [
         (
             float(row["label_1d_net_return_pct"])
@@ -166,14 +177,18 @@ def choose_fraction(results: Mapping[str, Mapping[str, Any]]) -> float:
     eligible = [
         (float(name), result)
         for name, result in results.items()
-        if int(result["count"]) >= 10
+        if int(result["count"]) >= MIN_VALIDATION_SELECTIONS
+        and int(result.get("distinct_market_dates") or 0) >= MIN_VALIDATION_DATES
     ]
     if not eligible:
-        raise ValueError("validation has fewer than ten capacity-limited selections")
+        raise ValueError(
+            "validation requires at least 30 selections across 10 decision dates"
+        )
     return max(
         eligible,
         key=lambda item: (
-            float(item[1]["mean_net_return_pct"]),
+            float(item[1]["validation_score"]),
+            float(item[1]["fifth_percentile_pct"]),
             float(item[1]["win_rate"]),
             -item[0],
         ),

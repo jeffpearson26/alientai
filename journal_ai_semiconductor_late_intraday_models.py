@@ -64,6 +64,7 @@ def merge_inputs(
     call_rows: Sequence[Mapping[str, Any]],
     schwab_archive: Path,
     decision_date: str,
+    prior_session_date: str,
     expected_symbols: Sequence[str],
 ) -> list[dict[str, Any]]:
     technical, calls = by_symbol(technical_rows), by_symbol(call_rows)
@@ -71,7 +72,6 @@ def merge_inputs(
     if set(technical) != expected or set(calls) != expected:
         raise ValueError("technical and call inputs must match the frozen universe")
     output = []
-    decision = date.fromisoformat(decision_date)
     for symbol in sorted(expected):
         tech, call = technical[symbol], calls[symbol]
         prior_dates = {
@@ -81,8 +81,11 @@ def merge_inputs(
         if len(prior_dates) != 1:
             raise ValueError(f"technical/call date mismatch for {symbol}")
         prior_date = next(iter(prior_dates))
-        if date.fromisoformat(prior_date) >= decision:
-            raise ValueError(f"technical/call rows are not prior-session data for {symbol}")
+        if prior_date != prior_session_date:
+            raise ValueError(
+                f"technical/call rows are stale for {symbol}: "
+                f"expected {prior_session_date}, found {prior_date}"
+            )
         candles = schwab_context(schwab_archive, symbol, decision_date)
         premarket = build_premarket_features(candles, decision_date)
         if (
@@ -182,6 +185,7 @@ def main() -> None:
     parser.add_argument("--schwab-archive", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--decision-date", required=True)
+    parser.add_argument("--prior-session-date", required=True)
     parser.add_argument("--journal", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
@@ -218,6 +222,7 @@ def main() -> None:
         read_jsonl(args.call_history),
         args.schwab_archive,
         args.decision_date,
+        args.prior_session_date,
         symbols,
     )
     observations = score_models(rows, args.model_root, args.decision_date)

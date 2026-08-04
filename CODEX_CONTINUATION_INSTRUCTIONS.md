@@ -951,9 +951,21 @@ The natural Alpha Vantage archive covers all 17 established AI/semiconductor
 symbols with 108-122 dated chains each. Of 1,694 underlying panel rows, 1,262
 have exact next-session entry and fifth-session exit chains, and every complete
 pair has matching contract IDs at exit (minimum 42, median 2,424, maximum
-11,510). Preserve the other rows as missing. Next, compile conservative
-multi-leg outcomes using ask/bid crossings and defined maximum risk, then train
-separate direction and absolute-move heads with purged chronology. Do not use
+11,510). Preserve the other rows as missing.
+`alientai_v2\research\exact_multileg_option_compiler.py` now requires a prior
+observable selection snapshot, a later distinct entry snapshot, and a later
+exit snapshot; it rejects same-snapshot selection/fill, missing contract IDs,
+and malformed quotes, crosses every spread, and charges fees. Next compile the
+full candidate set, then train separate direction and absolute-move heads with
+purged chronology. Do not use
 stock returns as option returns, marks/lasts as fills, nearby dates, naked short
 structures, or CBRS backfill. Controlling design:
 `AI_SEMICONDUCTOR_OPTIONS_VOLATILITY_MODEL_DESIGN.md`.
+
+For the Schwab 09:35 late-entry program, run
+`audit_schwab_late_entry_readiness.py` before the capture window. It requires
+the exact immediately preceding session (not merely any older date), one row
+per frozen symbol, Alpha Vantage technical provenance, at least ten historical
+call observations per symbol, and the frozen research-only manifest.
+`journal_ai_semiconductor_late_intraday_models.py` also requires an explicit
+`--prior-session-date` and independently rejects stale technical/call inputs.

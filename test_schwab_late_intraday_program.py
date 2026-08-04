@@ -76,11 +76,26 @@ class SchwabLateIntradayProgramTests(unittest.TestCase):
                 [{"symbol": "NVDA", "market_date": "2026-08-03", "call_volume_unusual": True}],
                 root,
                 "2026-08-04",
+                "2026-08-03",
                 ["NVDA"],
             )
         self.assertEqual(rows[0]["model_premarket_last_timestamp_et"], "2026-08-04 09:25:00")
         self.assertEqual(rows[0]["prior_feature_market_date"], "2026-08-03")
         self.assertTrue(rows[0]["model_call_volume_unusual"])
+
+    def test_merge_rejects_stale_prior_features(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_archive(root, "2026-08-04T13:31:00+00:00")
+            with self.assertRaisesRegex(ValueError, "stale"):
+                merge_inputs(
+                    [{"symbol": "NVDA", "market_date": "2026-07-31"}],
+                    [{"symbol": "NVDA", "market_date": "2026-07-31"}],
+                    root,
+                    "2026-08-04",
+                    "2026-08-03",
+                    ["NVDA"],
+                )
 
     def test_outcome_uses_0935_open_and_1030_close(self):
         with TemporaryDirectory() as directory:

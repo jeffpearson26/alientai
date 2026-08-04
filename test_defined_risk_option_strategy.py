@@ -1,6 +1,7 @@
 import unittest
 
 from alientai_v2.research.defined_risk_option_strategy import (
+    OptionStrategyPolicy,
     OptionStrategyInputs,
     choose_defined_risk_strategy,
 )
@@ -26,6 +27,20 @@ def inputs(**overrides):
 
 
 class DefinedRiskOptionStrategyTests(unittest.TestCase):
+    def test_policy_thresholds_are_explicit_and_validated(self):
+        decision = choose_defined_risk_strategy(
+            inputs(expected_absolute_move_pct=5.5, implied_move_pct=5.0),
+            OptionStrategyPolicy(underpriced_move_ratio=1.05),
+        )
+        self.assertEqual(decision.strategy, "bull_call_debit_spread")
+        with self.assertRaises(ValueError):
+            choose_defined_risk_strategy(
+                inputs(),
+                OptionStrategyPolicy(
+                    overpriced_move_ratio=1.3, underpriced_move_ratio=1.2
+                ),
+            )
+
     def test_bullish_underpriced_move_uses_call_debit_spread(self):
         result = choose_defined_risk_strategy(inputs())
         self.assertEqual(result.strategy, "bull_call_debit_spread")
