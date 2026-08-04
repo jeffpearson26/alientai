@@ -1,6 +1,6 @@
 # AI Semiconductor Defined-Risk Options Volatility Model
 
-Status: framework implemented; learned heads and exact multi-leg backtest pending  
+Status: framework implemented; learned heads and exact multi-leg backtest pending
 Execution enabled: `false`
 
 ## Objective

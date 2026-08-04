@@ -250,4 +250,3 @@ def choose_defined_risk_strategy(
         maximum_portfolio_risk_pct=maximum_risk,
         construction=_construction(strategy),
     )
-
