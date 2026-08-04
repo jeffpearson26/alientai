@@ -1,9 +1,20 @@
 import unittest
 
-from download_schwab_call_volume_panel import summarize_chain
+from download_schwab_call_volume_panel import is_symbol_unavailable_error, summarize_chain
 
 
 class SchwabCallVolumePanelTests(unittest.TestCase):
+    def test_symbol_specific_invalid_parameter_is_unavailable(self):
+        error = RuntimeError(
+            'Schwab HTTP 400: {"detail":"Check Param Values",'
+            '"source":{"parameter":"Invalid Paramter/Value"}}'
+        )
+        self.assertTrue(is_symbol_unavailable_error(error))
+
+    def test_auth_and_server_failures_are_not_unavailable(self):
+        self.assertFalse(is_symbol_unavailable_error(RuntimeError("Schwab HTTP 401 unauthorized")))
+        self.assertFalse(is_symbol_unavailable_error(RuntimeError("Schwab HTTP 500 failure")))
+
     def test_sums_only_normalized_call_contracts(self):
         payload = {
             "symbol": "AAA",

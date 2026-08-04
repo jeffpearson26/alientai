@@ -75,6 +75,18 @@ def fetch_with_refresh(symbol: str) -> dict[str, Any]:
         return fetch(symbol)
 
 
+def is_symbol_unavailable_error(error: Exception) -> bool:
+    text = str(error).lower()
+    return (
+        "no call expiration map" in text
+        or "no call contracts" in text
+        or (
+            "schwab http 400" in text
+            and "invalid paramter/value" in text
+        )
+    )
+
+
 def write_summary(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -134,7 +146,7 @@ def run(
             )
         except Exception as exc:
             text = str(exc)
-            if "no call expiration map" in text.lower() or "no call contracts" in text.lower():
+            if is_symbol_unavailable_error(exc):
                 manifest["unavailable"].append(symbol)
                 unavailable.add(symbol)
                 print(f"[{index}/{len(symbol_list)}] {symbol}: UNAVAILABLE", flush=True)
