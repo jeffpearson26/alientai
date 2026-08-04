@@ -1,6 +1,6 @@
 # AI/Semiconductor Catalyst-Momentum Five-Session Model
 
-Status: `RESEARCH_HOLD`  
+Status: `RESEARCH_HOLD`
 Execution enabled: `false`
 
 ## Purpose
@@ -87,4 +87,3 @@ AI/data-center supplement complete, rebuild the technical pretraining sample
 and obtain point-in-time structured catalyst histories. Pre-register the next
 chronology and risk policy before retraining. The present test is now observed
 and must not be used repeatedly to tune a replacement.
-

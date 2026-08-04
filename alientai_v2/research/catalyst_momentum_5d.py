@@ -136,4 +136,3 @@ def engineer_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
             })
             output[original_index] = row
     return [row for row in output if row is not None]
-
