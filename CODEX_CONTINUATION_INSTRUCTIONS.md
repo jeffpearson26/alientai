@@ -875,10 +875,12 @@ source contract. Do not treat the archive itself as model evidence or authorize
 paper/live trading from it.
 
 After that 8,137-request archive completes and passes its audit, run the same
-collector contract for the eight symbols in
+collector contract for the nine symbols in
 `ai_data_center_supplemental_symbols.txt` (ON, SMCI, TSM, ORCL, ANET, DELL,
-VRT, and IBM). Do not run this supplement concurrently with the active
-collector. The combined 109-stock research universe is frozen in
+VRT, IBM, and CBRS). CBRS is newly public as of 2026-05-14, so its pre-listing
+months must remain explicitly unavailable rather than being imputed. Do not run
+this supplement concurrently with the active collector. The combined 110-stock
+research universe is frozen in
 `nasdaq101_ai_data_center_expanded_symbols.txt`. Preserve
 `nasdaq100_2026-06_symbols.txt` unchanged because its hash identifies the
 active archive and prior Nasdaq research. The supplemental archive must have

@@ -512,10 +512,13 @@ trading without the normal frozen prospective promotion process.
 
 000a. `QUEUED 2026-08-03`: Preserve the running 103-symbol archive contract and
 then collect the same 2020-01 through 2026-07 adjusted five-minute history for
-the eight-symbol AI/data-center supplement in
+the nine-symbol AI/data-center supplement in
 `ai_data_center_supplemental_symbols.txt`: ON, SMCI, TSM, ORCL, ANET, DELL,
-VRT, and IBM. `nasdaq101_ai_data_center_expanded_symbols.txt` is the resulting
-109-stock research universe. Do not edit or replace the original
+VRT, IBM, and CBRS. `nasdaq101_ai_data_center_expanded_symbols.txt` is the
+resulting 110-stock research universe. CBRS is Cerebras Systems, which began
+Nasdaq trading on 2026-05-14; preserve all pre-listing months as explicitly
+unavailable and treat Jeff's NVIDIA-scale growth idea as a research hypothesis,
+not an assumed label or outcome. Do not edit or replace the original
 `nasdaq100_2026-06_symbols.txt`; its hash is part of the active collector
 manifest and existing frozen research. Run the supplement only after the
 active collector finishes so the Alpha Vantage request stream remains singular.
