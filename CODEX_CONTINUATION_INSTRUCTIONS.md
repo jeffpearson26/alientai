@@ -873,3 +873,14 @@ coverage, missing bars, and the exact four-bar target alignment before building
 or training a model. Keep current-month/live inference data in a separate
 source contract. Do not treat the archive itself as model evidence or authorize
 paper/live trading from it.
+
+After that 8,137-request archive completes and passes its audit, run the same
+collector contract for the eight symbols in
+`ai_data_center_supplemental_symbols.txt` (ON, SMCI, TSM, ORCL, ANET, DELL,
+VRT, and IBM). Do not run this supplement concurrently with the active
+collector. The combined 109-stock research universe is frozen in
+`nasdaq101_ai_data_center_expanded_symbols.txt`. Preserve
+`nasdaq100_2026-06_symbols.txt` unchanged because its hash identifies the
+active archive and prior Nasdaq research. The supplemental archive must have
+its own output directory and manifest; combine only after exact contract and
+coverage validation.

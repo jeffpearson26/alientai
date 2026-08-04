@@ -510,6 +510,17 @@ corporate actions, and regular-session continuity before building labels.
 Never connect this collection or a future model derived from it to paper/live
 trading without the normal frozen prospective promotion process.
 
+000a. `QUEUED 2026-08-03`: Preserve the running 103-symbol archive contract and
+then collect the same 2020-01 through 2026-07 adjusted five-minute history for
+the eight-symbol AI/data-center supplement in
+`ai_data_center_supplemental_symbols.txt`: ON, SMCI, TSM, ORCL, ANET, DELL,
+VRT, and IBM. `nasdaq101_ai_data_center_expanded_symbols.txt` is the resulting
+109-stock research universe. Do not edit or replace the original
+`nasdaq100_2026-06_symbols.txt`; its hash is part of the active collector
+manifest and existing frozen research. Run the supplement only after the
+active collector finishes so the Alpha Vantage request stream remains singular.
+Audit and join it by exact symbol/month contract before training.
+
 00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
 three priority programs listed in the August 2 reset. Preserve model hashes,
 universes, thresholds, costs, source identity, and timing. Do not retune after
