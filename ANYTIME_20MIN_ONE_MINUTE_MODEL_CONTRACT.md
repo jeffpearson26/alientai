@@ -15,6 +15,9 @@ after 09:30 Eastern. Those models and their evidence remain unchanged.
 ## Timing
 
 - Source timestamps are one-minute interval starts in `America/New_York`.
+- Compiled shards store observation and target timestamps as signed 64-bit
+  nanoseconds since the Unix epoch. The compiler and trainer reject any schema
+  or timestamp-unit mismatch.
 - Use only a candle whose full one-minute interval has completed.
 - `effective_as_of` is the close of the newest fully completed minute.
 - The target is the close of the twentieth subsequent regular-session minute.
@@ -78,3 +81,24 @@ their own point-in-time one-minute availability contracts and ablations.
 No historical result authorizes paper or live trading. A future live research
 scorer also requires a source-compatibility audit between the Alpha Vantage
 training archive and its chosen current one-minute feed.
+
+## Partial pipeline pilot on 2026-08-04
+
+A deliberately non-promotable snapshot proved the compiler/trainer path while
+the production archive continued collecting. It used 872 symbol-month shards,
+5,249,807 labeled rows, and 211 market dates from January through October 2020.
+The chronological split contained 126 training dates, 37 validation dates, two
+five-session embargoes, and 38 still-sealed test dates.
+
+The initial technical/market-context LightGBM policy failed validation. Its
+least-negative basket selected 683 observations, averaged -0.2220% net after
+the frozen 0.25% cost, had a -0.2433% median, a 37.34% win rate, and -27.16%
+capital-scaled drawdown. No threshold passed, so the trainer did not open the
+test partition. The report is permanently labeled
+`PARTIAL_PIPELINE_PILOT_ONLY`; it must never be promoted, frozen, compared as a
+final model, or connected to trading.
+
+This pilot exposed and fixed a pandas timestamp-resolution incompatibility
+before test evaluation. A regression test now proves exact nanosecond
+round-tripping. The legitimate experiment remains the complete independently
+audited 2020-01 through 2026-07 archive.

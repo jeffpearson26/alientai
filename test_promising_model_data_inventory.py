@@ -32,6 +32,25 @@ class PromisingModelDataInventoryTests(unittest.TestCase):
             self.assertEqual(result["state"], "READY")
             self.assertEqual(result["accounted"], 2)
 
+    def test_manifest_reason_omits_zero_completed_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "status": "running",
+                        "completed": [{"request": "AAA|2020-01"}],
+                        "unavailable": [],
+                        "failed": [],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = audit_manifest(path, {"required_accounted": 8137})
+            self.assertEqual(result["state"], "BLOCKED")
+            self.assertIn("8137 accounted required", result["reason"])
+            self.assertNotIn("0 completed", result["reason"])
+
     def test_boolean_coverage_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "panel.jsonl"

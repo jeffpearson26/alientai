@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 from compile_rolling_twenty_minute_panel import (
     build_training_frame,
@@ -36,6 +37,43 @@ def session(multiplier: float = 1.0) -> pd.DataFrame:
 
 
 class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
+    def _write_archive(
+        self,
+        raw_root: Path,
+        status: str,
+        include_spy: bool = True,
+    ) -> None:
+        records = []
+        inputs = [("AAA", 1.0), ("QQQ", 1.1)]
+        if include_spy:
+            inputs.append(("SPY", 0.9))
+        for symbol, multiplier in inputs:
+            path = raw_root / "2026" / "2026-07" / f"{symbol}.csv.gz"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            content = session(multiplier).to_csv(index=False).encode()
+            with gzip.open(path, "wb") as handle:
+                handle.write(content)
+            records.append(
+                {
+                    "symbol": symbol,
+                    "month": "2026-07",
+                    "relative_path": path.relative_to(raw_root).as_posix(),
+                    "content_sha256": hashlib.sha256(content).hexdigest(),
+                }
+            )
+        (raw_root / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": status,
+                    "failed": [],
+                    "unavailable": [],
+                    "interval": "1min",
+                    "completed": records,
+                }
+            ),
+            encoding="utf-8",
+        )
+
     def test_compiler_resumes_matching_shards_without_rewriting(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -69,10 +107,53 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
             )
             first = compile_archive(raw_root, output_root, ["AAA"])
             shard = output_root / first["completed"][0]["relative_path"]
+            self.assertEqual(first["timestamp_unit"], "ns_since_unix_epoch")
+            with np.load(shard) as values:
+                first_timestamp = values["timestamp"][0].astype("datetime64[ns]")
+            self.assertEqual(
+                first_timestamp,
+                np.datetime64("2026-07-31T09:30:00", "ns"),
+            )
             modified = shard.stat().st_mtime_ns
             second = compile_archive(raw_root, output_root, ["AAA"])
             self.assertEqual(second["status"], "complete")
             self.assertEqual(shard.stat().st_mtime_ns, modified)
+
+    def test_running_archive_requires_explicit_snapshot_flag(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            raw_root = root / "raw"
+            self._write_archive(raw_root, status="running")
+            with self.assertRaisesRegex(ValueError, "explicitly compiled"):
+                compile_archive(raw_root, root / "compiled", ["AAA"])
+
+    def test_running_snapshot_is_permanently_labeled_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            raw_root = root / "raw"
+            self._write_archive(raw_root, status="running")
+            result = compile_archive(
+                raw_root,
+                root / "compiled",
+                ["AAA"],
+                allow_running_snapshot=True,
+            )
+            self.assertEqual(result["status"], "complete")
+            self.assertTrue(result["partial_snapshot"])
+            self.assertEqual(result["source_snapshot"]["compiled_months"], ["2026-07"])
+
+    def test_running_snapshot_skips_month_without_benchmark_context(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            raw_root = root / "raw"
+            self._write_archive(raw_root, status="running", include_spy=False)
+            with self.assertRaisesRegex(ValueError, "no source months"):
+                compile_archive(
+                    raw_root,
+                    root / "compiled",
+                    ["AAA"],
+                    allow_running_snapshot=True,
+                )
 
     def test_full_session_produces_every_valid_twenty_minute_start(self) -> None:
         frame = build_training_frame(session(), session(1.1), session(0.9))

@@ -977,6 +977,22 @@ current minute. The first implementation remains research-only and must expose
 predicted return, direction probability, uncertainty/abstention, effective
 `as_of`, and target timestamps.
 
+On 2026-08-04, a separate partial pipeline pilot was explicitly allowed while
+the production collector continued. Schema v2 stores observation and target
+timestamps as nanoseconds since Unix epoch; both compiler and trainer fail
+closed on another unit. The first pilot exposed a pandas
+microsecond/nanosecond compatibility error before the test partition was
+opened. After correction, 872 symbol-month shards produced 5,249,807 rows and
+211 market dates. The chronological LightGBM run used 126 train dates, 37
+validation dates, two five-session embargoes, and kept 38 test dates sealed
+because no validation policy passed. Best validation: 683 signals, -0.2220%
+mean net, -0.2433% median, 37.34% wins, and -27.16% capital-scaled drawdown.
+The controlling report is
+`data_v2\rcef_research\rolling_20m_1min_partial_model_v2_20260804\training_report.json`
+with status `PARTIAL_PIPELINE_PILOT_ONLY`. Never promote or trade it. Continue
+the singular production collector, then compile/train again only after a
+complete manifest and content audit.
+
 ## Five-session catalyst-momentum model (2026-08-04)
 
 `train_ai_semiconductor_catalyst_momentum_5d.py` and

@@ -25,7 +25,8 @@ ROUND_TRIP_COST_PCT = 0.25
 RETURN_WINDOWS = (1, 2, 5, 10, 20, 60)
 ROLLING_WINDOWS = (5, 20, 60)
 BENCHMARKS = ("QQQ", "SPY")
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+TIMESTAMP_UNIT = "ns_since_unix_epoch"
 
 
 def file_sha256(path: Path) -> str:
@@ -270,10 +271,12 @@ def save_shard(path: Path, frame: pd.DataFrame, names: list[str]) -> dict[str, A
             gross=frame["forward_return_20m_gross_pct"].to_numpy(dtype=np.float32),
             net=frame["forward_return_20m_net_pct"].to_numpy(dtype=np.float32),
             positive=frame["positive_after_cost"].to_numpy(dtype=np.float32),
-            timestamp=frame["timestamp"].astype("int64").to_numpy(dtype=np.int64),
-            target_timestamp=frame["target_timestamp"].astype("int64").to_numpy(
-                dtype=np.int64
-            ),
+            timestamp=frame["timestamp"]
+            .to_numpy(dtype="datetime64[ns]")
+            .astype(np.int64),
+            target_timestamp=frame["target_timestamp"]
+            .to_numpy(dtype="datetime64[ns]")
+            .astype(np.int64),
         )
     os.replace(temporary, path)
     return {
@@ -294,11 +297,21 @@ def compile_archive(
     raw_root: Path,
     output_root: Path,
     target_symbols: Iterable[str],
+    allow_running_snapshot: bool = False,
 ) -> dict[str, Any]:
     raw_manifest_path = raw_root / "manifest.json"
-    raw_manifest = json.loads(raw_manifest_path.read_text(encoding="utf-8"))
-    if raw_manifest.get("status") != "complete" or raw_manifest.get("failed"):
-        raise ValueError("raw one-minute archive must be complete with zero failures")
+    raw_manifest_bytes = raw_manifest_path.read_bytes()
+    raw_manifest = json.loads(raw_manifest_bytes.decode("utf-8"))
+    source_complete = raw_manifest.get("status") == "complete"
+    if raw_manifest.get("failed"):
+        raise ValueError("raw one-minute archive has failures")
+    if not source_complete and not (
+        allow_running_snapshot and raw_manifest.get("status") == "running"
+    ):
+        raise ValueError(
+            "raw one-minute archive must be complete with zero failures "
+            "(or explicitly compiled as a running snapshot)"
+        )
     if raw_manifest.get("interval") != "1min":
         raise ValueError("raw archive is not one-minute data")
     records = _records(raw_manifest)
@@ -308,8 +321,10 @@ def compile_archive(
         "schema_version": SCHEMA_VERSION,
         "research_only": True,
         "execution_enabled": False,
-        "source_manifest_sha256": file_sha256(raw_manifest_path),
+        "partial_snapshot": not source_complete,
+        "source_manifest_sha256": hashlib.sha256(raw_manifest_bytes).hexdigest(),
         "source_interval": "1min",
+        "timestamp_unit": TIMESTAMP_UNIT,
         "horizon_minutes": HORIZON_MINUTES,
         "round_trip_cost_pct": ROUND_TRIP_COST_PCT,
         "feature_names": names,
@@ -337,6 +352,28 @@ def compile_archive(
     for symbol, month in records:
         if symbol in targets:
             by_month.setdefault(month, []).append(symbol)
+    incomplete_context_months = sorted(
+        month
+        for month in by_month
+        if any((benchmark, month) not in records for benchmark in BENCHMARKS)
+    )
+    if incomplete_context_months and source_complete:
+        raise ValueError(
+            "missing benchmark context for completed archive months: "
+            + ", ".join(incomplete_context_months)
+        )
+    for month in incomplete_context_months:
+        del by_month[month]
+    if not by_month:
+        raise ValueError("no source months have complete QQQ and SPY context")
+    output_manifest["source_snapshot"] = {
+        "source_status": raw_manifest.get("status"),
+        "completed_requests": len(raw_manifest.get("completed") or []),
+        "unavailable_requests": len(raw_manifest.get("unavailable") or []),
+        "failed_requests": len(raw_manifest.get("failed") or []),
+        "compiled_months": sorted(by_month),
+        "skipped_incomplete_context_months": incomplete_context_months,
+    }
     try:
         for month in sorted(by_month):
             benchmark_frames = {}
@@ -404,9 +441,22 @@ def main() -> None:
     parser.add_argument("--raw-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
+    parser.add_argument(
+        "--allow-running-snapshot",
+        action="store_true",
+        help=(
+            "Compile an immutable, explicitly partial pilot from the currently "
+            "completed portion of a healthy running archive"
+        ),
+    )
     args = parser.parse_args()
     symbols = read_symbols(args.symbols_file)
-    result = compile_archive(args.raw_root, args.output_root, symbols)
+    result = compile_archive(
+        args.raw_root,
+        args.output_root,
+        symbols,
+        allow_running_snapshot=args.allow_running_snapshot,
+    )
     print(
         json.dumps(
             {

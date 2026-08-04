@@ -18,7 +18,8 @@ FRACTIONS = (0.005, 0.01, 0.02, 0.05, 0.10)
 MAX_POSITIONS = 5
 MIN_VALIDATION_SELECTIONS = 1000
 EMBARGO_SESSIONS = 5
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+TIMESTAMP_UNIT = "ns_since_unix_epoch"
 
 
 @dataclass
@@ -265,6 +266,10 @@ def train(panel_root: Path, output_root: Path) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("status") != "complete" or manifest.get("failed"):
         raise ValueError("compiled panel must be complete with zero failures")
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError("compiled panel schema version is not supported")
+    if manifest.get("timestamp_unit") != TIMESTAMP_UNIT:
+        raise ValueError("compiled panel timestamp unit is not nanoseconds")
     dates = discover_dates(manifest, panel_root)
     splits = split_market_dates(dates)
     partitions = load_partitions(manifest, panel_root, splits)
@@ -368,15 +373,27 @@ def train(panel_root: Path, output_root: Path) -> dict[str, Any]:
         and test_result.get("win_rate_pct", 0) >= 52.0
         and test_result.get("capital_scaled_max_drawdown_pct", -100) >= -20.0
     )
+    partial_snapshot = bool(manifest.get("partial_snapshot"))
     report = {
         "schema_version": SCHEMA_VERSION,
         "status": (
-            "RESEARCH_PROMISING_PENDING_PROSPECTIVE"
-            if test_promising
-            else "RESEARCH_HOLD"
+            "PARTIAL_PIPELINE_PILOT_ONLY"
+            if partial_snapshot
+            else (
+                "RESEARCH_PROMISING_PENDING_PROSPECTIVE"
+                if test_promising
+                else "RESEARCH_HOLD"
+            )
         ),
         "research_only": True,
         "execution_enabled": False,
+        "partial_snapshot": partial_snapshot,
+        "partial_snapshot_warning": (
+            "Pipeline validation only; never compare, promote, freeze, or trade "
+            "this model. Repeat from the complete audited archive."
+            if partial_snapshot
+            else None
+        ),
         "source_panel_manifest_sha256": sha256(manifest_path),
         "feature_names": list(manifest["feature_names"]),
         "sampling": "one non-overlapping 20-minute phase per date; phase rotates by date",

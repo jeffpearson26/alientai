@@ -178,6 +178,12 @@ def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
         and completed >= required
         and accounted >= required_accounted
     )
+    thresholds = []
+    if required:
+        thresholds.append(f"{required} completed")
+    if required_accounted:
+        thresholds.append(f"{required_accounted} accounted")
+    threshold_text = " and ".join(thresholds) if thresholds else "complete status"
     return {
         "state": "READY" if ready else "BLOCKED",
         "latest_path": str(path),
@@ -192,7 +198,7 @@ def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
         else (
             f"manifest status={status}, completed={completed}, "
             f"unavailable={unavailable}, failed={failed}; "
-            f"{required} completed and {required_accounted} accounted required"
+            f"{threshold_text} required"
         ),
     }
 

@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-04 08:36 Pacific
+Generated: 2026-08-04 09:57 Pacific
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -39,10 +39,12 @@ The automatically refreshed data-family and coverage matrix is
   learned direction/move heads and full chronological backtest are pending.
 - Any-time rolling 20-minute model: Jeff refined this to one-minute resolution.
   The 103-symbol five-minute archive remains preserved and audited; the
-  separate 8,137-request one-minute archive is actively collecting after a
-  successful AAPL pilot (21,095 rows and complete 390-bar regular sessions).
-  Panel construction, chronological training, and live-source compatibility
-  validation remain pending.
+  separate 8,137-request one-minute archive is actively collecting. A
+  deliberately partial January-October 2020 pipeline pilot compiled 5,249,807
+  rows across 211 dates and correctly failed validation (best mean -0.2220%
+  net, 37.34% wins); its 38 test dates stayed sealed. This validates the
+  machinery but not the model. Complete-archive training and live-source
+  compatibility validation remain pending.
 - Five-day catalyst-momentum model: explicitly excluded from this promising
   list because its typical held-out selection lost money; status remains
   `RESEARCH_HOLD`.
