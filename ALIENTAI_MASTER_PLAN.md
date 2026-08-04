@@ -547,6 +547,17 @@ adjusted archive and missing structured catalyst histories support a
 pre-registered new chronology. Evidence:
 `AI_SEMICONDUCTOR_CATALYST_MOMENTUM_5D_REPORT_20260804.md`.
 
+000c. `PRESERVED 2026-08-04`: Jeff's durable AI-infrastructure thesis and its
+five-session adaptation are frozen in
+`AI_SEMICONDUCTOR_FIVE_DAY_THESIS.md`. Preserve visible AI demand,
+scarcity/pricing power, reasonable point-in-time valuation, stack
+diversification, custom-silicon share pressure, memory/packaging bottlenecks,
+and smaller risk for emerging inference specialists as hypotheses and
+secondary context. For five-day selection, catalyst, technical confirmation,
+positioning, and risk remain primary. Never translate this narrative into
+manual ticker bonuses or assume an outcome; require timestamped historical
+features and a new pre-registered chronology.
+
 00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
 three priority programs listed in the August 2 reset. Preserve model hashes,
 universes, thresholds, costs, source identity, and timing. Do not retune after

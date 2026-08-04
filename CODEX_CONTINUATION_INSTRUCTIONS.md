@@ -927,3 +927,13 @@ long adjusted technical archive is complete and should add independently
 timestamped upcoming earnings, structured analyst actions/targets, and
 guidance/design-win/capacity events. Hard stops require intraday path data; do
 not infer them from five-session endpoint returns.
+
+Jeff's controlling qualitative framework is preserved in
+`AI_SEMICONDUCTOR_FIVE_DAY_THESIS.md`. Future agents must retain the distinction
+between durable industry context (visible demand, scarcity/pricing power,
+valuation, and AI-stack diversification) and five-session drivers (catalyst,
+technical confirmation, sentiment/positioning, and risk). Merchant leaders,
+memory/packaging/foundry, custom-ASIC enablers, and emerging inference
+specialists require separate peer roles and risk treatment. Do not hand-score
+favored names, treat the thesis as a label, backfill current capacity or
+valuation into history, or retune the already observed 2026 test.
