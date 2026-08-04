@@ -886,3 +886,28 @@ research universe is frozen in
 active archive and prior Nasdaq research. The supplemental archive must have
 its own output directory and manifest; combine only after exact contract and
 coverage validation.
+
+## Five-session catalyst-momentum model (2026-08-04)
+
+`train_ai_semiconductor_catalyst_momentum_5d.py` and
+`alientai_v2\research\catalyst_momentum_5d.py` preserve Jeff's catalyst-first,
+technical-setup, call-positioning, fundamental-overlay, and risk-control logic
+as a research-only contract. Seven focused tests cover the primary gate,
+parabolic rejection, negative-overlay rejection, lagged relative-strength
+ranks, capacity, validation-only fraction choice, and the fixed one-day time
+stop.
+
+The four-stage test is `RESEARCH_HOLD`. On the untouched period, technical,
+catalyst+technical, and positioning variants had negative means. The full
+variant had +0.227821% mean across 20 trades, but -3.578902% median, 25% wins,
+and -14.897556% worst trade. Its few winners do not establish an edge. The
+one-day nonpositive time stop worsened every model. Do not adopt it, retune
+against this now-observed test, create a prospective journal, or connect it to
+execution. The controlling evidence is
+`AI_SEMICONDUCTOR_CATALYST_MOMENTUM_5D_REPORT_20260804.md`.
+
+The next legitimate attempt must use a pre-registered new chronology after the
+long adjusted technical archive is complete and should add independently
+timestamped upcoming earnings, structured analyst actions/targets, and
+guidance/design-win/capacity events. Hard stops require intraday path data; do
+not infer them from five-session endpoint returns.

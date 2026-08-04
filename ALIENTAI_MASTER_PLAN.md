@@ -524,6 +524,18 @@ manifest and existing frozen research. Run the supplement only after the
 active collector finishes so the Alpha Vantage request stream remains singular.
 Audit and join it by exact symbol/month contract before training.
 
+000b. `RESEARCH_HOLD 2026-08-04`: Implemented Jeff's five-session
+catalyst-momentum framework as four isolated, purged chronological ablations
+over the existing 1,694-row, 17-symbol point-in-time panel. The full model was
+the only variant with a positive untouched-test mean (+0.227821% across 20
+capacity-limited trades), but its median was -3.578902%, win rate 25%, and
+worst trade -14.897556%; a fixed one-day nonpositive time stop worsened it to
+-0.754140% mean and 10% wins. Do not promote or freeze this instantiation.
+Preserve the tested feature/risk contract and rebuild only after the longer
+adjusted archive and missing structured catalyst histories support a
+pre-registered new chronology. Evidence:
+`AI_SEMICONDUCTOR_CATALYST_MOMENTUM_5D_REPORT_20260804.md`.
+
 00. `ACTIVE 2026-08-02`: Accumulate immutable forward evidence for only the
 three priority programs listed in the August 2 reset. Preserve model hashes,
 universes, thresholds, costs, source identity, and timing. Do not retune after
