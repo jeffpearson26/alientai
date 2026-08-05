@@ -97,6 +97,9 @@ their own point-in-time one-minute availability contracts and ablations.
 - report gross and 0.25%-cost-adjusted mean, median, win rate, calibration,
   fifth percentile, worst observation, concentration, and time-of-day/regime
   stability;
+- report non-retuned 0.05%/0.10%/0.25% cost sensitivity and a market-date
+  clustered 95% confidence interval; policy passage requires its lower bound
+  to remain above zero across at least 20 market dates;
 - compare against unconditional, QQQ-relative, momentum, and mean-reversion
   controls;
 - preserve overlapping observations for realistic query behavior and a

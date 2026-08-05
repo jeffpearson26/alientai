@@ -12,6 +12,7 @@ from train_rolling_twenty_minute_lightgbm import (
     Partition,
     max_drawdown_capital_scaled,
     load_test_partition_after_gate,
+    metrics,
     rotating_nonoverlap_mask,
     select_cross_section,
     split_market_dates,
@@ -133,6 +134,31 @@ class TrainRollingTwentyMinuteTests(unittest.TestCase):
             shard.write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "hash mismatch"):
                 validate_compiled_panel_files(manifest, root)
+
+    def test_metrics_report_daily_cluster_and_cost_sensitivity(self) -> None:
+        timestamps = np.array(
+            [
+                np.datetime64("2026-07-30T10:00", "ns").astype(np.int64),
+                np.datetime64("2026-07-30T10:05", "ns").astype(np.int64),
+                np.datetime64("2026-07-31T10:00", "ns").astype(np.int64),
+                np.datetime64("2026-07-31T10:05", "ns").astype(np.int64),
+            ]
+        )
+        partition = Partition(
+            x=np.empty((4, 0)),
+            gross=np.array([0.3, 0.2, 0.5, 0.4]),
+            net=np.array([0.05, -0.05, 0.25, 0.15]),
+            positive=np.array([1, 0, 1, 1]),
+            timestamp=timestamps,
+            symbol=np.array([0, 1, 0, 1]),
+        )
+        result = metrics(partition)
+        self.assertEqual(result["market_dates"], 2)
+        self.assertIsNotNone(result["daily_cluster_mean_net_ci95_low_pct"])
+        self.assertAlmostEqual(
+            result["diagnostic_cost_sensitivity"]["0.10pct"]["mean_net_pct"],
+            0.25,
+        )
 
 
 if __name__ == "__main__":

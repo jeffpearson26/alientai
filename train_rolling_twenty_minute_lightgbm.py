@@ -26,6 +26,7 @@ SCHEMA_VERSION = 3
 TIMESTAMP_UNIT = "ns_since_unix_epoch"
 ENTRY_ASSUMPTION = "next_minute_open"
 ALLOWED_HORIZON_MINUTES = (5, 10, 20, 30, 60, 90)
+DIAGNOSTIC_COST_PCTS = (0.05, 0.10, 0.25)
 
 
 @dataclass
@@ -368,15 +369,53 @@ def metrics(
     values = partition.net[mask]
     if not len(values):
         return {"signals": 0}
+    gross_values = partition.gross[mask]
+    market_dates = (
+        partition.timestamp[mask]
+        .astype("datetime64[ns]")
+        .astype("datetime64[D]")
+    )
+    daily_means = np.asarray(
+        [
+            float(np.mean(values[market_dates == market_date]))
+            for market_date in np.unique(market_dates)
+        ],
+        dtype=float,
+    )
+    if len(daily_means) >= 2:
+        daily_standard_error = float(
+            np.std(daily_means, ddof=1) / np.sqrt(len(daily_means))
+        )
+        daily_mean = float(np.mean(daily_means))
+        daily_ci_low = daily_mean - 1.96 * daily_standard_error
+        daily_ci_high = daily_mean + 1.96 * daily_standard_error
+    else:
+        daily_standard_error = None
+        daily_ci_low = None
+        daily_ci_high = None
     return {
         "signals": int(len(values)),
         "timestamps": int(len(np.unique(partition.timestamp[mask]))),
+        "market_dates": int(len(daily_means)),
         "symbols": int(len(np.unique(partition.symbol[mask]))),
-        "mean_gross_pct": float(np.mean(partition.gross[mask])),
-        "median_gross_pct": float(np.median(partition.gross[mask])),
+        "mean_gross_pct": float(np.mean(gross_values)),
+        "median_gross_pct": float(np.median(gross_values)),
         "mean_net_pct": float(np.mean(values)),
         "median_net_pct": float(np.median(values)),
         "win_rate_pct": float(np.mean(values > 0.0) * 100.0),
+        "daily_cluster_standard_error_pct": daily_standard_error,
+        "daily_cluster_mean_net_ci95_low_pct": daily_ci_low,
+        "daily_cluster_mean_net_ci95_high_pct": daily_ci_high,
+        "diagnostic_cost_sensitivity": {
+            f"{cost_pct:.2f}pct": {
+                "mean_net_pct": float(np.mean(gross_values - cost_pct)),
+                "median_net_pct": float(np.median(gross_values - cost_pct)),
+                "win_rate_pct": float(
+                    np.mean((gross_values - cost_pct) > 0.0) * 100.0
+                ),
+            }
+            for cost_pct in DIAGNOSTIC_COST_PCTS
+        },
         "fifth_percentile_net_pct": float(np.percentile(values, 5)),
         "worst_net_pct": float(np.min(values)),
         "largest_symbol_share_pct": float(
@@ -521,9 +560,15 @@ def choose_threshold(
         }
         passes = (
             result["signals"] >= MIN_POLICY_SELECTIONS
+            and result.get("market_dates", 0) >= 20
             and result.get("mean_net_pct", float("-inf")) > 0
             and result.get("median_net_pct", float("-inf")) > 0
             and result.get("win_rate_pct", 0.0) >= 52.0
+            and result.get(
+                "daily_cluster_mean_net_ci95_low_pct",
+                float("-inf"),
+            )
+            > 0.0
             and result.get("capital_scaled_max_drawdown_pct", -100.0) >= -20.0
             and result.get("largest_symbol_share_pct", 100.0) <= 20.0
         )
@@ -761,6 +806,12 @@ def train(panel_root: Path, output_root: Path) -> dict[str, Any]:
         and test_result.get("mean_net_pct", 0) > 0
         and test_result.get("median_net_pct", 0) > 0
         and test_result.get("win_rate_pct", 0) >= 52.0
+        and test_result.get("market_dates", 0) >= 20
+        and test_result.get(
+            "daily_cluster_mean_net_ci95_low_pct",
+            float("-inf"),
+        )
+        > 0.0
         and test_result.get("capital_scaled_max_drawdown_pct", -100) >= -20.0
         and test_result.get("largest_symbol_share_pct", 100) <= 20.0
     )
