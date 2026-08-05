@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "status": "RESEARCH_PREPARATION",
+  "research_only": true,
+  "execution_enabled": false,
+  "created_date": "2026-08-05",
+  "round_trip_cost_pct": 0.25,
+  "shared_rule": {
+    "description": "Preserve each source model's decision time, entry, universe, and feature families; replace only its exit with the official close of the next complete regular market session after the source decision.",
+    "selection_policy": "validation_only",
+    "test_policy": "sealed until the clone independently passes its validation gate",
+    "prospective_policy": "new append-only journal; never reuse or rewrite a source-model observation"
+  },
+  "clones": [
+    {
+      "source_model_id": "autonomous_transparent_20session",
+      "clone_model_id": "autonomous_transparent_next_session_close_v1",
+      "universe": "Nasdaq-101",
+      "feature_contract": "126/60-session QQQ-relative momentum plus inverse 60-session volatility",
+      "decision_contract": "after completed regular-session close",
+      "entry_contract": "next regular-session open",
+      "exit_contract": "that next regular session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+    },
+    {
+      "source_model_id": "contextual_options_top_quarter",
+      "clone_model_id": "contextual_options_next_session_close_v1",
+      "universe": "Natural universe",
+      "feature_contract": "frozen technical top-quarter context plus prior public unusual call buying",
+      "decision_contract": "after completed regular-session close with point-in-time call history",
+      "entry_contract": "source model's next executable regular-session entry",
+      "exit_contract": "the next complete regular session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "ONE_SESSION_LABEL_AND_RETRAIN_REQUIRED"
+    },
+    {
+      "source_model_id": "nasdaq100_complete_101_baseline_v1",
+      "clone_model_id": "nasdaq101_baseline_next_session_close_v1",
+      "universe": "Nasdaq-101",
+      "feature_contract": "daily technical features",
+      "decision_contract": "after completed regular-session close",
+      "entry_contract": "source model's next executable regular-session entry",
+      "exit_contract": "the next complete regular session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+    },
+    {
+      "source_model_id": "nasdaq100_complete_101_qqq_relative_v1",
+      "clone_model_id": "nasdaq101_qqq_relative_next_session_close_v1",
+      "universe": "Nasdaq-101",
+      "feature_contract": "daily technical plus QQQ-relative features",
+      "decision_contract": "after completed regular-session close",
+      "entry_contract": "source model's next executable regular-session entry",
+      "exit_contract": "the next complete regular session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+    },
+    {
+      "source_model_id": "nasdaq100_technical_clone_v1",
+      "clone_model_id": "nasdaq80_champion_next_session_close_v1",
+      "universe": "Nasdaq-80",
+      "feature_contract": "daily technical plus QQQ-context features",
+      "decision_contract": "after completed regular-session close",
+      "entry_contract": "source model's next executable regular-session entry",
+      "exit_contract": "the next complete regular session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+    },
+    {
+      "source_model_id": "ai_semiconductor_60m_calls_frozen_20260731",
+      "clone_model_id": "ai_semiconductor_calls_next_session_close_v1",
+      "universe": "17 AI/semi symbols",
+      "feature_contract": "prior-session technical context, exact premarket state, and prior-session unusual call activity",
+      "decision_contract": "source intraday decision window",
+      "entry_contract": "source model's frozen intraday entry",
+      "exit_contract": "the following complete regular market session's official close",
+      "target_horizon_sessions": 1,
+      "implementation_state": "EXISTING_ONE_SESSION_ANALOG_REVIEW_REQUIRED"
+    }
+  ]
+}
