@@ -66,8 +66,8 @@ def build_next_open_horizon_close_labels(
         raise ValueError("large_move_target_pct must be finite")
     if maximum_calendar_gap_days < 1:
         raise ValueError("maximum_calendar_gap_days must be positive")
-    if horizon_sessions < 2:
-        raise ValueError("horizon_sessions must be at least two")
+    if horizon_sessions < 1:
+        raise ValueError("horizon_sessions must be at least one")
 
     source = list(candles)
     parsed_days = [_day(row.get("date")) for row in source]

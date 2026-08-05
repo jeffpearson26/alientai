@@ -21,6 +21,18 @@ def candles():
 
 
 class FiveDayOpenCloseLabelTests(unittest.TestCase):
+    def test_one_session_horizon_uses_entry_session_close(self):
+        rows = candles()
+        labels = build_next_open_horizon_close_labels(
+            "AAA", rows, horizon_sessions=1, round_trip_cost_pct=0.0
+        )
+        first = labels[0]
+        self.assertEqual(first["holding_sessions"], 1)
+        self.assertEqual(first["entry_date"], rows[1]["date"])
+        self.assertEqual(first["exit_date"], rows[1]["date"])
+        self.assertEqual(first["entry_price"], rows[1]["open"])
+        self.assertEqual(first["exit_price"], rows[1]["close"])
+
     def test_generic_two_session_horizon_uses_second_close(self):
         rows = candles()
         labels = build_next_open_horizon_close_labels(

@@ -76,6 +76,22 @@ class LocalTechnicalTrainingRowsTests(unittest.TestCase):
         self.assertTrue(rows)
         self.assertEqual(rows[0]["holding_sessions"], 2)
         self.assertEqual(rows[0]["future_market_date"], self.candles()[61]["date"])
+        self.assertIn("label_forward_return_2d_pct", rows[0])
+        self.assertNotIn("label_forward_return_5d_pct", rows[0])
+
+    def test_one_session_target_has_a_one_day_label(self):
+        rows = build_rows(
+            self.candles(),
+            "AAA",
+            date(2025, 1, 1),
+            date(2025, 12, 31),
+            horizon_sessions=1,
+            entry_assumption="next_regular_session_open",
+        )
+        self.assertTrue(rows)
+        self.assertEqual(rows[0]["holding_sessions"], 1)
+        self.assertEqual(rows[0]["future_market_date"], self.candles()[60]["date"])
+        self.assertIn("label_forward_return_1d_pct", rows[0])
 
     def test_benchmark_mode_skips_dates_without_required_history(self):
         candles = self.candles()

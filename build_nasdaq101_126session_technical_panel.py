@@ -254,7 +254,7 @@ def main() -> None:
     parser.add_argument(
         "--horizon-sessions",
         type=int,
-        choices=(20, 60, 126),
+        choices=(1, 20, 60, 126),
         default=HORIZON_SESSIONS,
     )
     args = parser.parse_args()
@@ -323,7 +323,10 @@ def main() -> None:
         "warnings": [
             "fixed current-membership universe creates survivorship bias",
             "delisted historical constituents are not represented",
-            "adjacent 126-session outcomes overlap and require embargo/HAC/non-overlap audits",
+            (
+                f"adjacent {args.horizon_sessions}-session outcomes require "
+                "horizon-appropriate embargo/HAC/non-overlap audits"
+            ),
         ],
     }
     output_manifest = args.output.with_suffix(".manifest.json")

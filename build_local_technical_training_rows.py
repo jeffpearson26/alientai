@@ -61,7 +61,7 @@ def build_rows(
             "market_date": current["date"],
             "future_market_date": future["date"],
             "close": close,
-            "label_forward_return_5d_pct": (
+            f"label_forward_return_{horizon_sessions}d_pct": (
                 float(executable["gross_return_pct"])
                 if executable is not None
                 else (float(future["close"]) / close - 1.0) * 100.0
@@ -159,6 +159,9 @@ def main() -> None:
         "start_date": args.start_date.isoformat(),
         "end_date": args.end_date.isoformat(),
         "horizon_sessions": args.horizon_sessions,
+        "target_label": (
+            f"label_forward_return_{args.horizon_sessions}d_pct"
+        ),
         "entry_assumption": args.entry_assumption,
         "symbols_requested": len(coverage),
         "symbols_with_rows": sum(row["rows"] > 0 for row in coverage),
