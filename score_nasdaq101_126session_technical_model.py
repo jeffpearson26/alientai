@@ -93,6 +93,7 @@ def latest_rows(
             {
                 "symbol": symbol,
                 "market_date": decision_date,
+                "decision_adjusted_close": float(candles[-1]["close"]),
                 **features,
                 **benchmark_features,
                 **relative,
@@ -134,6 +135,20 @@ def main() -> None:
         for symbol in [*candidates, *BENCHMARKS]
     }
     decision_date, rows = latest_rows(daily, candidates)
+    eligibility = report.get("selection_eligibility", {})
+    minimum_price = float(
+        eligibility.get("minimum_decision_adjusted_price", 0.0)
+    )
+    minimum_dollar_volume = float(
+        eligibility.get("minimum_average_dollar_volume_20d", 0.0)
+    )
+    rows = [
+        row
+        for row in rows
+        if float(row["decision_adjusted_close"]) >= minimum_price
+        and float(row.get("lh_average_dollar_volume_20d") or 0.0)
+        >= minimum_dollar_volume
+    ]
     add_cross_sectional_feature_ranks(rows)
     names = list(report["features"])
     values = matrix(rows, names)
@@ -193,7 +208,7 @@ def main() -> None:
         "decision_date": decision_date,
         "candidate_universe_count": len(candidates),
         "context_only_symbols": list(BENCHMARKS),
-        "horizon_sessions": 126,
+        "horizon_sessions": int(report.get("horizon_sessions", 126)),
         "threshold": float(threshold),
         "selection_diagnostics": diagnostics,
         "selections": ranked,

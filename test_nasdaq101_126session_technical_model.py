@@ -14,7 +14,11 @@ from train_nasdaq101_126session_technical_model import (
     add_qqq_relative_targets,
     additive_mark_to_market_drawdown,
     cross_sectional_score_percentiles,
+    matched_qqq_control_rows,
+    matched_transparent_control_rows,
     nonoverlap_summary,
+    read_rows_for_dates,
+    scan_panel_dates_without_parsing_labels,
     split_dates,
 )
 from score_nasdaq101_126session_technical_model import latest_rows
@@ -51,6 +55,7 @@ def test_features_are_point_in_time_and_include_long_windows() -> None:
     assert first["lh_slope_252_pct_per_day"] is not None
     assert first["lh_money_flow_index_14"] is not None
     assert first["lh_chaikin_money_flow_20d"] is not None
+    assert first["lh_average_dollar_volume_20d"] > 0.0
 
 
 def test_panel_uses_candidates_only_and_exact_126_session_label() -> None:
@@ -116,6 +121,27 @@ def test_nonoverlap_uses_market_calendar_not_selected_date_order() -> None:
     summary = nonoverlap_summary(rows)
     assert summary["observed_folds"] == 1
     assert summary["folds"][0]["signals"] == 5
+
+
+def test_twenty_session_stride_five_has_four_observable_offsets() -> None:
+    import train_nasdaq101_126session_technical_model as module
+
+    original = module.HORIZON_SESSIONS
+    try:
+        module.HORIZON_SESSIONS = 20
+        rows = [
+            {
+                "market_date": str(
+                    date(2020, 1, 1) + timedelta(days=index)
+                ),
+                "market_session_index": index * 5,
+                "label_126d_net_return_pct": 1.0,
+            }
+            for index in range(20)
+        ]
+        assert module.nonoverlap_summary(rows)["observed_folds"] == 4
+    finally:
+        module.HORIZON_SESSIONS = original
 
 
 def test_drawdown_respects_idle_cash_and_daily_marking() -> None:
@@ -186,3 +212,71 @@ def test_model_target_is_future_excess_return_over_qqq() -> None:
     assert row["model_excess_to_qqq_126d_pct"] == pytest.approx(
         20.0 - qqq_gross
     )
+
+
+def test_generalized_panel_can_build_exact_twenty_session_labels() -> None:
+    candidate = candles(offset=2.0)
+    rows = build_rows(
+        {
+            "AAA": candidate,
+            "QQQ": candles(offset=1.0),
+            "SPY": candles(),
+        },
+        ["AAA"],
+        "2020-01-01",
+        horizon_sessions=20,
+    )
+    first = rows[0]
+    decision_index = 125
+    assert (
+        first["label_20d_exit_market_date"]
+        == candidate[decision_index + 20]["market_date"]
+    )
+    assert "label_126d_exit_market_date" not in first
+    assert "exit 20th subsequent adjusted close" in first["label_contract"]
+
+
+def test_matched_controls_preserve_capacity_without_using_outcomes() -> None:
+    qqq = candles(260)
+    selected = [
+        {
+            "market_date": qqq[0]["market_date"],
+            "market_session_index": 0,
+            "symbol": symbol,
+            "label_entry_market_date": qqq[1]["market_date"],
+            "label_entry_next_adjusted_open": 100.0,
+            "label_126d_exit_market_date": qqq[126]["market_date"],
+            "label_126d_gross_return_pct": value,
+            "label_126d_net_return_pct": value - 0.25,
+            "model_qqq_126d_gross_return_pct": 3.0,
+            "round_trip_cost_pct": 0.25,
+            "rank_relative_to_qqq_126d_pct": rank,
+            "rank_relative_to_qqq_60d_pct": rank,
+            "rank_lh_realized_volatility_60d_pct": 1.0 - rank,
+        }
+        for symbol, value, rank in (
+            ("AAA", 5.0, 1.0),
+            ("BBB", 4.0, 0.5),
+        )
+    ]
+    qqq_control = matched_qqq_control_rows(selected, qqq)
+    transparent = matched_transparent_control_rows(selected, selected)
+    assert len(qqq_control) == len(selected)
+    assert all(row["symbol"] == "QQQ" for row in qqq_control)
+    assert all(row["label_126d_net_return_pct"] == 2.75 for row in qqq_control)
+    assert len(transparent) == len(selected)
+
+
+def test_sealed_dates_are_not_json_parsed(tmp_path) -> None:
+    panel = tmp_path / "panel.jsonl"
+    panel.write_text(
+        '{"market_date":"2020-01-01","value":1}\n'
+        '{"market_date":"2021-01-01","sealed_label":INVALID}\n',
+        encoding="utf-8",
+    )
+    assert scan_panel_dates_without_parsing_labels(panel) == {
+        "2020-01-01",
+        "2021-01-01",
+    }
+    rows = read_rows_for_dates(panel, {"2020-01-01"})
+    assert rows == [{"market_date": "2020-01-01", "value": 1}]

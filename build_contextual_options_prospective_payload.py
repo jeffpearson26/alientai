@@ -75,6 +75,53 @@ def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:
             handle.write(json.dumps(dict(row), sort_keys=True) + "\n")
 
 
+def available_symbols(
+    symbol_list: list[str],
+    manifest_path: Path,
+    actual_market_date: str,
+) -> tuple[list[str], list[str]]:
+    def normalized(symbol: str) -> str:
+        return symbol.upper().replace(".", "-").replace("/", "-")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    completed = list(manifest.get("completed") or [])
+    unavailable = list(manifest.get("unavailable") or [])
+    failed = list(manifest.get("failed") or [])
+    if manifest.get("status") != "complete" or failed:
+        raise ValueError("option availability manifest is not complete and clean")
+    accounted = [*completed, *unavailable]
+    if any(
+        str(key).rsplit("|", 1)[-1] != actual_market_date
+        for key in accounted
+    ):
+        raise ValueError("option availability manifest date mismatch")
+    requested = {normalized(symbol) for symbol in symbol_list}
+    completed_symbols = {
+        normalized(str(key).rsplit("|", 1)[0]) for key in completed
+    }
+    unavailable_symbols = {
+        normalized(str(key).rsplit("|", 1)[0]) for key in unavailable
+    }
+    accounted_symbols = completed_symbols | unavailable_symbols
+    if not accounted_symbols.issubset(requested):
+        raise ValueError("option availability manifest contains foreign symbols")
+    request_count = int(manifest.get("requests") or len(accounted))
+    if len(accounted_symbols) != request_count:
+        raise ValueError("option availability manifest request count mismatch")
+    return (
+        [
+            symbol
+            for symbol in symbol_list
+            if normalized(symbol) in completed_symbols
+        ],
+        [
+            symbol
+            for symbol in symbol_list
+            if normalized(symbol) in unavailable_symbols
+        ],
+    )
+
+
 def build(
     *,
     actual_market_date: str,
@@ -84,6 +131,7 @@ def build(
     daily_dir: Path,
     previous_features: Path,
     chains: Path,
+    target_chains: Path | None,
     technical_model: Path,
     minimum_universe_rows: int = 400,
 ) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
@@ -116,6 +164,7 @@ def build(
         daily_dir,
         actual_market_date,
         price_rows,
+        target_chains,
     )
     if option_missing:
         raise ValueError(
@@ -215,6 +264,19 @@ def main() -> None:
     parser.add_argument("--daily-dir", type=Path, required=True)
     parser.add_argument("--previous-features", type=Path, required=True)
     parser.add_argument("--chains", type=Path, required=True)
+    parser.add_argument(
+        "--target-chains",
+        type=Path,
+        help="Optional separate source root containing target-date chains.",
+    )
+    parser.add_argument(
+        "--availability-manifest",
+        type=Path,
+        help=(
+            "Completed manifest used to exclude only explicitly unavailable "
+            "symbols from the complete common universe."
+        ),
+    )
     parser.add_argument("--technical-model", type=Path, required=True)
     parser.add_argument("--scored-output", type=Path, required=True)
     parser.add_argument("--payload-output", type=Path, required=True)
@@ -222,17 +284,28 @@ def main() -> None:
     parser.add_argument("--minimum-universe-rows", type=int, default=400)
     args = parser.parse_args()
 
+    symbol_list = symbols(args.symbols_file)
+    explicitly_unavailable: list[str] = []
+    if args.availability_manifest:
+        symbol_list, explicitly_unavailable = available_symbols(
+            symbol_list,
+            args.availability_manifest,
+            args.actual_market_date,
+        )
     scored, payload, summary = build(
         actual_market_date=args.actual_market_date,
         schwab_stored_market_date=args.schwab_stored_market_date,
         decision_at_utc=args.decision_at_utc,
-        symbol_list=symbols(args.symbols_file),
+        symbol_list=symbol_list,
         daily_dir=args.daily_dir,
         previous_features=args.previous_features,
         chains=args.chains,
+        target_chains=args.target_chains,
         technical_model=args.technical_model,
         minimum_universe_rows=args.minimum_universe_rows,
     )
+    summary["explicitly_unavailable_symbols"] = explicitly_unavailable
+    summary["explicitly_unavailable_count"] = len(explicitly_unavailable)
     write_jsonl(args.scored_output, scored)
     args.payload_output.parent.mkdir(parents=True, exist_ok=True)
     args.payload_output.write_text(

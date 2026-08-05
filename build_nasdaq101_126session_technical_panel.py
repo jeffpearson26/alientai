@@ -123,6 +123,7 @@ def build_rows(
     start_date: str,
     workers: int = 1,
     decision_stride: int = 1,
+    horizon_sessions: int = HORIZON_SESSIONS,
 ) -> list[dict[str, Any]]:
     benchmark_maps = {
         symbol: {
@@ -149,7 +150,7 @@ def build_rows(
     def build_symbol(symbol: str) -> list[dict[str, Any]]:
         symbol_output: list[dict[str, Any]] = []
         candles = daily[symbol]
-        for index in range(MIN_HISTORY - 1, len(candles) - HORIZON_SESSIONS):
+        for index in range(MIN_HISTORY - 1, len(candles) - horizon_sessions):
             decision = candles[index]
             market_date = str(decision["market_date"])
             if market_date < start_date or market_date not in benchmark_cache:
@@ -159,7 +160,7 @@ def build_rows(
             if any(market_date not in benchmark_maps[name] for name in BENCHMARKS):
                 continue
             entry = candles[index + 1]
-            exit_row = candles[index + HORIZON_SESSIONS]
+            exit_row = candles[index + horizon_sessions]
             features = long_horizon_technical_features(
                 candles[max(0, index + 1 - TECHNICAL_WINDOW) : index + 1]
             )
@@ -207,18 +208,22 @@ def build_rows(
                     "label_entry_next_adjusted_open": round(
                         float(entry["open"]), 8
                     ),
-                    "label_126d_exit_market_date": exit_row["market_date"],
-                    "label_126d_exit_adjusted_close": round(
+                    f"label_{horizon_sessions}d_exit_market_date": exit_row[
+                        "market_date"
+                    ],
+                    f"label_{horizon_sessions}d_exit_adjusted_close": round(
                         float(exit_row["close"]), 8
                     ),
-                    "label_126d_gross_return_pct": round(gross, 8),
-                    "label_126d_net_return_pct": round(
+                    f"label_{horizon_sessions}d_gross_return_pct": round(
+                        gross, 8
+                    ),
+                    f"label_{horizon_sessions}d_net_return_pct": round(
                         gross - ROUND_TRIP_COST_PCT, 8
                     ),
                     "round_trip_cost_pct": ROUND_TRIP_COST_PCT,
                     "label_contract": (
                         "decision after completed close; enter next adjusted "
-                        "open; exit 126th subsequent adjusted close"
+                        f"open; exit {horizon_sessions}th subsequent adjusted close"
                     ),
                     "research_only": True,
                     "execution_enabled": False,
@@ -246,6 +251,12 @@ def main() -> None:
     parser.add_argument("--start-date", default="2000-01-01")
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--decision-stride", type=int, default=5)
+    parser.add_argument(
+        "--horizon-sessions",
+        type=int,
+        choices=(20, 60, 126),
+        default=HORIZON_SESSIONS,
+    )
     args = parser.parse_args()
 
     candidates = read_candidates(args.candidates_file)
@@ -277,6 +288,7 @@ def main() -> None:
         args.start_date,
         args.workers,
         args.decision_stride,
+        args.horizon_sessions,
     )
     if not rows:
         raise ValueError("panel is empty")
@@ -303,7 +315,7 @@ def main() -> None:
         "dates": len(dates),
         "first_date": dates[0],
         "last_date": dates[-1],
-        "horizon_sessions": HORIZON_SESSIONS,
+        "horizon_sessions": args.horizon_sessions,
         "build_workers": args.workers,
         "decision_stride_market_sessions": args.decision_stride,
         "round_trip_cost_pct": ROUND_TRIP_COST_PCT,

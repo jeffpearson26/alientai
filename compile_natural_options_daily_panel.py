@@ -79,6 +79,31 @@ def extension_history(symbol_list: Iterable[str], chains: Path, start_date: str,
     return totals, target_chains
 
 
+def target_history(
+    symbol_list: Iterable[str],
+    chains: Path,
+    target_date: str,
+) -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]]]:
+    totals: list[dict[str, Any]] = []
+    target_chains: dict[str, list[dict[str, Any]]] = {}
+    for symbol in symbol_list:
+        path = chain_path(chains, symbol, target_date)
+        if not path.exists():
+            continue
+        chain = load_chain(path)
+        volume, interest = chain_totals(chain)
+        totals.append(
+            {
+                "symbol": symbol,
+                "market_date": target_date,
+                "option_call_volume": volume,
+                "option_call_open_interest": interest,
+            }
+        )
+        target_chains[symbol] = chain
+    return totals, target_chains
+
+
 def compile_panel(
     symbol_list: list[str],
     previous: list[Mapping[str, Any]],
@@ -86,13 +111,23 @@ def compile_panel(
     daily_dir: Path,
     target_date: str,
     price_rows: Iterable[Mapping[str, Any]] = (),
+    target_chains: Path | None = None,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     prior = prior_rows(previous, target_date)
     latest_prior_date = max((str(row["market_date"]) for row in prior), default="")
     if not latest_prior_date or latest_prior_date >= target_date:
         raise ValueError("previous feature history must end before target date")
-    extension, target_chains = extension_history(symbol_list, chains, latest_prior_date, target_date)
-    history = unusual_call_features([*prior, *extension])
+    extension, embedded_target_chains = extension_history(
+        symbol_list, chains, latest_prior_date, target_date
+    )
+    if target_chains is None:
+        current_totals = []
+        current_chains = embedded_target_chains
+    else:
+        current_totals, current_chains = target_history(
+            symbol_list, target_chains, target_date
+        )
+    history = unusual_call_features([*prior, *extension, *current_totals])
     history_by_key = {(row["symbol"], row["market_date"]): row for row in history}
     prices = {
         (str(row.get("symbol") or "").upper(), str(row.get("market_date") or "")): float(row["close"])
@@ -101,7 +136,7 @@ def compile_panel(
     }
     rows, missing = [], []
     for symbol in symbol_list:
-        chain = target_chains.get(symbol)
+        chain = current_chains.get(symbol)
         close = prices.get((symbol, target_date))
         if close is None:
             close = local_close(daily_dir, symbol, target_date)
@@ -120,6 +155,11 @@ def main() -> None:
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--previous-features", type=Path, required=True)
     parser.add_argument("--chains", type=Path, required=True)
+    parser.add_argument(
+        "--target-chains",
+        type=Path,
+        help="Optional separate source root containing the target-date chains.",
+    )
     parser.add_argument("--daily-dir", type=Path, required=True)
     parser.add_argument("--price-panel", type=Path)
     parser.add_argument("--output", type=Path, required=True)
@@ -127,7 +167,7 @@ def main() -> None:
     price_rows = read_jsonl(args.price_panel) if args.price_panel else []
     rows, missing = compile_panel(
         symbols(args.symbols_file), read_jsonl(args.previous_features), args.chains,
-        args.daily_dir, args.target_date, price_rows,
+        args.daily_dir, args.target_date, price_rows, args.target_chains,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8", newline="\n") as handle:

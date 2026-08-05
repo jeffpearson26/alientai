@@ -226,8 +226,12 @@ def long_horizon_technical_features(
             output[f"lh_latest_volume_vs_{window}d_mean"] = (
                 float(volumes[-1] / average) if average > 0.0 else None
             )
+            output[f"lh_average_dollar_volume_{window}d"] = float(
+                np.mean(closes[-window:] * volumes[-window:])
+            )
         else:
             output[f"lh_latest_volume_vs_{window}d_mean"] = None
+            output[f"lh_average_dollar_volume_{window}d"] = None
     for window in (20, 60, 126):
         if len(closes) > window:
             signs = np.sign(np.diff(closes[-(window + 1) :]))
