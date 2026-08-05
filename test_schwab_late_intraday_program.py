@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from capture_schwab_intraday_snapshot import capture
 from evaluate_schwab_late_intraday_outcomes import completed_outcomes
 from download_russell_2000_5m_schwab import read_symbols as read_schwab_symbols
 from journal_ai_semiconductor_late_intraday_models import (
@@ -66,6 +67,26 @@ class SchwabLateIntradayProgramTests(unittest.TestCase):
                 manifest,
                 datetime(2026, 8, 4, 13, 36, tzinfo=timezone.utc),
             )
+
+    def test_outcome_capture_mode_accepts_only_at_or_after_1035(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaisesRegex(ValueError, "before 10:35"):
+                capture(
+                    [],
+                    "2026-08-04",
+                    root / "too_early",
+                    datetime(2026, 8, 4, 14, 34, tzinfo=timezone.utc),
+                    purpose="outcome",
+                )
+            manifest = capture(
+                [],
+                "2026-08-04",
+                root / "complete",
+                datetime(2026, 8, 4, 14, 35, tzinfo=timezone.utc),
+                purpose="outcome",
+            )
+        self.assertEqual(manifest["purpose"], "outcome")
 
     def test_merge_uses_exact_schwab_0925_premarket(self):
         with TemporaryDirectory() as directory:

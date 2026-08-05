@@ -40,6 +40,7 @@ def capture(
     decision_date: str,
     output: Path,
     now_utc: datetime | None = None,
+    purpose: str = "entry",
 ) -> dict[str, object]:
     decision = date.fromisoformat(decision_date)
     observed = now_utc or datetime.now(timezone.utc)
@@ -48,8 +49,16 @@ def capture(
     now_et = observed.astimezone(EASTERN)
     if now_et.date() != decision:
         raise ValueError("decision date must be the current Eastern date")
-    if not time(9, 30) <= now_et.time() < time(9, 35):
-        raise ValueError("entry snapshot must be captured from 09:30 through 09:34:59 ET")
+    if purpose == "entry":
+        if not time(9, 30) <= now_et.time() < time(9, 35):
+            raise ValueError(
+                "entry snapshot must be captured from 09:30 through 09:34:59 ET"
+            )
+    elif purpose == "outcome":
+        if now_et.time() < time(10, 35):
+            raise ValueError("outcome snapshot is unavailable before 10:35 ET")
+    else:
+        raise ValueError("purpose must be entry or outcome")
 
     start = datetime.combine(decision, time(0, 0), tzinfo=EASTERN).astimezone(timezone.utc)
     output.mkdir(parents=True, exist_ok=False)
@@ -85,6 +94,7 @@ def capture(
         "bar_interval_minutes": 5,
         "timestamp_convention": "interval_start",
         "extended_hours": True,
+        "purpose": purpose,
         "decision_date": decision_date,
         "captured_at_utc": observed.astimezone(timezone.utc).isoformat(),
         "symbols": summaries,
@@ -101,11 +111,18 @@ def main() -> None:
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--decision-date", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--purpose",
+        choices=("entry", "outcome"),
+        default="entry",
+        help="entry enforces 09:30-09:34:59 ET; outcome enforces 10:35 ET or later",
+    )
     args = parser.parse_args()
     manifest = capture(
         read_symbols(args.symbols_file),
         args.decision_date,
         args.output,
+        purpose=args.purpose,
     )
     print(json.dumps(manifest, indent=2))
 
