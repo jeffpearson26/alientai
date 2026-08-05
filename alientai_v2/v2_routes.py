@@ -499,6 +499,7 @@ def v2_monitor():
     </div>
 
     <div class="nav">
+      <a href="/v2/models" target="_blank">Model Monitor</a>
       <a href="/v2/status" target="_blank">V2 JSON</a>
       <a href="/quote-debug/AAPL" target="_blank">Quote Test</a>
       <a href="/dashboard" target="_blank">Old Dashboard</a>

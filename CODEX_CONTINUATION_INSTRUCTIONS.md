@@ -2,6 +2,70 @@
 
 Updated: 2026-08-02 Pacific time
 
+## Autonomous transparent Nasdaq-101 champion (2026-08-05)
+
+Treat the frozen transparent 20-session model documented in
+`AUTONOMOUS_CHAMPION_20SESSION_REPORT_20260805.md` as a primary promising
+research program. Its exact report is
+`D:\AlientAI\Models\autonomous_transparent_20session_corrected_folds_20260805\training_report.json`
+with SHA-256
+`67c31d496e02fc0193630a99e3258d0d330dc38170085718d579ca0f0ffa139b`.
+Never change its 101-security universe, formula, eligibility rules, 20-session
+horizon, 0.25% cost, entry/exit contract, or prior observations.
+
+After each completed market close and before the next regular-session open,
+refresh the complete source-pure Alpha Vantage adjusted-daily universe and run
+`journal_autonomous_transparent_20session.py`. Append a new observation or
+honest abstention even while older horizons are pending; never backfill after
+the next open. Use
+`data_v2\rcef_research\autonomous_champion_20session_prospective_journal.jsonl`.
+Run `evaluate_autonomous_transparent_20session_outcomes.py` after daily data
+refreshes. It must leave incomplete horizons pending and append source-hashed
+outcomes only after the exact twentieth subsequent adjusted close exists.
+Preserve the outcomes and summary under `data_v2\rcef_research`. No prospective
+outcome has matured yet; the first August 4 observation contains FTNT, DDOG,
+PANW, CSX, and CRWD and was journaled before the August 5 open.
+
+## Jeff competition basket stop clarification (2026-08-05)
+
+Jeff's five frozen competition picks remain MU, AVGO, AMD, MRVL, and NVDA.
+Track a separate Jeff-specific equal-weight basket rule with a fixed overall
+stop at -3% from the initial competition basket entry value. This is not a
+3% stop on each ticker. Preserve the original competition manifest/journal
+unchanged and report the clarified basket-stop track separately using
+`data_v2\rcef_research\pick_competition_rule_amendments.jsonl`. Do not silently
+reinterpret it as a trailing stop unless Jeff explicitly clarifies that.
+
+## Read-only model intelligence monitor (2026-08-05)
+
+`alientai_v2\model_monitor.py` provides the professional owner research page
+at `/v2/models` and its read-only JSON feed at `/v2/models/data`. It displays
+model descriptions, horizons, universes, dated picks, daily ledgers,
+preliminary and final P/L, win rates, and explicit operating states. It reads
+only preserved local research journals/outcomes and never makes provider calls,
+changes a model, or exposes an execution action.
+
+The normal V2 application includes this router when it is safely restarted.
+Until then, `model_monitor_server.py` may be run loopback-only on port 8011 to
+serve the monitor without importing or starting the trading engine. Preserve
+the separation between forecasts, preliminary marks, and final cost-adjusted
+outcomes. Update the model registry whenever a promising, blocked, development,
+or preview model materially changes state.
+
+## Canonical Jeff research memory
+
+The canonical append-only file for material Jeff explicitly asks Codex to
+remember, save, preserve, or retain is:
+
+`D:\AlientAI\Project_Memory\JEFF_RESEARCH_MEMORY.md`
+
+Whenever Jeff explicitly marks pasted information for memory, append a dated,
+descriptive entry there and preserve its substantive content and intended use.
+Do not substitute a vague summary. Never store credentials, authentication
+codes, private tokens, or other secrets. Treat hypotheses as hypotheses rather
+than verified evidence. If drive D is unavailable, notify Jeff and do not
+silently create a competing canonical memory file on another drive.
+
 ## Mission
 
 Continue building AlienTAI as a research-first system for finding a very small number of unusually strong five-trading-day stock opportunities. Optimize for honest out-of-sample evidence, calibrated probabilities, realistic costs, and severe leakage prevention. Never promise profitability.
@@ -166,6 +230,17 @@ Inspect live state rather than assuming these counts remain current. Do not repr
   begins. If it remains unavailable, report the blocker and continue building
   a separately source-pure Schwab call-volume history; never compare a current
   Schwab volume with an Alpha Vantage historical baseline.
+- The August 4 after-close collection completed with 479 nonempty chains, four
+  explicit provider-unavailable symbols (BF.B, BRK.B, EA, NVR), and zero
+  failures. Before the August 5 open, the append-only Schwab refresher added the
+  matching completed session to all 483 existing histories with zero failures.
+  `build_contextual_options_prospective_payload.py` then formed a complete
+  479-symbol common universe, with 479 technical rows, 479 nonempty option rows,
+  and 479 rows having 20 prior call observations. It locked NRG, INTC, GPN, CAT,
+  and IT in
+  `data_v2\rcef_research\contextual_options_shadow_payload_2026-08-04.json`.
+  This is the second prospective decision date. Leave it pending for five later
+  Schwab sessions and continue later eligible observations without retuning.
 - The local Schwab daily refresher also previously omitted `endDate`, allowing
   Schwab to return a cached prior-session series. It now anchors each request
   to the current instant. On August 3 it appended the completed session across
@@ -961,13 +1036,19 @@ The separate July AAPL pilot passed: 21,095 rows, 22 regular sessions, exactly
 archive must remain resumable, singular, credential-safe, and separately
 audited before panel construction.
 
-The prediction contract uses only fully completed one-minute bars. A historical
-observation is keyed by the effective close of the newest completed minute and
-targets the close of the twentieth subsequent regular-session minute, with no
-overnight crossing. A mid-minute user query must report its effective
-completed-minute `as_of` timestamp and minute-resolution target; never pretend
-one-minute candles support exact sub-minute timing. Use whole market dates for
-chronological train/validation/test partitions and purge target overlap.
+The prediction contract uses only fully completed one-minute bars. Schema v3
+keys each historical observation by the effective close of the newest completed
+minute, uses the next interval's recorded open as the research entry, and uses
+the close of the horizon-th subsequent regular-session bar as the exit. Store
+both the target bar start and its one-minute-later effective close timestamp;
+never label an interval-start as though it were the close. The 0.25% frozen cost
+covers an execution allowance, but exact next-bar-open fills remain a research
+approximation. Exclude missing entry/target minutes and overnight crossings. A
+mid-minute user query must report its effective completed-minute `as_of`
+timestamp and minute-resolution target; never pretend one-minute candles
+support exact sub-minute timing. Use whole market dates for five separate
+chronological stages (train, fit-validation, calibration, policy-validation,
+and sealed test) with five-session embargoes at every boundary.
 
 Alpha Vantage is the historical training source. A live Schwab one-minute feed
 may be considered only after a separately recorded overlapping
@@ -976,6 +1057,35 @@ semantics match closely enough. Never silently splice sources or use a partial
 current minute. The first implementation remains research-only and must expose
 predicted return, direction probability, uncertainty/abstention, effective
 `as_of`, and target timestamps.
+
+Jeff's multi-horizon refinement uses the same original model architecture and
+the same point-in-time feature definition for every fit. Train separate,
+independently stored copies whose only intentional experimental difference is
+the target horizon: 5, 10, 30, 60, and 90 subsequent regular-session minutes.
+These are not five unrelated model designs and training one horizon must never
+overwrite another horizon's artifact. Each observation must use only fully
+completed one-minute candles, report its effective completed-minute `as_of`
+timestamp, and exclude targets that would cross the regular-session close.
+
+After every horizon model has independently passed the same validation and
+sealed-test discipline, a separate research-only consensus engine may combine
+their out-of-fold predictions. It must expose every component prediction and
+must distinguish sustained agreement, short-lived momentum, pullback/recovery,
+conflict, and abstention. Any learned combiner must train only on out-of-fold
+base-model predictions so it cannot learn from in-sample scores or sealed-test
+outcomes. Preserve the standalone horizon results alongside the combined
+result; the consensus engine may not conceal disagreement or authorize paper
+or live execution.
+
+Jeff also requested a separately trained AI/semiconductor-only clone. Its exact
+universe is the 17 symbols in
+`research_universes\ai_semiconductor_screen_2026.txt`; fourteen are in the main
+one-minute archive and ANET, ORCL, and SMCI come from the separately tagged
+one-minute AI/data-center supplement. Audit the supplement independently, then
+train the same 5/10/30/60/90-minute architecture, features, costs, chronology,
+embargoes, and validation/sealed-test rules with universe as the intentional
+experimental difference. Preserve and hash the exact 17-symbol list, keep the
+Nasdaq model unchanged, and do not silently add the other supplemental symbols.
 
 On 2026-08-04, a separate partial pipeline pilot was explicitly allowed while
 the production collector continued. Schema v2 stores observation and target
@@ -992,6 +1102,49 @@ The controlling report is
 with status `PARTIAL_PIPELINE_PILOT_ONLY`. Never promote or trade it. Continue
 the singular production collector, then compile/train again only after a
 complete manifest and content audit.
+
+On 2026-08-04 the main 8,137-request archive and the separate 869-request
+AI/data-center supplement both reached complete with zero failures. The
+main archive independently passed its content audit: 7,670 valid gzip files,
+467 explicitly unavailable symbol-months, 82,425,431 rows, and zero orphans.
+The controlling report is
+`data_v2\rcef_research\rolling_20m_1min_full_archive_audit_20260804.json`. The
+supplement independently passed its content audit: 793 valid gzip files,
+76 explicitly unavailable symbol-months, 10,412,846 rows, and zero orphans.
+Its controlling report is
+`data_v2\rcef_research\rolling_20m_ai_data_center_supplement_1min_content_audit_20260804.json`.
+Both schema-v3 compilation prerequisites are therefore satisfied.
+
+Schema v3 corrects deficiencies found in the first implementation without
+rewriting either schema-v2 artifact. `compile_rolling_twenty_minute_panel.py`
+now supports independently stored 5/10/20/30/60/90-minute labels, exact
+next-interval entry and effective-exit timestamps, strict gap semantics,
+immutable target-universe hashes, and same-contract main+supplement inputs.
+`build_model_features_at` uses the compiler's exact feature implementation.
+Before loading data, the trainer verifies every compiled shard hash, rejects
+duplicates/unexpected symbols/path escapes/orphans, and reconciles the manifest
+row count. The trainer may abstain, separates early stopping, calibration, and policy
+selection into later chronological stages, and does not load or score the test
+partition unless a threshold first passes the frozen policy-validation gate.
+It reports calibration, uncertainty, concentration, time/regime slices,
+capacity-matched controls, non-retuned 0.05%/0.10%/0.25% cost sensitivity,
+market-date-clustered confidence intervals, and capital-scaled drawdown. A
+policy cannot pass unless it spans at least 20 market dates and the lower 95%
+clustered bound remains above zero at the frozen 0.25% cost.
+Each horizon and universe must use a new empty output root. The contemporary
+fixed Nasdaq and AI/semiconductor universes still carry historical
+survivorship/selection bias, so retrospective passage alone never authorizes
+promotion.
+
+The first schema-v3 production result is the AI/semi-17 five-minute clone at
+`D:\AlientAI\Models\rolling_anytime_ai17_schema3_h05_20260804`. Its panel
+contained 1,335 shards and 9,563,195 rows. All five policy-validation thresholds
+failed: the least-negative mean was -0.2049% net after 0.25% cost (gross
++0.0451%), with -0.25% median, 32.93% wins, and -38.61% capital-scaled
+drawdown. Status is `RESEARCH_HOLD`; the 243-date test is explicitly
+`SEALED_UNLOADED`. Never retune or open that test. The separate AI17 ten-minute
+schema-v3 panel is the next active artifact; continue the frozen horizon
+sequence one at a time.
 
 ## Five-session catalyst-momentum model (2026-08-04)
 

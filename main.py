@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from dotenv import load_dotenv
 
 from alientai_v2.control_auth import CONTROL_HEADER, control_request_allowed, is_control_request
+from alientai_v2.model_monitor import router as model_monitor_router
 from alientai_v2.v2_routes import router as v2_router
 
 
@@ -13,6 +14,7 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 app = FastAPI(title="AlientAI V2 Clean App")
 
 app.include_router(v2_router)
+app.include_router(model_monitor_router)
 
 
 @app.middleware("http")
@@ -35,6 +37,7 @@ def api_home():
         "status": "success",
         "message": "AlientAI V2 Clean App is running.",
         "monitor": "/v2/monitor",
+        "model_monitor": "/v2/models",
         "status_url": "/v2/status",
         "build": "ALIENTAI_V2_REFACTORED_CLEAN_APP_V1",
     }

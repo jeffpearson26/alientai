@@ -496,6 +496,16 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `COMPLETED 2026-08-05`: Added a professional, read-only AlientAI model
+intelligence monitor at `/v2/models`, plus a standalone loopback-only launcher
+on port 8011. The dashboard reads append-only research journals and outcomes
+without network calls, displays model descriptions, horizons, universes,
+dated picks, preliminary/final P/L, win rates, and explicit
+active/attention/blocked/development/preview states. Forecasts remain visually
+and semantically separate from realized P/L. It exposes no write, engine,
+paper-order, or live-order endpoint. Targeted monitor/account tests passed and
+the existing owner monitor now links to the new page.
+
 000. `ACTIVE 2026-08-04`: Jeff refined the rolling 20-minute goal from a
 five-minute-grid model to a one-minute-resolution model that may be queried at
 any eligible regular-session minute. Preserve the already completed and audited
@@ -749,6 +759,11 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-05: Jeff directed creation of a permanent professional monitoring
+  page for all models still under consideration. The new page is read-only,
+  emphasizes prospective-test state and exact evidence, and does not broaden
+  execution authority. It distinguishes preliminary marks, forecasts, and
+  final cost-adjusted outcomes instead of presenting them as interchangeable.
 - 2026-07-20: Jeff established a single mandatory dynamic roadmap that every future AI task must read and maintain. The initial roadmap consolidates the existing research priorities, safety gates, data-collection phases, evaluation path, storage work, and future decisions.
 - 2026-07-20: Added a limited TradingAgents-inspired qualitative review experiment to Phase 8. It is a shadow-only second-opinion layer for candidates already selected by AlienTAI, not a replacement signal model or execution authority. The plan explicitly avoids a wholesale repository merge, uncontrolled live-data use in historical evaluation, and reuse of unsafe credential-bearing HTTP error paths.
 - 2026-07-21: Jeff determined the existing Alpha Vantage key was not compromised through GitHub and directed AlienTAI to continue using it. The roadmap no longer requires key rotation as a precondition for the resumable research-data harvest.
