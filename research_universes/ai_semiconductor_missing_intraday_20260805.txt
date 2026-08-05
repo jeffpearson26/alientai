@@ -1,0 +1,4 @@
+# Missing from the completed Nasdaq-101 adjusted one-minute archive.
+ANET
+ORCL
+SMCI
