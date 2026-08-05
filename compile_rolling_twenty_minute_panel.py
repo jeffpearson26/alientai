@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Compile adjusted one-minute candles into resumable 20-minute model shards."""
+"""Compile adjusted one-minute candles into executable intraday model shards."""
 
 import argparse
 import gzip
@@ -16,17 +16,20 @@ import pandas as pd
 
 from download_alpha_vantage_adjusted_intraday_archive import (
     atomic_json,
+    month_range,
     read_symbols,
 )
 
 
-HORIZON_MINUTES = 20
+DEFAULT_HORIZON_MINUTES = 20
+ALLOWED_HORIZON_MINUTES = (5, 10, 20, 30, 60, 90)
 ROUND_TRIP_COST_PCT = 0.25
 RETURN_WINDOWS = (1, 2, 5, 10, 20, 60)
 ROLLING_WINDOWS = (5, 20, 60)
 BENCHMARKS = ("QQQ", "SPY")
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 TIMESTAMP_UNIT = "ns_since_unix_epoch"
+ENTRY_ASSUMPTION = "next_minute_open"
 
 
 def file_sha256(path: Path) -> str:
@@ -128,11 +131,19 @@ def technical_frame(raw: pd.DataFrame) -> pd.DataFrame:
     one_minute_return = one_minute_return.where(
         (frame["timestamp"] - prior_stamp) == pd.Timedelta(minutes=1)
     )
-    frame["realized_volatility_20m_pct"] = (
+    realized_volatility = (
         one_minute_return.groupby(frame["market_date"])
         .rolling(20, min_periods=5)
         .std(ddof=0)
         .reset_index(level=0, drop=True)
+    )
+    volatility_start_stamp = grouped["timestamp"].shift(19)
+    exact_volatility_history = (
+        (frame["timestamp"] - volatility_start_stamp)
+        == pd.Timedelta(minutes=19)
+    )
+    frame["realized_volatility_20m_pct"] = realized_volatility.where(
+        exact_volatility_history
     )
 
     for window in ROLLING_WINDOWS:
@@ -161,12 +172,14 @@ def technical_frame(raw: pd.DataFrame) -> pd.DataFrame:
             == pd.Timedelta(minutes=window - 1)
         ).fillna(window == 1)
         frame[f"volume_history_{window}m_available"] = exact_history.astype(np.float32)
-        frame[f"volume_vs_{window}m_mean"] = frame["volume"] / mean_volume.replace(
-            0, np.nan
+        frame[f"volume_vs_{window}m_mean"] = (
+            frame["volume"] / mean_volume.replace(0, np.nan)
+        ).where(
+            exact_history
         )
         frame[f"range_{window}m_pct"] = (
             rolling_high / rolling_low - 1.0
-        ) * 100.0
+        ).mul(100.0).where(exact_history)
     return frame
 
 
@@ -207,7 +220,7 @@ def feature_names() -> list[str]:
     return names
 
 
-def build_training_frame(
+def build_feature_frame(
     symbol_raw: pd.DataFrame,
     qqq_raw: pd.DataFrame,
     spy_raw: pd.DataFrame,
@@ -235,21 +248,50 @@ def build_training_frame(
                 - frame[f"{benchmark}_return_{window}m_pct"]
             )
 
+    return frame.reset_index(drop=True)
+
+
+def build_training_frame(
+    symbol_raw: pd.DataFrame,
+    qqq_raw: pd.DataFrame,
+    spy_raw: pd.DataFrame,
+    *,
+    horizon_minutes: int = DEFAULT_HORIZON_MINUTES,
+    round_trip_cost_pct: float = ROUND_TRIP_COST_PCT,
+) -> pd.DataFrame:
+    if horizon_minutes not in ALLOWED_HORIZON_MINUTES:
+        raise ValueError(
+            f"horizon_minutes must be one of {ALLOWED_HORIZON_MINUTES}"
+        )
+    if round_trip_cost_pct < 0:
+        raise ValueError("round_trip_cost_pct must be nonnegative")
+    frame = build_feature_frame(symbol_raw, qqq_raw, spy_raw)
     grouped = frame.groupby("market_date", sort=False)
-    target_close = grouped["close"].shift(-HORIZON_MINUTES)
-    target_stamp = grouped["timestamp"].shift(-HORIZON_MINUTES)
+    entry_open = grouped["open"].shift(-1)
+    entry_stamp = grouped["timestamp"].shift(-1)
+    target_close = grouped["close"].shift(-horizon_minutes)
+    target_bar_start_stamp = grouped["timestamp"].shift(-horizon_minutes)
+    exact_entry = (
+        entry_stamp - frame["timestamp"]
+    ) == pd.Timedelta(minutes=1)
     exact_target = (
-        target_stamp - frame["timestamp"]
-    ) == pd.Timedelta(minutes=HORIZON_MINUTES)
-    frame["target_timestamp"] = target_stamp
-    frame["forward_return_20m_gross_pct"] = (
-        target_close / frame["close"] - 1.0
+        target_bar_start_stamp - frame["timestamp"]
+    ) == pd.Timedelta(minutes=horizon_minutes)
+    frame["entry_timestamp"] = entry_stamp
+    frame["target_bar_start_timestamp"] = target_bar_start_stamp
+    frame["target_timestamp"] = (
+        target_bar_start_stamp + pd.Timedelta(minutes=1)
+    )
+    frame["entry_open"] = entry_open
+    frame["target_close"] = target_close
+    frame["forward_return_gross_pct"] = (
+        target_close / entry_open - 1.0
     ) * 100.0
-    frame["forward_return_20m_net_pct"] = (
-        frame["forward_return_20m_gross_pct"] - ROUND_TRIP_COST_PCT
+    frame["forward_return_net_pct"] = (
+        frame["forward_return_gross_pct"] - round_trip_cost_pct
     )
     frame["positive_after_cost"] = (
-        frame["forward_return_20m_net_pct"] > 0.0
+        frame["forward_return_net_pct"] > 0.0
     ).astype(np.float32)
     complete_context = frame[
         [
@@ -257,7 +299,7 @@ def build_training_frame(
             "spy_session_return_pct",
         ]
     ].notna().all(axis=1)
-    frame = frame[exact_target & complete_context].copy()
+    frame = frame[exact_entry & exact_target & complete_context].copy()
     return frame.reset_index(drop=True)
 
 
@@ -268,10 +310,16 @@ def save_shard(path: Path, frame: pd.DataFrame, names: list[str]) -> dict[str, A
         np.savez_compressed(
             handle,
             x=frame[names].to_numpy(dtype=np.float32),
-            gross=frame["forward_return_20m_gross_pct"].to_numpy(dtype=np.float32),
-            net=frame["forward_return_20m_net_pct"].to_numpy(dtype=np.float32),
+            gross=frame["forward_return_gross_pct"].to_numpy(dtype=np.float32),
+            net=frame["forward_return_net_pct"].to_numpy(dtype=np.float32),
             positive=frame["positive_after_cost"].to_numpy(dtype=np.float32),
             timestamp=frame["timestamp"]
+            .to_numpy(dtype="datetime64[ns]")
+            .astype(np.int64),
+            entry_timestamp=frame["entry_timestamp"]
+            .to_numpy(dtype="datetime64[ns]")
+            .astype(np.int64),
+            target_bar_start_timestamp=frame["target_bar_start_timestamp"]
             .to_numpy(dtype="datetime64[ns]")
             .astype(np.int64),
             target_timestamp=frame["target_timestamp"]
@@ -298,23 +346,136 @@ def compile_archive(
     output_root: Path,
     target_symbols: Iterable[str],
     allow_running_snapshot: bool = False,
+    *,
+    horizon_minutes: int = DEFAULT_HORIZON_MINUTES,
+    round_trip_cost_pct: float = ROUND_TRIP_COST_PCT,
+    supplemental_raw_roots: Iterable[Path] = (),
 ) -> dict[str, Any]:
-    raw_manifest_path = raw_root / "manifest.json"
-    raw_manifest_bytes = raw_manifest_path.read_bytes()
-    raw_manifest = json.loads(raw_manifest_bytes.decode("utf-8"))
-    source_complete = raw_manifest.get("status") == "complete"
-    if raw_manifest.get("failed"):
-        raise ValueError("raw one-minute archive has failures")
-    if not source_complete and not (
-        allow_running_snapshot and raw_manifest.get("status") == "running"
-    ):
+    if horizon_minutes not in ALLOWED_HORIZON_MINUTES:
         raise ValueError(
-            "raw one-minute archive must be complete with zero failures "
-            "(or explicitly compiled as a running snapshot)"
+            f"horizon_minutes must be one of {ALLOWED_HORIZON_MINUTES}"
         )
-    if raw_manifest.get("interval") != "1min":
-        raise ValueError("raw archive is not one-minute data")
-    records = _records(raw_manifest)
+    if round_trip_cost_pct < 0:
+        raise ValueError("round_trip_cost_pct must be nonnegative")
+    requested_targets = sorted(set(target_symbols) - set(BENCHMARKS))
+    if not requested_targets:
+        raise ValueError("at least one non-benchmark target symbol is required")
+    source_archives: list[tuple[Path, bytes, dict[str, Any]]] = []
+    source_contract: dict[str, Any] | None = None
+    for source_root in (raw_root, *tuple(supplemental_raw_roots)):
+        manifest_path = source_root / "manifest.json"
+        manifest_bytes = manifest_path.read_bytes()
+        source_manifest = json.loads(manifest_bytes.decode("utf-8"))
+        if source_manifest.get("failed"):
+            raise ValueError(f"raw one-minute archive has failures: {source_root}")
+        complete = source_manifest.get("status") == "complete"
+        if not complete and not (
+            allow_running_snapshot and source_manifest.get("status") == "running"
+        ):
+            raise ValueError(
+                "raw one-minute archive must be complete with zero failures "
+                "(or explicitly compiled as a running snapshot)"
+            )
+        if source_manifest.get("interval") != "1min":
+            raise ValueError("raw archive is not one-minute data")
+        archive_contract = {
+            field: source_manifest.get(field)
+            for field in (
+                "start_month",
+                "end_month",
+                "function",
+                "interval",
+                "adjusted",
+                "extended_hours",
+                "timestamp_convention",
+                "timestamp_timezone",
+            )
+        }
+        if source_contract is None:
+            source_contract = archive_contract
+        elif archive_contract != source_contract:
+            raise ValueError(
+                f"source archive contract mismatch: {source_root}"
+            )
+        required_semantics = {
+            "function": "TIME_SERIES_INTRADAY",
+            "interval": "1min",
+            "adjusted": True,
+            "extended_hours": True,
+            "timestamp_convention": "interval_start",
+            "timestamp_timezone": "America/New_York",
+        }
+        if (
+            not archive_contract["start_month"]
+            or not archive_contract["end_month"]
+            or any(
+                archive_contract[field] != expected
+                for field, expected in required_semantics.items()
+            )
+        ):
+            raise ValueError(
+                f"source archive has unsupported semantics: {source_root}"
+            )
+        source_archives.append(
+            (source_root, manifest_bytes, source_manifest)
+        )
+    assert source_contract is not None
+    source_complete = all(
+        manifest.get("status") == "complete"
+        for _, _, manifest in source_archives
+    )
+    records: dict[
+        tuple[str, str],
+        tuple[Path, dict[str, Any]],
+    ] = {}
+    targets = set(requested_targets)
+    accounted_keys: set[tuple[str, str]] = set()
+    for source_root, _, source_manifest in source_archives:
+        accounted_keys.update(
+            (str(record["symbol"]), str(record["month"]))
+            for state in ("completed", "unavailable")
+            for record in (source_manifest.get(state) or [])
+            if str(record["symbol"]) in targets or str(record["symbol"]) in BENCHMARKS
+        )
+        for key, record in _records(source_manifest).items():
+            symbol, _ = key
+            if symbol not in targets and symbol not in BENCHMARKS:
+                continue
+            existing = records.get(key)
+            if existing is None:
+                records[key] = (source_root, record)
+                continue
+            if existing[1].get("content_sha256") != record.get("content_sha256"):
+                raise ValueError(
+                    f"conflicting duplicate source shard: {symbol}|{key[1]}"
+                )
+    expected_months = month_range(
+        str(source_contract["start_month"]),
+        str(source_contract["end_month"]),
+    )
+    if source_complete:
+        missing_accounted = sorted(
+            f"{symbol}|{month}"
+            for symbol in (*requested_targets, *BENCHMARKS)
+            for month in expected_months
+            if (symbol, month) not in accounted_keys
+        )
+        if missing_accounted:
+            preview = ", ".join(missing_accounted[:10])
+            raise ValueError(
+                "completed source archives do not account for every requested "
+                f"symbol-month ({len(missing_accounted)} missing): {preview}"
+            )
+        targets_without_data = sorted(
+            symbol
+            for symbol in requested_targets
+            if not any(key[0] == symbol for key in records)
+        )
+        if targets_without_data:
+            raise ValueError(
+                "target symbols have no usable completed data: "
+                + ", ".join(targets_without_data)
+            )
     names = feature_names()
     output_manifest_path = output_root / "manifest.json"
     contract: dict[str, Any] = {
@@ -322,11 +483,31 @@ def compile_archive(
         "research_only": True,
         "execution_enabled": False,
         "partial_snapshot": not source_complete,
-        "source_manifest_sha256": hashlib.sha256(raw_manifest_bytes).hexdigest(),
+        "source_manifest_sha256": hashlib.sha256(
+            source_archives[0][1]
+        ).hexdigest(),
+        "source_archives": [
+            {
+                "dataset": source_manifest.get("dataset"),
+                "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+            }
+            for _, manifest_bytes, source_manifest in source_archives
+        ],
         "source_interval": "1min",
+        "source_start_month": source_contract["start_month"],
+        "source_end_month": source_contract["end_month"],
         "timestamp_unit": TIMESTAMP_UNIT,
-        "horizon_minutes": HORIZON_MINUTES,
-        "round_trip_cost_pct": ROUND_TRIP_COST_PCT,
+        "horizon_minutes": horizon_minutes,
+        "round_trip_cost_pct": round_trip_cost_pct,
+        "target_symbols": requested_targets,
+        "target_symbols_count": len(requested_targets),
+        "target_symbols_sha256": hashlib.sha256(
+            ("\n".join(requested_targets) + "\n").encode("utf-8")
+        ).hexdigest(),
+        "entry_assumption": ENTRY_ASSUMPTION,
+        "decision_timestamp_convention": "completed_bar_close",
+        "entry_timestamp_convention": "next_interval_start",
+        "target_timestamp_convention": "exit_bar_close",
         "feature_names": names,
     }
     if output_manifest_path.exists():
@@ -348,7 +529,6 @@ def compile_archive(
         for item in output_manifest.get("completed") or []
     }
     by_month: dict[str, list[str]] = {}
-    targets = set(target_symbols) - set(BENCHMARKS)
     for symbol, month in records:
         if symbol in targets:
             by_month.setdefault(month, []).append(symbol)
@@ -367,10 +547,17 @@ def compile_archive(
     if not by_month:
         raise ValueError("no source months have complete QQQ and SPY context")
     output_manifest["source_snapshot"] = {
-        "source_status": raw_manifest.get("status"),
-        "completed_requests": len(raw_manifest.get("completed") or []),
-        "unavailable_requests": len(raw_manifest.get("unavailable") or []),
-        "failed_requests": len(raw_manifest.get("failed") or []),
+        "source_status": "complete" if source_complete else "running_snapshot",
+        "completed_requests": sum(
+            len(manifest.get("completed") or [])
+            for _, _, manifest in source_archives
+        ),
+        "unavailable_requests": sum(
+            len(manifest.get("unavailable") or [])
+            for _, _, manifest in source_archives
+        ),
+        "failed_requests": 0,
+        "source_archive_count": len(source_archives),
         "compiled_months": sorted(by_month),
         "skipped_incomplete_context_months": incomplete_context_months,
     }
@@ -378,14 +565,15 @@ def compile_archive(
         for month in sorted(by_month):
             benchmark_frames = {}
             for benchmark in BENCHMARKS:
-                record = records.get((benchmark, month))
-                if record is None:
+                source = records.get((benchmark, month))
+                if source is None:
                     raise ValueError(f"missing {benchmark} context for {month}")
+                source_root, record = source
                 benchmark_frames[benchmark] = read_gzip_csv(
-                    raw_root / record["relative_path"]
+                    source_root / record["relative_path"]
                 )
             for symbol in sorted(by_month[month]):
-                record = records[(symbol, month)]
+                source_root, record = records[(symbol, month)]
                 existing = completed_by_key.get((symbol, month))
                 if existing is not None:
                     existing_path = output_root / existing["relative_path"]
@@ -401,9 +589,11 @@ def compile_archive(
                         f"existing compiled shard does not match source: {symbol}|{month}"
                     )
                 frame = build_training_frame(
-                    read_gzip_csv(raw_root / record["relative_path"]),
+                    read_gzip_csv(source_root / record["relative_path"]),
                     benchmark_frames["QQQ"],
                     benchmark_frames["SPY"],
+                    horizon_minutes=horizon_minutes,
+                    round_trip_cost_pct=round_trip_cost_pct,
                 )
                 destination = (
                     output_root / month[:4] / month / f"{symbol}.npz"
@@ -439,8 +629,26 @@ def compile_archive(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-root", type=Path, required=True)
+    parser.add_argument(
+        "--supplemental-raw-root",
+        type=Path,
+        action="append",
+        default=[],
+        help="Additional independently audited one-minute archive root",
+    )
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
+    parser.add_argument(
+        "--horizon-minutes",
+        type=int,
+        choices=ALLOWED_HORIZON_MINUTES,
+        default=DEFAULT_HORIZON_MINUTES,
+    )
+    parser.add_argument(
+        "--round-trip-cost-pct",
+        type=float,
+        default=ROUND_TRIP_COST_PCT,
+    )
     parser.add_argument(
         "--allow-running-snapshot",
         action="store_true",
@@ -456,6 +664,9 @@ def main() -> None:
         args.output_root,
         symbols,
         allow_running_snapshot=args.allow_running_snapshot,
+        horizon_minutes=args.horizon_minutes,
+        round_trip_cost_pct=args.round_trip_cost_pct,
+        supplemental_raw_roots=args.supplemental_raw_root,
     )
     print(
         json.dumps(

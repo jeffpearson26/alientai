@@ -897,3 +897,20 @@ feature-family ablation order, chronological splits, and promotion gates.
   and targeted tests. Live scoring remains blocked until the historical
   archive, content audit, training, and Alpha-versus-live-source compatibility
   audit complete. No engine, paper, or live trading path changed.
+- 2026-08-04: Completed a schema-v3 methodological correction before starting
+  multi-horizon training. The successor uses a next-interval-open research
+  entry, an accurately timestamped exit-bar close, strict missing-minute
+  handling, exact compiler/live feature parity, and immutable universe hashes.
+  It supports separate 5/10/20/30/60/90-minute artifacts and an independently
+  tagged 17-symbol AI/semiconductor clone. Training now uses distinct
+  train/fit-validation/calibration/policy-validation/sealed-test stages with
+  four five-session embargoes; selection can abstain; the test arrays remain
+  unloaded unless policy validation passes; and diagnostics include calibrated
+  probabilities, uncertainty, concentration, time/QQQ regimes, matched
+  controls, costs, and capital-scaled drawdown. The original full schema-v2
+  Nasdaq model remains an immutable `RESEARCH_HOLD` with its test sealed.
+  Both raw archives are complete with zero failures and independently audited.
+  The main audit passed 7,670 valid files, 467 unavailable, 82,425,431 rows,
+  and zero orphans; the supplement passed 793 valid files, 76 unavailable,
+  10,412,846 rows, and zero orphans. The first schema-v3 AI17 five-minute panel
+  compilation then began in a new horizon-specific D-drive artifact.

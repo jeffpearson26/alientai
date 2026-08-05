@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Leakage-safe one-minute features and 20-minute research labels."""
+"""Leakage-safe one-minute features and configurable intraday research labels."""
 
 import math
 from dataclasses import dataclass
@@ -12,7 +12,8 @@ from zoneinfo import ZoneInfo
 NEW_YORK = ZoneInfo("America/New_York")
 REGULAR_OPEN = time(9, 30)
 REGULAR_LAST_BAR = time(15, 59)
-HORIZON_MINUTES = 20
+DEFAULT_HORIZON_MINUTES = 20
+ALLOWED_HORIZON_MINUTES = (5, 10, 20, 30, 60, 90)
 ROUND_TRIP_COST_PCT = 0.25
 RETURN_WINDOWS = (1, 2, 5, 10, 20, 60)
 
@@ -139,7 +140,11 @@ def build_features_at(
         output["distance_from_session_vwap_pct"] = None
 
     for window in RETURN_WINDOWS:
-        available = index >= window
+        available = (
+            index >= window
+            and current.timestamp - candles[index - window].timestamp
+            == timedelta(minutes=window)
+        )
         output[f"history_{window}m_available"] = available
         output[f"return_{window}m_pct"] = (
             _safe_return(current.close, candles[index - window].close)
@@ -156,7 +161,11 @@ def build_features_at(
     for window in (5, 20, 60):
         start = max(0, index - window + 1)
         sample = candles[start : index + 1]
-        complete = len(sample) == window
+        complete = (
+            len(sample) == window
+            and sample[-1].timestamp - sample[0].timestamp
+            == timedelta(minutes=window - 1)
+        )
         output[f"volume_history_{window}m_available"] = complete
         average_volume = _mean([item.volume for item in sample])
         output[f"volume_vs_{window}m_mean"] = (
@@ -174,51 +183,119 @@ def build_label_at(
     feature_bar_start: datetime,
     *,
     round_trip_cost_pct: float = ROUND_TRIP_COST_PCT,
+    horizon_minutes: int = DEFAULT_HORIZON_MINUTES,
 ) -> dict[str, Any] | None:
     if round_trip_cost_pct < 0:
         raise ValueError("round_trip_cost_pct must be nonnegative")
+    if horizon_minutes not in ALLOWED_HORIZON_MINUTES:
+        raise ValueError(
+            f"horizon_minutes must be one of {ALLOWED_HORIZON_MINUTES}"
+        )
     candles = regular_session(rows)
     wanted = _timestamp(feature_bar_start)
     by_stamp = {item.timestamp: item for item in candles}
-    current = by_stamp.get(wanted)
-    if current is None:
+    if wanted not in by_stamp:
         return None
     future_stamps = [
         wanted + timedelta(minutes=offset)
-        for offset in range(1, HORIZON_MINUTES + 1)
+        for offset in range(1, horizon_minutes + 1)
     ]
     if any(stamp.date() != wanted.date() or stamp not in by_stamp for stamp in future_stamps):
         return None
+    entry = by_stamp[future_stamps[0]]
     target = by_stamp[future_stamps[-1]]
-    gross = _safe_return(target.close, current.close)
+    gross = _safe_return(target.close, entry.open)
     return {
         "label_effective_as_of_et": (wanted + timedelta(minutes=1)).isoformat(),
+        "label_entry_at_et": future_stamps[0].isoformat(),
         "label_target_at_et": (
-            wanted + timedelta(minutes=HORIZON_MINUTES + 1)
+            wanted + timedelta(minutes=horizon_minutes + 1)
         ).isoformat(),
-        "label_baseline_close": current.close,
+        "label_entry_open": entry.open,
         "label_target_close": target.close,
-        "label_forward_return_20m_gross_pct": gross,
-        "label_forward_return_20m_net_pct": gross - round_trip_cost_pct,
+        "label_forward_return_gross_pct": gross,
+        "label_forward_return_net_pct": gross - round_trip_cost_pct,
         "label_positive_after_cost": gross > round_trip_cost_pct,
         "round_trip_cost_pct": round_trip_cost_pct,
+        "entry_assumption": "next_minute_open",
+        "horizon_minutes": horizon_minutes,
     }
 
 
 def build_observation_at(
     rows: Iterable[Mapping[str, Any]],
     feature_bar_start: datetime,
+    *,
+    horizon_minutes: int = DEFAULT_HORIZON_MINUTES,
 ) -> dict[str, Any] | None:
     materialized = list(rows)
     features = build_features_at(materialized, feature_bar_start)
-    label = build_label_at(materialized, feature_bar_start)
+    label = build_label_at(
+        materialized,
+        feature_bar_start,
+        horizon_minutes=horizon_minutes,
+    )
     if features is None or label is None:
         return None
     return {
         **features,
         **label,
         "interval": "1min",
-        "horizon_minutes": HORIZON_MINUTES,
+        "horizon_minutes": horizon_minutes,
+        "research_only": True,
+        "execution_enabled": False,
+    }
+
+
+def build_model_features_at(
+    symbol_rows: Iterable[Mapping[str, Any]],
+    qqq_rows: Iterable[Mapping[str, Any]],
+    spy_rows: Iterable[Mapping[str, Any]],
+    captured_at: datetime,
+) -> dict[str, Any] | None:
+    """Build the exact compiler feature vector for the newest completed minute."""
+
+    if captured_at.tzinfo is None:
+        raise ValueError("captured_at must be timezone-aware")
+    import pandas as pd
+
+    from compile_rolling_twenty_minute_panel import build_feature_frame, feature_names
+
+    wanted = latest_completed_bar_start(captured_at)
+
+    def frame(rows: Iterable[Mapping[str, Any]]) -> Any:
+        output = pd.DataFrame(list(rows))
+        if output.empty:
+            return output
+        output["timestamp"] = pd.to_datetime(output["timestamp"])
+        if output["timestamp"].dt.tz is not None:
+            output["timestamp"] = (
+                output["timestamp"].dt.tz_convert(NEW_YORK).dt.tz_localize(None)
+            )
+        return output
+
+    compiled = build_feature_frame(
+        frame(symbol_rows),
+        frame(qqq_rows),
+        frame(spy_rows),
+    )
+    wanted_naive = wanted.replace(tzinfo=None)
+    matched = compiled[compiled["timestamp"] == wanted_naive]
+    if len(matched) != 1:
+        return None
+    row = matched.iloc[0]
+    if pd.isna(row["qqq_session_return_pct"]) or pd.isna(
+        row["spy_session_return_pct"]
+    ):
+        return None
+    return {
+        "feature_bar_start_et": wanted.isoformat(),
+        "effective_as_of_et": (wanted + timedelta(minutes=1)).isoformat(),
+        "feature_names": feature_names(),
+        "features": {
+            name: None if pd.isna(row[name]) else float(row[name])
+            for name in feature_names()
+        },
         "research_only": True,
         "execution_enabled": False,
     }

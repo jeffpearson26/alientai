@@ -42,9 +42,10 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
         raw_root: Path,
         status: str,
         include_spy: bool = True,
+        target_symbol: str = "AAA",
     ) -> None:
         records = []
-        inputs = [("AAA", 1.0), ("QQQ", 1.1)]
+        inputs = [(target_symbol, 1.0), ("QQQ", 1.1)]
         if include_spy:
             inputs.append(("SPY", 0.9))
         for symbol, multiplier in inputs:
@@ -67,7 +68,14 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
                     "status": status,
                     "failed": [],
                     "unavailable": [],
+                    "start_month": "2026-07",
+                    "end_month": "2026-07",
+                    "function": "TIME_SERIES_INTRADAY",
                     "interval": "1min",
+                    "adjusted": True,
+                    "extended_hours": True,
+                    "timestamp_convention": "interval_start",
+                    "timestamp_timezone": "America/New_York",
                     "completed": records,
                 }
             ),
@@ -79,40 +87,22 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
             root = Path(directory)
             raw_root = root / "raw"
             output_root = root / "compiled"
-            records = []
-            for symbol, multiplier in (("AAA", 1.0), ("QQQ", 1.1), ("SPY", 0.9)):
-                path = raw_root / "2026" / "2026-07" / f"{symbol}.csv.gz"
-                path.parent.mkdir(parents=True, exist_ok=True)
-                content = session(multiplier).to_csv(index=False).encode()
-                with gzip.open(path, "wb") as handle:
-                    handle.write(content)
-                records.append(
-                    {
-                        "symbol": symbol,
-                        "month": "2026-07",
-                        "relative_path": path.relative_to(raw_root).as_posix(),
-                        "content_sha256": hashlib.sha256(content).hexdigest(),
-                    }
-                )
-            (raw_root / "manifest.json").write_text(
-                json.dumps(
-                    {
-                        "status": "complete",
-                        "failed": [],
-                        "interval": "1min",
-                        "completed": records,
-                    }
-                ),
-                encoding="utf-8",
-            )
+            self._write_archive(raw_root, status="complete")
             first = compile_archive(raw_root, output_root, ["AAA"])
             shard = output_root / first["completed"][0]["relative_path"]
             self.assertEqual(first["timestamp_unit"], "ns_since_unix_epoch")
+            self.assertEqual(first["schema_version"], 3)
+            self.assertEqual(first["entry_assumption"], "next_minute_open")
             with np.load(shard) as values:
                 first_timestamp = values["timestamp"][0].astype("datetime64[ns]")
+                first_entry = values["entry_timestamp"][0].astype("datetime64[ns]")
             self.assertEqual(
                 first_timestamp,
                 np.datetime64("2026-07-31T09:30:00", "ns"),
+            )
+            self.assertEqual(
+                first_entry,
+                np.datetime64("2026-07-31T09:31:00", "ns"),
             )
             modified = shard.stat().st_mtime_ns
             second = compile_archive(raw_root, output_root, ["AAA"])
@@ -161,8 +151,109 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
         self.assertEqual(frame.iloc[0]["timestamp"].strftime("%H:%M"), "09:30")
         self.assertEqual(
             frame.iloc[-1]["target_timestamp"].strftime("%H:%M"),
-            "15:59",
+            "16:00",
         )
+        self.assertEqual(frame.iloc[0]["entry_timestamp"].strftime("%H:%M"), "09:31")
+
+    def test_configurable_five_minute_horizon_uses_next_minute_open(self) -> None:
+        symbol = session()
+        frame = build_training_frame(
+            symbol,
+            session(1.1),
+            session(0.9),
+            horizon_minutes=5,
+        )
+        self.assertEqual(len(frame), 385)
+        first = frame.iloc[0]
+        expected = (symbol.iloc[5]["close"] / symbol.iloc[1]["open"] - 1.0) * 100.0
+        self.assertAlmostEqual(first["forward_return_gross_pct"], expected)
+        self.assertEqual(first["entry_timestamp"].strftime("%H:%M"), "09:31")
+        self.assertEqual(first["target_bar_start_timestamp"].strftime("%H:%M"), "09:35")
+        self.assertEqual(first["target_timestamp"].strftime("%H:%M"), "09:36")
+
+    def test_horizon_contract_prevents_output_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            raw_root = root / "raw"
+            output_root = root / "compiled"
+            self._write_archive(raw_root, status="complete")
+            compile_archive(
+                raw_root,
+                output_root,
+                ["AAA"],
+                horizon_minutes=5,
+            )
+            with self.assertRaisesRegex(ValueError, "contract mismatch"):
+                compile_archive(
+                    raw_root,
+                    output_root,
+                    ["AAA"],
+                    horizon_minutes=10,
+                )
+
+    def test_compiler_combines_main_and_supplemental_archives(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            main = root / "main"
+            supplemental = root / "supplemental"
+            self._write_archive(main, status="complete", target_symbol="AAA")
+            self._write_archive(
+                supplemental,
+                status="complete",
+                target_symbol="BBB",
+            )
+            result = compile_archive(
+                main,
+                root / "compiled",
+                ["AAA", "BBB"],
+                horizon_minutes=5,
+                supplemental_raw_roots=[supplemental],
+            )
+            symbols = {item["symbol"] for item in result["completed"]}
+            self.assertEqual(symbols, {"AAA", "BBB"})
+            self.assertEqual(result["source_snapshot"]["source_archive_count"], 2)
+            self.assertEqual(result["target_symbols"], ["AAA", "BBB"])
+            self.assertEqual(result["target_symbols_count"], 2)
+
+    def test_complete_archive_requires_every_symbol_month_accounted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            raw_root = root / "raw"
+            self._write_archive(raw_root, status="complete")
+            manifest_path = raw_root / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["start_month"] = "2026-06"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "do not account"):
+                compile_archive(raw_root, root / "compiled", ["AAA"])
+
+    def test_combined_archives_reject_conflicting_benchmark_content(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            main = root / "main"
+            supplemental = root / "supplemental"
+            self._write_archive(main, status="complete", target_symbol="AAA")
+            self._write_archive(
+                supplemental,
+                status="complete",
+                target_symbol="BBB",
+            )
+            manifest_path = supplemental / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            qqq = next(
+                record
+                for record in manifest["completed"]
+                if record["symbol"] == "QQQ"
+            )
+            qqq["content_sha256"] = "0" * 64
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "conflicting duplicate"):
+                compile_archive(
+                    main,
+                    root / "compiled",
+                    ["AAA", "BBB"],
+                    supplemental_raw_roots=[supplemental],
+                )
 
     def test_missing_future_minute_removes_crossing_targets(self) -> None:
         symbol = session()
@@ -171,9 +262,15 @@ class CompileRollingTwentyMinutePanelTests(unittest.TestCase):
         frame = build_training_frame(symbol, session(1.1), session(0.9))
         crossing = frame[
             (frame["timestamp"] < missing_stamp)
-            & (frame["target_timestamp"] >= missing_stamp)
+            & (frame["target_bar_start_timestamp"] >= missing_stamp)
         ]
         self.assertTrue(crossing.empty)
+        after_gap = frame[
+            frame["timestamp"] == missing_stamp + timedelta(minutes=1)
+        ].iloc[0]
+        self.assertEqual(after_gap["history_1m_available"], 0.0)
+        self.assertTrue(pd.isna(after_gap["return_1m_pct"]))
+        self.assertTrue(pd.isna(after_gap["realized_volatility_20m_pct"]))
 
     def test_features_exclude_all_targets_and_future_prices(self) -> None:
         names = feature_names()
