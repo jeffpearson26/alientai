@@ -522,30 +522,46 @@ def main() -> None:
     fit_y = np.asarray(
         [float(row[TARGET]) for row in groups["fit_validation"]], dtype=float
     )
-    model = lgb.LGBMRegressor(
-        objective="regression_l2",
-        n_estimators=2_000,
-        learning_rate=0.025,
-        num_leaves=31,
-        min_child_samples=100,
-        subsample=0.80,
-        colsample_bytree=0.80,
-        reg_alpha=0.25,
-        reg_lambda=1.0,
-        random_state=20260805,
-        deterministic=True,
-        force_col_wise=True,
-        n_jobs=-1,
-        verbosity=-1,
-    )
-    model.fit(
+    train_dataset = lgb.Dataset(
         train_x,
-        train_y,
-        eval_set=[(fit_x, fit_y)],
-        eval_metric="l2",
+        label=train_y,
+        feature_name=names,
+        free_raw_data=False,
+    )
+    fit_dataset = lgb.Dataset(
+        fit_x,
+        label=fit_y,
+        feature_name=names,
+        reference=train_dataset,
+        free_raw_data=False,
+    )
+    booster = lgb.train(
+        {
+            "objective": "regression_l2",
+            "metric": "l2",
+            "learning_rate": 0.025,
+            "num_leaves": 31,
+            "min_data_in_leaf": 100,
+            "bagging_fraction": 0.80,
+            "bagging_freq": 1,
+            "feature_fraction": 0.80,
+            "lambda_l1": 0.25,
+            "lambda_l2": 1.0,
+            "seed": 20260805,
+            "feature_fraction_seed": 20260805,
+            "bagging_seed": 20260805,
+            "data_random_seed": 20260805,
+            "deterministic": True,
+            "force_col_wise": True,
+            "num_threads": 0,
+            "verbosity": -1,
+        },
+        train_dataset,
+        num_boost_round=2_000,
+        valid_sets=[fit_dataset],
+        valid_names=["fit_validation"],
         callbacks=[lgb.early_stopping(100, verbose=False)],
     )
-    booster = model.booster_
     args.output_root.mkdir(parents=True, exist_ok=True)
     model_path = args.output_root / "model.txt"
     booster.save_model(str(model_path))

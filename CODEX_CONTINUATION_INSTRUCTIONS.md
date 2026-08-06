@@ -1159,6 +1159,7 @@ The new research-only implementation is:
 
 - `alientai_v2\research\cross_sectional_technical_5d.py`
 - `build_cross_sectional_technical_5d_panel.py`
+- `audit_cross_sectional_technical_5d_panel.py`
 - `train_cross_sectional_technical_5d.py`
 - `test_cross_sectional_technical_5d.py`
 
@@ -1179,7 +1180,7 @@ sealed-test stages with two-sided five-session embargoes. The policy gate
 requires at least 100 trades across 20 dates, positive mean and median,
 at least 50% wins, mean rank IC of at least 0.01, a positive top-minus-bottom
 spread, and fixed-slot capital-scaled drawdown above -20%. It also reports five
-non-overlap rotations and capital-scaled Sharpe. Nine model tests plus the
+non-overlap rotations and capital-scaled Sharpe. Ten model/panel tests plus the
 adjusted-downloader test, compilation, and diff checks pass.
 
 Do not launch its panel builder or trainer while a schema-v3 compiler/trainer
@@ -1195,6 +1196,23 @@ The earlier compact AI archive is explicitly unsuitable because ANET and SMCI
 have split histories. Verify both manifests and all hashes. Historical results
 retain fixed-current-universe survivorship and selection bias and cannot
 authorize execution.
+
+The completed panel at
+`D:\AlientAI\Data\Compiled\nasdaq_ai_cross_sectional_technical_5d_v1_20260805`
+contains 162,609 unique rows across 1,650 decision dates, with 133,062 eligible
+rows and 92-104 candidates per date. Its full content audit passed with zero
+errors and fingerprints panel SHA-256
+`27b0a6a30d04a3a728f2013a54ed0c2b9b99c7f98a9437e8d71911825656f133`.
+
+Calibration chose the LightGBM top-20%/maximum-15 policy. It stopped at
+iteration 4. Independent policy validation then failed: 1,719 selections
+across 119 dates, -0.025200% mean net, -0.188650% median, 48.17% wins,
+-0.058954 mean rank IC, -1.134547% top-minus-bottom mean, and -12.869151%
+capital-scaled drawdown. The bottom-ranked control was positive; do not invert
+the model after observing this result. Status is `RESEARCH_HOLD`, and the
+160-date December 2025-July 2026 test remains `UNOPENED`. Never retune, open
+that test, create a prospective journal, or enable execution. Controlling
+evidence: `NASDAQ_AI_CROSS_SECTIONAL_TECHNICAL_5D_REPORT_20260805.md`.
 
 ## Five-session catalyst-momentum model (2026-08-04)
 

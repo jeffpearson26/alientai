@@ -15,6 +15,7 @@ from build_cross_sectional_technical_5d_panel import (
     build_rows,
     validate_manifest,
 )
+from audit_cross_sectional_technical_5d_panel import audit_panel
 from train_cross_sectional_technical_5d import (
     mark_to_market_drawdown,
     policy_gate,
@@ -136,6 +137,37 @@ def test_manifest_rejects_unadjusted_supplement(tmp_path) -> None:
         assert "not full adjusted daily" in str(error)
     else:
         raise AssertionError("unadjusted manifest should fail closed")
+
+
+def test_full_content_audit_accepts_valid_rows(tmp_path) -> None:
+    common = candles(100)
+    rows, coverage = build_rows(
+        {
+            "AAA": common,
+            "BBB": candles(100, drift=0.12),
+            "QQQ": candles(100, drift=0.08),
+            "SPY": candles(100, drift=0.06),
+        },
+        ["AAA", "BBB"],
+        start_date="2025-01-01",
+        minimum_cross_sectional_coverage=1.0,
+    )
+    panel = tmp_path / "panel.jsonl"
+    panel.write_text(
+        "".join(json.dumps(row) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+    result = audit_panel(
+        panel,
+        {
+            "candidates": ["AAA", "BBB"],
+            "rows": len(rows),
+            "dates": len({row["market_date"] for row in rows}),
+            **coverage,
+        },
+    )
+    assert result["status"] == "PASS"
+    assert result["unique_keys"] == len(rows)
 
 
 def test_split_has_two_sided_five_session_embargoes() -> None:
