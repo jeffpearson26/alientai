@@ -1,11 +1,20 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
-from build_prospective_event_requests import build_requests
+from build_prospective_event_requests import build_requests, symbols
 
 
 class ProspectiveEventRequestTests(unittest.TestCase):
+    def test_symbols_strips_utf8_bom_from_first_symbol(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "symbols.txt"
+            path.write_text("\ufeffAAPL\nMSFT\n", encoding="utf-8")
+
+            self.assertEqual(symbols(path), ["AAPL", "MSFT"])
+
     def test_builds_exact_0925_eastern_requests(self) -> None:
         rows = build_requests(
             ["AMD", "NVDA"],

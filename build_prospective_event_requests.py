@@ -15,7 +15,7 @@ FROZEN_CUTOFF = time(9, 25)
 
 def symbols(path: Path) -> list[str]:
     values = [
-        line.strip().upper()
+        line.strip().lstrip("\ufeff").upper()
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
