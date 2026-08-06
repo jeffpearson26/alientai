@@ -80,6 +80,19 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
   -12.869151% capital-scaled drawdown. Status `RESEARCH_HOLD`; the 160-date
   test remains `UNOPENED`. Evidence:
   `NASDAQ_AI_CROSS_SECTIONAL_TECHNICAL_5D_REPORT_20260805.md`.
+- 2026-08-05: Jeff then supplied a stricter production-style version of the
+  same cross-sectional thesis requiring purged K-fold validation with embargo
+  and an end-to-end daily ranking path. The isolated V1 uses 23 date-local
+  ranked technical inputs, exact five-session label intervals, five contiguous
+  purged folds, a five-session post-fold embargo, a 252-session sealed test,
+  fixed top-10%/maximum-10 equal-weight baskets, stricter relative-volume and
+  liquidity filters, and a transparent rank baseline. Out-of-fold LightGBM
+  selected 11,248 rows across 1,393 dates with +0.244242% mean net,
+  +0.157053% median, and 51.50% wins, but mean rank IC was effectively zero,
+  the bottom control did better by 0.090561 percentage points, and
+  capital-scaled drawdown was -44.9781%. Status `RESEARCH_HOLD`; the final 252
+  dates remain `UNOPENED`. The label-free daily scorer passed an AVOID-only
+  preview. Evidence: `CROSS_SECTIONAL_PICKER_5D_REPORT_20260805.md`.
 - 2026-08-05: Jeff supplied a broader practical Nasdaq-100 plus
   AI-semiconductor five-session roadmap and directed that it be set up as
   written. The isolated research contract
@@ -531,6 +544,15 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `COMPLETED RESEARCH_HOLD 2026-08-05`: Preserve the production-style
+purged-CV cross-sectional picker as reusable research infrastructure, but do
+not invert it, tune the observed folds, open its 252-session sealed test,
+create a prospective journal, or connect it to execution. Its positive basket
+mean was a broad market effect rather than demonstrated ranking skill because
+rank IC was effectively zero and the bottom control outperformed it. A
+successor requires a pre-registered independent feature change and new sealed
+chronology. Evidence: `CROSS_SECTIONAL_PICKER_5D_REPORT_20260805.md`.
+
 000. `SETUP_COMPLETE_DATA_BLOCKED 2026-08-05`: Preserve the exact broader
 Nasdaq+AI five-session roadmap contract and its fail-closed readiness audit.
 Acquire only authorized, point-in-time quarterly Nasdaq membership; full
@@ -812,6 +834,14 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-05: Jeff supplied a complete production-ready cross-sectional
+  five-session picker specification with mandatory purged K-fold validation,
+  daily scoring, and ranked technical inputs. This explicitly authorized a new
+  isolated implementation despite the earlier model-proliferation pause. The
+  implementation may reuse audited adjusted-daily source rows and pure feature
+  calculations, but it cannot inherit the prior model's evidence, change
+  frozen prospective programs, open a sealed test after a failed gate, or
+  authorize execution.
 - 2026-08-05: Jeff supplied and directed setup of a broader practical
   Nasdaq-100 plus AI-semiconductor five-session model. This is a separate
   development candidate, not a reinterpretation of the completed fixed-104

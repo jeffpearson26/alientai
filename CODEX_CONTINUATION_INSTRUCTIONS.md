@@ -1260,6 +1260,39 @@ Preserve the active singular schema-v3 job and do not train this model until
 the audit returns `READY_TO_BUILD_PANEL`. No engine, settings, paper, live, or
 frozen prospective state changed.
 
+## Production-style purged-CV cross-sectional picker (2026-08-05)
+
+Jeff supplied and explicitly authorized a complete cross-sectional
+Nasdaq-100 plus AI/semiconductor five-session pipeline with mandatory purged
+K-fold validation. The isolated implementation is:
+
+- `alientai_v2\research\cross_sectional_picker_5d.py`
+- `train_cross_sectional_picker_5d.py`
+- `score_cross_sectional_picker_5d.py`
+- `run_cross_sectional_picker_5d.py`
+- `cross_sectional_picker_5d_config.json`
+- `CROSS_SECTIONAL_PICKER_5D.md`
+- `test_cross_sectional_picker_5d.py`
+
+It reuses only the already audited 162,609-row adjusted-daily panel and pure
+technical calculations; it inherits no model, threshold, or evidence from the
+earlier failed fixed-104 experiment. Every predictive input is a same-date
+cross-sectional percentile rank. The default model uses five whole-date
+purged folds, exact label-interval overlap removal, five-session post-fold
+embargoes, a separate five-session pre-test embargo, and 252 sealed dates.
+Daily scoring rebuilds the same ranks without labels and emits JSON/CSV with
+`execution_decision: AVOID`.
+
+The completed out-of-fold evaluation selected 11,248 rows across 1,393 dates:
++0.244242% mean net, +0.157053% median, 51.5025% wins, essentially zero mean
+rank IC (+0.000010), -0.090561% top-minus-bottom mean, +80.8420% long-history
+overlapping return, and -44.9781% drawdown. The bottom-ranked control was
+better. Status is `RESEARCH_HOLD`; the 252-date test remains `UNOPENED`.
+Twenty-one targeted tests and compilation passed. Preserve the implementation
+as reusable infrastructure, but never invert or retune the observed folds,
+open the test, start a prospective journal, or connect it to execution.
+Controlling evidence: `CROSS_SECTIONAL_PICKER_5D_REPORT_20260805.md`.
+
 ## Five-session catalyst-momentum model (2026-08-04)
 
 `train_ai_semiconductor_catalyst_momentum_5d.py` and

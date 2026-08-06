@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "model_id": "nasdaq_ai_cross_sectional_picker_5d_purged_cv_v1",
+  "research_only": true,
+  "execution_enabled": false,
+  "horizon_sessions": 5,
+  "round_trip_cost_pct": 0.25,
+  "target_mode": "cross_sectional_rank",
+  "data": {
+    "primary_daily_root": "D:\\AlientAI\\Data\\AlphaVantage_2026\\nasdaq101_qqq_spy_daily_adjusted_full_20260805",
+    "ai_supplement_daily_root": "D:\\AlientAI\\Data\\AlphaVantage_2026\\nasdaq_ai_cross_sectional_additions_adjusted_full_20260805",
+    "nasdaq_symbols": "C:\\Users\\jeffp\\alientai_start_over_8010\\nasdaq100_2026-06_symbols.txt",
+    "ai_symbols": "C:\\Users\\jeffp\\alientai_start_over_8010\\research_universes\\ai_semiconductor_screen_2026.txt",
+    "minimum_cross_sectional_coverage": 0.8
+  },
+  "filters": {
+    "minimum_price": 5.0,
+    "minimum_average_dollar_volume": 20000000.0,
+    "minimum_relative_volume": 0.5,
+    "maximum_atr_pct": 10.0
+  },
+  "cross_validation": {
+    "folds": 5,
+    "purge_sessions": 5,
+    "embargo_sessions": 5,
+    "sealed_test_sessions": 252
+  },
+  "selection": {
+    "top_quantile": 0.1,
+    "maximum_names": 10,
+    "weighting": "equal",
+    "holding_policy": "overlapping five-session cohorts with daily reranking"
+  },
+  "model": {
+    "type": "LightGBM",
+    "boosting_rounds": 200,
+    "learning_rate": 0.025,
+    "num_leaves": 15,
+    "max_depth": 5,
+    "min_data_in_leaf": 200,
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.8,
+    "lambda_l1": 0.5,
+    "lambda_l2": 2.0,
+    "seed": 20260805,
+    "num_threads": 0
+  }
+}
