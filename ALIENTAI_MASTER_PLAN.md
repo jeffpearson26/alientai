@@ -61,6 +61,19 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
 - 2026-08-03: Jeff explicitly approved a separate Schwab late-entry exception for the 17-symbol AI/semiconductor intraday experiment after Alpha Vantage realtime and delayed entitlements failed. Schwab supplied all 17 extended-hours histories. The executable contract waits for the 09:25 candle to complete, scores from 09:30 through 09:34:59 ET, enters at 09:35, and exits the 60-minute horizon at the 10:30 bar close. Validation-only fraction selection advanced the 60-minute premarket and calls variants to future-only research; their untouched tests were respectively 56 trades / 51.79% wins / +0.389522% mean and 28 trades / 57.14% wins / +0.632541% mean after 0.25% cost. This is promising but small-sample research, not execution authorization. The original Alpha Vantage-frozen study and competition remain unchanged.
 - 2026-08-03: Trained an isolated QQQ-relative five-session clone on the frozen NVDA/AVGO/AMD/MU/AMAT large-cap AI infrastructure universe. The 2,230-row model stopped at one iteration and had heavily tied scores; a new 1.5x tie-expansion guard rejected the nominal 5% and 10% policies and locked 20% on validation. The untouched test was strong (50 signals, +5.186912% mean net, +4.241945% median, 76.00% wins, +59.328065% capital-scaled return, -15.706655% drawdown), but the simple equal-weight five-stock control was materially better than the model during validation. Status `RESEARCH_PROMISING_SECTOR_REGIME_NOT_MODEL_PROOF`: preserve model and control for future-only comparison; do not retune or execute.
 - 2026-08-05: At Jeff's explicit direction, built a separate three-month clone of the Nasdaq QQQ-relative thesis using adjusted Alpha Vantage daily candles rather than noisy minute rows. The panel has 155,304 point-in-time rows across the current 101-stock universe plus selectable QQQ and SPY, with next-open to 60th-session-close labels, 0.25% cost, two-sided 60-session embargoes, a 59-lag Newey-West confidence check, 60 rotating non-overlap cohorts, 300 cash-scaled overlapping slots, and a fail-closed fifth-place tie guard. Exact news/unusual-call fields were attached to 2,612 rows but excluded from the long-history fit because they cover only 48 sampled 2026 dates and 80 symbols. The full-context model produced only tied market-regime scores and was rejected. The stock-specific relative ablation had strong-looking validation at the 99th percentile (309 signals, +22.017792% mean, +21.390963% median, 66.9903% wins, 55/60 positive non-overlap folds, -7.846113% drawdown), but the overlap-aware 95% lower bound was -15.314138% and both learners stopped after one tree. Status `RESEARCH_HOLD`; the final 2025-12-12 through 2026-05-07 test remains `SEALED_UNLOADED`. Do not retune, execute, or present the nominal return as validated skill. Evidence: `NASDAQ_QQQ_SPY_60SESSION_CLONE_REPORT_20260805.md`.
+- 2026-08-05: Jeff explicitly directed a separate five-session
+  cross-sectional technical model over the fixed Nasdaq-101 union of the
+  AI/semi-17 screen (104 unique candidates), with QQQ and SPY as context only.
+  The implementation uses only completed decision-close OHLCV, next-open to
+  fifth-subsequent-close labels, 0.25% cost, date-local feature ranks, the
+  supplied transparent composite, and a separate LightGBM rank learner.
+  Chronology is split into train, fit-validation, calibration,
+  policy-validation, and conditionally opened sealed-test stages with
+  two-sided five-session embargoes. Policy validation requires positive mean
+  and median, at least 50% wins, positive rank IC, a top-over-bottom spread,
+  at least 100 trades/20 dates, and capital-scaled drawdown above -20%.
+  Nine focused model tests pass. Panel compilation and training remain queued behind
+  the single active schema-v3 compiler; do not run them concurrently.
 - 2026-08-03: Activated the saved AI/semiconductor multi-horizon catalyst design as an isolated partial V1. A new 1,694-row point-in-time panel carries separate next-open-to-1/5/20-session-close labels with 0.25% costs. Fifteen nested LightGBM ablations tested technical, premarket, unusual-call, conservative analyst-headline, and available short-interest families using chronological label-purged splits and validation-only basket selection. The cleanest untouched results were technical+premarket: 1 session, 37 selections, +0.665156% mean, +0.483114% median, 59.46% positive; 5 sessions, 31 selections, +1.726041% mean, -0.063763% median, 48.39% positive. Calls did not improve those horizons; analyst proxy and short interest added no incremental result. Every 20-session variant remained negative. Preserve the 1- and 5-session candidates without retuning; build the missing point-in-time fundamentals/guidance, catalyst-calendar, structured analyst, general-news, and industry-demand families as separate future ablations. Full evidence: `AI_SEMICONDUCTOR_MULTI_HORIZON_CATALYST_REPORT_20260803.md`. Research only; no execution changes.
 - 2026-08-03: Jeff clarified that the intended future-model logic is the attached narrative combining accelerating fundamentals/guidance, a pullback within an intact trend, role-specific AI demand, and a horizon-aligned public catalyst. `AI_SEMICONDUCTOR_NARRATIVE_FEATURE_CONTRACT.md` now preserves that exact hypothesis without treating the narrative's named stocks, quoted prices, media picks, or opaque scores as evidence. A tested pure feature layer enforces publication cutoffs, explicit missingness, dated AI-stack roles, separate horizon-crossing indicators, and fundamental/demand/technical agreement interactions. It cannot score, select, or trade. Historical point-in-time source tables must be completed before training this full extension.
 - 2026-08-03: Audited the saved narrative data and completed two paired extensions without new API calls. Event-time Alpha Vantage earnings and target-specific news both cover all 1,694 panel rows. Earnings context modestly improved the exploratory one-session technical+premarket result to +0.747626% mean net, +0.539776% median, and 62.16% wins across 37 selections, but worsened five sessions. Broader news did not beat the simpler one- or five-session candidates, and every 20-session variant remained negative. The historical test was already observed, so freeze any future comparison rather than retuning. Current estimates, financial statements, overviews, and earnings calendar are not historical vintages and must not be backfilled. Evidence: `AI_SEMICONDUCTOR_NARRATIVE_DATA_AUDIT_20260803.md`.
@@ -496,6 +509,18 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `ACTIVE 2026-08-05`: Complete the isolated Nasdaq+AI/semi
+cross-sectional technical five-session model requested by Jeff. The feature,
+panel, training, sealed-test, and risk-gate code is implemented and tested.
+Wait for the current singular schema-v3 compile/train job to release resources,
+then build the 104-candidate Alpha Vantage adjusted-daily panel into a new
+D-drive root. Validate source hashes, exact next-open/fifth-close labels,
+date-local ranks, and cross-sectional coverage before training. Open the
+sealed test only if the independently frozen policy-validation gate passes.
+Document the honest result, including an explicit warning that ROC(10) and
+10-session return are algebraically redundant and that the fixed current
+universe has survivorship/selection bias. Never connect it to execution.
+
 000. `COMPLETED 2026-08-05`: Added a professional, read-only AlientAI model
 intelligence monitor at `/v2/models`, plus a standalone loopback-only launcher
 on port 8011. The dashboard reads append-only research journals and outcomes
@@ -759,6 +784,16 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-05: Jeff supplied a specific cross-sectional technical thesis and
+  directed that it be built at a five-trading-day horizon. This is an explicit
+  exception to the August 2 model-proliferation pause. Preserve every frozen
+  prospective program unchanged. Build the new candidate in isolation on the
+  104-name Nasdaq-101/AI-semi union, retain QQQ/SPY as context only, use
+  next-open to fifth-close labels and 0.25% costs, and require independent
+  chronology, date-local ranks, validation-only policy choice, a sealed test,
+  non-overlap diagnostics, and idle-cash-aware portfolio risk measurement.
+  Historical passage may prioritize a future journal but cannot authorize
+  paper or live execution.
 - 2026-08-05: Jeff directed creation of a permanent professional monitoring
   page for all models still under consideration. The new page is read-only,
   emphasizes prospective-test state and exact evidence, and does not broaden

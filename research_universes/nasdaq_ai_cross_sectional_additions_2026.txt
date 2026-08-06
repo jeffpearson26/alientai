@@ -1,0 +1,5 @@
+# Exact AI/semi-17 additions outside the fixed Nasdaq-101 universe.
+# QQQ and SPY remain context-only and are not candidates.
+ANET
+ORCL
+SMCI

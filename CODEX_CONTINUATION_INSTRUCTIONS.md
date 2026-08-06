@@ -1146,6 +1146,56 @@ drawdown. Status is `RESEARCH_HOLD`; the 243-date test is explicitly
 schema-v3 panel is the next active artifact; continue the frozen horizon
 sequence one at a time.
 
+## Cross-sectional technical five-session model (2026-08-05)
+
+Jeff explicitly directed a separate implementation of the supplied
+short-momentum, oscillator, volatility-regime, volume-confirmation, and
+date-local cross-sectional ranking thesis. The exact candidate universe is the
+union of `nasdaq100_2026-06_symbols.txt` and
+`research_universes\ai_semiconductor_screen_2026.txt`: 104 unique candidates.
+QQQ and SPY are context only.
+
+The new research-only implementation is:
+
+- `alientai_v2\research\cross_sectional_technical_5d.py`
+- `build_cross_sectional_technical_5d_panel.py`
+- `train_cross_sectional_technical_5d.py`
+- `test_cross_sectional_technical_5d.py`
+
+It uses completed adjusted-daily OHLCV through the decision close, enters at
+the next regular-session adjusted open, exits at the fifth subsequent regular
+close, deducts 0.25%, and stores the exact five-session mark-to-market path.
+Features include 1/5/10-session momentum, RSI, stochastic K/D, CCI, ATR,
+Bollinger position/width, 10/20-session realized volatility, relative and
+directional volume, EMA distance, MACD histogram, ADX, five-session range
+position, gap, liquidity, and date-local percentile ranks. The supplied
+transparent formula is preserved, but its ROC(10) and 10-session-return
+redundancy is disclosed rather than represented as two independent signals.
+A separate LightGBM learner predicts the within-date future-return rank.
+
+The trainer never reads sealed-test JSON rows unless policy validation passes.
+It uses whole-date train, fit-validation, calibration, policy-validation, and
+sealed-test stages with two-sided five-session embargoes. The policy gate
+requires at least 100 trades across 20 dates, positive mean and median,
+at least 50% wins, mean rank IC of at least 0.01, a positive top-minus-bottom
+spread, and fixed-slot capital-scaled drawdown above -20%. It also reports five
+non-overlap rotations and capital-scaled Sharpe. Nine model tests plus the
+adjusted-downloader test, compilation, and diff checks pass.
+
+Do not launch its panel builder or trainer while a schema-v3 compiler/trainer
+is active. Once the singular current job releases resources, build into a new
+D-drive panel root using
+`nasdaq101_qqq_spy_daily_adjusted_full_20260805` as the primary full adjusted
+archive and
+`nasdaq_ai_cross_sectional_additions_adjusted_full_20260805` for the three
+same-provider additions ANET, ORCL, and SMCI. The dedicated supplement
+completed all three `TIME_SERIES_DAILY_ADJUSTED` full requests with zero
+failures; all three files contain adjusted-close fields and end on August 5.
+The earlier compact AI archive is explicitly unsuitable because ANET and SMCI
+have split histories. Verify both manifests and all hashes. Historical results
+retain fixed-current-universe survivorship and selection bias and cannot
+authorize execution.
+
 ## Five-session catalyst-momentum model (2026-08-04)
 
 `train_ai_semiconductor_catalyst_momentum_5d.py` and
