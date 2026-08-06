@@ -280,6 +280,15 @@
         "technical_only_sp500_panel",
         "technical_only_sp500_h20_report"
       ]
+    },
+    {
+      "model_id": "external_clean_rank_sp120_h20_20260806",
+      "display_name": "External clean-rank S&P-120-style 20-session model (audit hold)",
+      "lifecycle": "development",
+      "requirements": [
+        "external_clean_rank_bundle",
+        "external_clean_rank_audit"
+      ]
     }
   ],
   "requirements": {
@@ -785,6 +794,20 @@
       "timing_contract": "Development gate failed; sealed test remains unloaded",
       "kind": "file",
       "path": "D:/AlientAI/Models/technical_only_sp500_h20_20260806/training_report.json"
+    },
+    "external_clean_rank_bundle": {
+      "data_type": "External scripts and saved S&P-style predictions",
+      "source": "Jeff-supplied ZIP",
+      "timing_contract": "Immutable source hash only; all outcomes through 2026-07-09 are exposed and cannot become a sealed test",
+      "kind": "file",
+      "path": "D:/Downloads/alientai_clean_rank_model.zip"
+    },
+    "external_clean_rank_audit": {
+      "data_type": "Independent integrity, metric, purge, and robustness audit",
+      "source": "AlienTAI local read-only review",
+      "timing_contract": "Development evidence only; exact defects must be corrected before any new prospective contract",
+      "kind": "file",
+      "path": "EXTERNAL_CLEAN_RANK_MODEL_AUDIT_20260806.md"
     }
   }
 }

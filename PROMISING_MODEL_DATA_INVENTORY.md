@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T18:29:37.062959+00:00`
+Automatically refreshed: `2026-08-06T19:16:27.391860+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -33,6 +33,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-100 pure daily-technical ranker, 20 sessions (sealed-test failure) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 
 ## Data requirements
 
@@ -107,3 +108,5 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `technical_only_nasdaq_h20_report` | Purged pure-technical Nasdaq twenty-session report | Local immutable historical screen | — | **READY** | Development passed; sealed test opened once and failed; never retune against opened period |
 | `technical_only_sp500_h05_report` | Purged pure-technical S&P five-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
 | `technical_only_sp500_h20_report` | Purged pure-technical S&P twenty-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
+| `external_clean_rank_bundle` | External scripts and saved S&P-style predictions | Jeff-supplied ZIP | — | **READY** | Immutable source hash only; all outcomes through 2026-07-09 are exposed and cannot become a sealed test |
+| `external_clean_rank_audit` | Independent integrity, metric, purge, and robustness audit | AlienTAI local read-only review | — | **READY** | Development evidence only; exact defects must be corrected before any new prospective contract |

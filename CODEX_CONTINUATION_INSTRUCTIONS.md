@@ -2,6 +2,24 @@
 
 Updated: 2026-08-02 Pacific time
 
+## External clean-rank research lead (2026-08-06)
+
+Preserve the source audit in
+`EXTERNAL_CLEAN_RANK_MODEL_AUDIT_20260806.md` and the original ZIP hash
+`0ef7c67df672d9badd57d0331c3d38211dd722e74e87155617ace9b3d64697d6`.
+The bundled S&P-style prediction file internally reproduces +0.04851 mean
+daily Rank IC and +1.5449% top-minus-bottom spread, with positive latest-fold
+non-overlap diagnostics. It remains `PROMISING_EXTERNAL_LEAD / NOT VALIDATED`.
+
+Never integrate or promote the scripts as-is. Their label enters at the same
+close used by the features, costs are absent, the current hand-selected
+universe has survivorship/selection bias, exact audit found label-overlap
+leakage in folds 2-5, QQQ context is absent, and no sealed test exists. Every
+bundled outcome through July 9 is already exposed. A future corrected
+implementation must use a new predeclared source/universe/entry/purge/cost
+contract and treat all historical work as development evidence; genuine
+confirmation must be prospective.
+
 ## Pure daily-technical rankers (2026-08-06)
 
 Preserve the source-isolated contract in

@@ -98,6 +98,14 @@ The automatically refreshed data-family and coverage matrix is
 - Pure daily-technical S&P rankers: both 5- and 20-session horizons produced
   negative development means, medians, and rank IC. Both are `RESEARCH_HOLD`
   and their sealed tests remain unopened.
+- External clean-rank S&P-120-style 20-session model: the bundled 220,753
+  prediction rows independently reproduce +0.04851 mean daily Rank IC and
+  +1.5449% top-minus-bottom spread. Its latest chronological fold remains
+  positive across all 20 non-overlapping offsets. It is parked as
+  `PROMISING_EXTERNAL_LEAD / NOT VALIDATED`: the label enters at an
+  unexecutable same close, costs are absent, exact purge audit found 4-7
+  overlapping training dates in folds 2-5, the universe is hand-selected, and
+  no sealed test exists. See `EXTERNAL_CLEAN_RANK_MODEL_AUDIT_20260806.md`.
 
 ## Morning rules
 
