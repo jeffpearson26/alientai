@@ -1,6 +1,7 @@
 # Daily-only technical + call-option cross-sectional rankers
 
-Date: 2026-08-06  
+Date: 2026-08-06
+
 Status: research only; no paper/live execution
 
 ## Outcome
@@ -110,4 +111,3 @@ Training-report SHA-256 values:
   `741018a00a20e1c6d6d8941d6e1721b0461b3e2eb45414acc74fc516fb9eaa76`
 - S&P 20-session readiness:
   `939a57ad31a9923c09b2766ff1de29a52ff1ea81401d02ecc0660262611fc341`
-

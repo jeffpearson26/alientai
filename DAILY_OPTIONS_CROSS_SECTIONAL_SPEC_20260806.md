@@ -112,4 +112,3 @@ The two horizons have separate reports, validation, and sealed-test states.
   date-clustered 95% confidence bound.
 
 All results remain `AVOID` and research-only regardless of historical outcome.
-
