@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T18:15:18.536791+00:00`
+Automatically refreshed: `2026-08-06T18:29:37.062959+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -29,6 +29,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-100 daily-only technical + call-options ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready daily-only technical + call-options ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready daily-only technical + call-options ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq-100 pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq-100 pure daily-technical ranker, 20 sessions (sealed-test failure) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 
 ## Data requirements
 
@@ -97,3 +101,9 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `daily_options_nasdaq_h20_report` | Daily-only twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common call-history dates exist |
 | `daily_options_sp500_h05_report` | Purged daily-only LightGBM/XGBoost five-session report | Local immutable historical screen | — | **READY** | Daily technical and daily-plus-calls same-sample comparison; unopened sealed test after validation failure |
 | `daily_options_sp500_h20_report` | Daily-only twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common call-history dates exist |
+| `technical_only_nasdaq_panel` | Audited exact-101 pure daily-technical panel | Alpha Vantage adjusted daily candidates and QQQ/SPY context | — | **READY** | Full candidate coverage every date; no option, news, event, intraday, premarket, or after-hours source |
+| `technical_only_sp500_panel` | Audited exact-483 pure daily-technical panel | Schwab daily candidates; Alpha Vantage QQQ/SPY context only | — | **READY** | Full candidate coverage every date; no option, news, event, intraday, premarket, or after-hours source |
+| `technical_only_nasdaq_h05_report` | Purged pure-technical Nasdaq five-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
+| `technical_only_nasdaq_h20_report` | Purged pure-technical Nasdaq twenty-session report | Local immutable historical screen | — | **READY** | Development passed; sealed test opened once and failed; never retune against opened period |
+| `technical_only_sp500_h05_report` | Purged pure-technical S&P five-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
+| `technical_only_sp500_h20_report` | Purged pure-technical S&P twenty-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |

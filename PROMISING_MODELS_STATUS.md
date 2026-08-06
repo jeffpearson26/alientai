@@ -89,6 +89,15 @@ The automatically refreshed data-family and coverage matrix is
   point-in-time call-history dates, below the frozen 120-date minimum. Both
   are `BLOCKED_INSUFFICIENT_HISTORY`; neither was fit. These variants read no
   intraday, premarket, after-hours, or news source.
+- Pure daily-technical Nasdaq rankers: the 5-session XGBoost slice had positive
+  basket statistics but missed the frozen 0.01 rank-IC gate at 0.00794, so its
+  test remains sealed. The 20-session LightGBM/XGBoost slices passed
+  development strongly, then both failed the once-opened May 20-July 7 sealed
+  test: -4.4546% and -3.9485% mean, respectively, with negative rank IC and
+  sub-40% win rates. Both horizons are `RESEARCH_HOLD`; no retuning is allowed.
+- Pure daily-technical S&P rankers: both 5- and 20-session horizons produced
+  negative development means, medians, and rank IC. Both are `RESEARCH_HOLD`
+  and their sealed tests remain unopened.
 
 ## Morning rules
 

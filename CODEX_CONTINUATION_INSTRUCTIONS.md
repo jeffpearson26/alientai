@@ -2,6 +2,24 @@
 
 Updated: 2026-08-02 Pacific time
 
+## Pure daily-technical rankers (2026-08-06)
+
+Preserve the source-isolated contract in
+`TECHNICAL_ONLY_CROSS_SECTIONAL_SPEC_20260806.md`. These models use only
+completed daily technicals and QQQ/SPY technical context. They must never read
+options/calls, news/events/fundamentals, intraday, premarket, or after-hours
+inputs. QQQ and SPY are reference-only and cannot be selected.
+
+The audited panels are under
+`D:\AlientAI\Data\Compiled\technical_only_cross_sectional_20260806`. Nasdaq has
+208 exact-101 dates and S&P has 394 exact-483 dates. Nasdaq 5-session and both
+S&P horizons are `RESEARCH_HOLD` with unopened tests. Nasdaq 20-session passed
+development, opened its test once, and then failed decisively: LightGBM
+returned -4.4546% mean and XGBoost -3.9485%, with negative medians, win rates
+below 40%, and negative rank IC. Preserve the opened-test artifacts under
+`D:\AlientAI\Models\technical_only_nasdaq100_h20_20260806`; never retune or
+retest against that period.
+
 ## Daily-only technical + call-option rankers (2026-08-06)
 
 Preserve the isolated research contract in

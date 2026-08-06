@@ -240,6 +240,46 @@
         "daily_options_sp500_panel",
         "daily_options_sp500_h20_report"
       ]
+    },
+    {
+      "model_id": "technical_only_nasdaq100_h05_20260806",
+      "display_name": "Nasdaq-100 pure daily-technical ranker, 5 sessions (development hold)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "technical_only_nasdaq_panel",
+        "technical_only_nasdaq_h05_report"
+      ]
+    },
+    {
+      "model_id": "technical_only_nasdaq100_h20_20260806",
+      "display_name": "Nasdaq-100 pure daily-technical ranker, 20 sessions (sealed-test failure)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "technical_only_nasdaq_panel",
+        "technical_only_nasdaq_h20_report"
+      ]
+    },
+    {
+      "model_id": "technical_only_sp500_h05_20260806",
+      "display_name": "S&P data-ready pure daily-technical ranker, 5 sessions (development hold)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "technical_only_sp500_panel",
+        "technical_only_sp500_h05_report"
+      ]
+    },
+    {
+      "model_id": "technical_only_sp500_h20_20260806",
+      "display_name": "S&P data-ready pure daily-technical ranker, 20 sessions (development hold)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "technical_only_sp500_panel",
+        "technical_only_sp500_h20_report"
+      ]
     }
   ],
   "requirements": {
@@ -703,6 +743,48 @@
       "timing_contract": "Blocked until at least 120 common call-history dates exist",
       "kind": "file",
       "path": "D:/AlientAI/Models/daily_options_sp500_h20_20260806/training_report.json"
+    },
+    "technical_only_nasdaq_panel": {
+      "data_type": "Audited exact-101 pure daily-technical panel",
+      "source": "Alpha Vantage adjusted daily candidates and QQQ/SPY context",
+      "timing_contract": "Full candidate coverage every date; no option, news, event, intraday, premarket, or after-hours source",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/technical_only_cross_sectional_20260806/nasdaq100/content_audit.json"
+    },
+    "technical_only_sp500_panel": {
+      "data_type": "Audited exact-483 pure daily-technical panel",
+      "source": "Schwab daily candidates; Alpha Vantage QQQ/SPY context only",
+      "timing_contract": "Full candidate coverage every date; no option, news, event, intraday, premarket, or after-hours source",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/technical_only_cross_sectional_20260806/sp500/content_audit.json"
+    },
+    "technical_only_nasdaq_h05_report": {
+      "data_type": "Purged pure-technical Nasdaq five-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Development gate failed; sealed test remains unloaded",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/technical_only_nasdaq100_h05_20260806/training_report.json"
+    },
+    "technical_only_nasdaq_h20_report": {
+      "data_type": "Purged pure-technical Nasdaq twenty-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Development passed; sealed test opened once and failed; never retune against opened period",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/technical_only_nasdaq100_h20_20260806/training_report.json"
+    },
+    "technical_only_sp500_h05_report": {
+      "data_type": "Purged pure-technical S&P five-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Development gate failed; sealed test remains unloaded",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/technical_only_sp500_h05_20260806/training_report.json"
+    },
+    "technical_only_sp500_h20_report": {
+      "data_type": "Purged pure-technical S&P twenty-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Development gate failed; sealed test remains unloaded",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/technical_only_sp500_h20_20260806/training_report.json"
     }
   }
 }
