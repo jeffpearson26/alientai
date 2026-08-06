@@ -87,6 +87,16 @@
       ]
     },
     {
+      "model_id": "autonomous_transparent_20session",
+      "display_name": "Autonomous transparent Nasdaq-101 champion",
+      "requirements": [
+        "autonomous_daily_adjusted_archive",
+        "autonomous_transparent_frozen_report",
+        "autonomous_prospective_journal",
+        "twenty_session_daily_outcomes"
+      ]
+    },
+    {
       "model_id": "defined_risk_options_model",
       "display_name": "Defined-risk options model (development)",
       "lifecycle": "development",
@@ -100,14 +110,26 @@
       ]
     },
     {
-      "model_id": "rolling_anytime_20m",
-      "display_name": "Any-time rolling 20-minute model (development)",
+      "model_id": "rolling_anytime_multi_horizon_nasdaq101",
+      "display_name": "Any-time 5/10/20/30/60/90-minute Nasdaq-101 clones (development)",
       "lifecycle": "development",
       "requirements": [
         "adjusted_one_minute_archive",
         "market_and_sector_context",
         "one_minute_live_source_compatibility",
-        "purged_rolling_20m_labels"
+        "purged_rolling_multi_horizon_labels"
+      ]
+    },
+    {
+      "model_id": "rolling_anytime_multi_horizon_ai17",
+      "display_name": "Any-time 5/10/20/30/60/90-minute AI/semi-17 clones (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "adjusted_one_minute_archive",
+        "rolling_archive_supplement_9",
+        "market_and_sector_context",
+        "one_minute_live_source_compatibility",
+        "purged_rolling_multi_horizon_labels"
       ]
     },
     {
@@ -145,7 +167,7 @@
       "timing_contract": "Nonempty exact-date chains; empty chains are unavailable",
       "kind": "manifest_glob",
       "path": "D:/AlientAI/Data/AlphaVantage_2026/contextual_options_prospective_*/manifest.json",
-      "required_completed": 496
+      "required_accounted": 483
     },
     "call_history_10": {
       "data_type": "Lagged call-activity history",
@@ -356,7 +378,7 @@
     "adjusted_one_minute_archive": {
       "data_type": "Adjusted one-minute intraday candles",
       "source": "Alpha Vantage",
-      "timing_contract": "Completed monthly archive; one-minute interval-start timestamps; content audit required",
+      "timing_contract": "Completed 8,137-request monthly archive; independent content audit passed on 82,425,431 rows with zero orphan files",
       "kind": "manifest_glob",
       "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_nasdaq101_adjusted_1min_202001_202607/manifest.json",
       "required_accounted": 8137
@@ -364,9 +386,10 @@
     "rolling_archive_supplement_9": {
       "data_type": "Nine-symbol AI/data-center intraday supplement",
       "source": "Alpha Vantage",
-      "timing_contract": "Separate manifest and exact coverage audit",
-      "kind": "directory",
-      "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_ai_data_center_supplement_202001_202607"
+      "timing_contract": "Completed 869-request archive; independent audit passed on 793 gzip files and 10,412,846 rows with 76 explicitly unavailable months and zero orphans",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_ai_data_center_supplement_1min_202001_202607/manifest.json",
+      "required_accounted": 869
     },
     "market_and_sector_context": {
       "data_type": "QQQ/SPY/semiconductor market context",
@@ -380,10 +403,38 @@
       "timing_contract": "Use only fully completed one-minute bars; live scoring blocked until overlapping normalized features pass a frozen source-compatibility audit",
       "kind": "logical"
     },
-    "purged_rolling_20m_labels": {
-      "data_type": "Any-time 20-minute forward labels",
+    "purged_rolling_multi_horizon_labels": {
+      "data_type": "Any-time 5/10/20/30/60/90-minute forward labels",
       "source": "Audited one-minute archive",
-      "timing_contract": "Last completed minute close to the twentieth subsequent regular-session minute close; no overnight crossing; purged chronological splits",
+      "timing_contract": "Newest completed minute decision, next-interval-open research entry, horizon-th subsequent bar close exit, no missing entry/target minute or overnight crossing; separate fit/calibration/policy/sealed-test stages",
+      "kind": "logical"
+    },
+    "autonomous_daily_adjusted_archive": {
+      "data_type": "Nasdaq-101 plus QQQ/SPY full adjusted daily candles",
+      "source": "Alpha Vantage",
+      "timing_contract": "Completed regular sessions only; all candidates and both context benchmarks must share the decision date",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/nasdaq101_qqq_spy_daily_adjusted_full_20260805/manifest.json",
+      "required_accounted": 103
+    },
+    "autonomous_transparent_frozen_report": {
+      "data_type": "Frozen transparent-model formula, gates, validation and sealed test",
+      "source": "Immutable local research artifact",
+      "timing_contract": "Report SHA-256 and frozen formula must match every prospective observation",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/autonomous_transparent_20session_corrected_folds_20260805/training_report.json"
+    },
+    "autonomous_prospective_journal": {
+      "data_type": "Append-only pre-entry prospective selections and abstentions",
+      "source": "Frozen model applied to Alpha Vantage adjusted daily data",
+      "timing_contract": "Journal after the completed decision close and strictly before the next regular-session open; no backfill",
+      "kind": "file",
+      "path": "data_v2/rcef_research/autonomous_champion_20session_prospective_journal.jsonl"
+    },
+    "twenty_session_daily_outcomes": {
+      "data_type": "Exact 20-session prospective outcomes",
+      "source": "Alpha Vantage adjusted daily archive",
+      "timing_contract": "Next-session adjusted open to 20th subsequent adjusted close, less 0.25%; append only after each horizon matures",
       "kind": "logical"
     },
     "nasdaq_ai_roadmap_contract": {

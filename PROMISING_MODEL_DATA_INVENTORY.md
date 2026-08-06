@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-04T16:47:09.478000+00:00`
+Automatically refreshed: `2026-08-06T12:45:33.486493+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -8,16 +8,19 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 
 | Model | State | Blocking data |
 |---|---|---|
-| Technical context + unusual calls | **BLOCKED** | alpha_full_universe_option_chains |
-| Nasdaq-101 baseline | **DATA_PATH_PRESENT** | None in current local audit |
-| Nasdaq-101 QQQ-relative | **DATA_PATH_PRESENT** | None in current local audit |
-| Nasdaq-80 champion | **DATA_PATH_PRESENT** | None in current local audit |
+| Technical context + unusual calls | **DATA_PATH_PRESENT** | None in current local audit |
+| Nasdaq-101 baseline | **BLOCKED** | schwab_nasdaq101_daily |
+| Nasdaq-101 QQQ-relative | **BLOCKED** | schwab_nasdaq101_daily |
+| Nasdaq-80 champion | **BLOCKED** | schwab_nasdaq80_daily |
 | AI/semiconductor technical + premarket | **BLOCKED** | alpha_ai17_premarket_0925 |
 | AI/semiconductor narrative earnings | **BLOCKED** | alpha_ai17_premarket_0925 |
 | Original Alpha AI/semiconductor intraday models | **BLOCKED** | alpha_ai17_realtime_premarket_0925 |
 | Schwab 09:35 late-entry models | **BLOCKED** | schwab_ai17_0925_snapshot |
+| Autonomous transparent Nasdaq-101 champion | **DATA_PATH_PRESENT** | None in current local audit |
 | Defined-risk options model (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
-| Any-time rolling 20-minute model (development) | **DEVELOPMENT_NOT_TESTING** | adjusted_one_minute_archive |
+| Any-time 5/10/20/30/60/90-minute Nasdaq-101 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Any-time 5/10/20/30/60/90-minute AI/semi-17 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Exact Nasdaq + AI semiconductor five-day roadmap (development) | **DEVELOPMENT_NOT_TESTING** | nasdaq_quarterly_point_in_time_membership, nasdaq_ai_roadmap_point_in_time_fundamentals, nasdaq_ai_roadmap_known_earnings_calendar, nasdaq_ai_roadmap_readiness_audit |
 
 ## Data requirements
 
@@ -25,26 +28,26 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 |---|---|---|---|---|---|
 | `schwab_sp500_daily` | Daily OHLCV | Schwab | — | **READY** | Completed regular sessions only; source-pure |
 | `contextual_technical_panel` | Point-in-time technical features | Schwab daily candles | — | **READY** | Complete same-day universe before selection |
-| `alpha_full_universe_option_chains` | Full-universe historical option chains | Alpha Vantage | — | **BLOCKED** | no file matches D:/AlientAI/Data/AlphaVantage_2026/contextual_options_prospective_*/manifest.json |
+| `alpha_full_universe_option_chains` | Full-universe historical option chains | Alpha Vantage | — | **READY** | Nonempty exact-date chains; empty chains are unavailable |
 | `call_history_10` | Lagged call-activity history | Same provider as the observation | — | **READY** | At least ten prior observations per symbol |
 | `five_session_daily_outcomes` | Five-session future daily OHLCV | Frozen model source | — | **CONTRACT** | validated when each observation reaches this stage |
 | `one_session_daily_outcomes` | One-session future daily OHLCV | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
-| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-03 | **READY** | Latest common completed session; never splice providers |
+| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-05 |
 | `qqq_daily` | QQQ benchmark daily OHLCV | Schwab | — | **READY** | Same completed session as Nasdaq universe |
 | `nasdaq_frozen_artifacts` | Frozen model/report/manifest hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-03 | **READY** | Latest common completed session |
+| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-05 |
 | `nasdaq80_frozen_artifacts` | Frozen model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-03 | **READY** | Complete decision-session close before next-open selection |
-| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-03 | **READY** | Exact immediately preceding completed session |
+| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **READY** | Complete decision-session close before next-open selection |
+| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **READY** | Exact immediately preceding completed session |
 | `alpha_ai17_premarket_0925` | Extended-hours five-minute premarket features | Alpha Vantage | 2026-08-04 | **BLOCKED** | only 0 usable rows; 17 required |
 | `timestamped_earnings_events` | Earnings events and guidance available timestamps | Alpha Vantage archived earnings data | — | **READY** | available_at_utc must be no later than decision cutoff |
 | `ai17_frozen_artifacts` | Frozen five-session model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `narrative_frozen_artifacts` | Frozen narrative model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-03 | **READY** | Exact prior session only; calls, not puts/sell volume |
+| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-05 | **READY** | Exact prior session only; calls, not puts/sell volume |
 | `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed required |
 | `alpha_ai17_exact_intraday_outcomes` | Exact 09:30-10:25 five-minute outcome path | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
 | `alpha_intraday_frozen_artifacts` | Six frozen intraday model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:30 timing contract must match |
-| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | — | **BLOCKED** | no file matches D:/AlientAI/Data/Schwab_2026/ai_semiconductor_late_*/manifest.json |
+| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | — | **BLOCKED** | manifest status=complete, completed=0, unavailable=0, failed=0; 17 completed required |
 | `schwab_ai17_1030_outcomes` | Exact 09:35-entry through 10:30-bar outcome path | Schwab | — | **CONTRACT** | validated when each observation reaches this stage |
 | `schwab_late_frozen_artifacts` | Frozen Schwab late-entry model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:35 timing contract must match |
 | `point_in_time_option_selection_chains` | Option chain observable at selection | Alpha Vantage archive | — | **READY** | Selection snapshot strictly before entry snapshot |
@@ -53,8 +56,18 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `option_quotes_liquidity_and_fees` | Bid/ask, volume, open interest, IV and fees | Archived option chains | — | **CONTRACT** | validated when each observation reaches this stage |
 | `purged_option_training_labels` | Direction and absolute-move option labels | Exact compiled option outcomes | — | **CONTRACT** | validated when each observation reaches this stage |
 | `adjusted_five_minute_archive` | Adjusted five-minute intraday candles | Alpha Vantage | — | **READY** | Audited complete archive; interval-start timestamps |
-| `adjusted_one_minute_archive` | Adjusted one-minute intraday candles | Alpha Vantage | — | **BLOCKED** | manifest status=running, completed=824, unavailable=131, failed=0; 8137 accounted required |
-| `rolling_archive_supplement_9` | Nine-symbol AI/data-center intraday supplement | Alpha Vantage | — | **BLOCKED** | no file matches D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_ai_data_center_supplement_202001_202607 |
+| `adjusted_one_minute_archive` | Adjusted one-minute intraday candles | Alpha Vantage | — | **READY** | Completed 8,137-request monthly archive; independent content audit passed on 82,425,431 rows with zero orphan files |
+| `rolling_archive_supplement_9` | Nine-symbol AI/data-center intraday supplement | Alpha Vantage | — | **READY** | Completed 869-request archive; independent audit passed on 793 gzip files and 10,412,846 rows with 76 explicitly unavailable months and zero orphans |
 | `market_and_sector_context` | QQQ/SPY/semiconductor market context | Same source and timestamp as rolling observation | — | **CONTRACT** | validated when each observation reaches this stage |
 | `one_minute_live_source_compatibility` | Current-session one-minute candles and source-agreement audit | Schwab live candidate versus Alpha Vantage training archive | — | **CONTRACT** | validated when each observation reaches this stage |
-| `purged_rolling_20m_labels` | Any-time 20-minute forward labels | Audited one-minute archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `purged_rolling_multi_horizon_labels` | Any-time 5/10/20/30/60/90-minute forward labels | Audited one-minute archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `autonomous_daily_adjusted_archive` | Nasdaq-101 plus QQQ/SPY full adjusted daily candles | Alpha Vantage | — | **READY** | Completed regular sessions only; all candidates and both context benchmarks must share the decision date |
+| `autonomous_transparent_frozen_report` | Frozen transparent-model formula, gates, validation and sealed test | Immutable local research artifact | — | **READY** | Report SHA-256 and frozen formula must match every prospective observation |
+| `autonomous_prospective_journal` | Append-only pre-entry prospective selections and abstentions | Frozen model applied to Alpha Vantage adjusted daily data | — | **READY** | Journal after the completed decision close and strictly before the next regular-session open; no backfill |
+| `twenty_session_daily_outcomes` | Exact 20-session prospective outcomes | Alpha Vantage adjusted daily archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `nasdaq_ai_roadmap_contract` | Immutable five-session model, feature, timing, validation and safety contract | Jeff-supplied roadmap normalized into local machine-readable contract | — | **READY** | Five-session next-open to fifth-close label; 0.25% cost; whole-date purge and embargo; research only |
+| `nasdaq_quarterly_point_in_time_membership` | Quarterly historical Nasdaq-100 membership with provenance and known timestamps | Authorized dated constituent source | — | **BLOCKED** | no file matches D:/AlientAI/Data/PointInTime/nasdaq100_quarterly_membership.jsonl |
+| `nasdaq_ai_roadmap_adjusted_daily_context` | Full adjusted daily candidates plus QQQ, SMH, SOXX, VIX and NVDA regime context | Alpha Vantage source-pure archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `nasdaq_ai_roadmap_point_in_time_fundamentals` | Revenue/EPS growth, gross-margin trend and earnings beat/miss streak | Timestamped filings and earnings facts | — | **BLOCKED** | no file matches D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_fundamentals.jsonl |
+| `nasdaq_ai_roadmap_known_earnings_calendar` | Historically known next-earnings dates | Timestamped earnings calendar archive | — | **BLOCKED** | no file matches D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_earnings_calendar.jsonl |
+| `nasdaq_ai_roadmap_readiness_audit` | Content- and timing-level fail-closed readiness result | audit_nasdaq_ai_roadmap_5d_readiness.py | — | **BLOCKED** | JSON status='BLOCKED'; required 'READY_TO_BUILD_PANEL' |

@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-04 09:57 Pacific
+Generated: 2026-08-06 05:44 Pacific
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -11,16 +11,17 @@ The automatically refreshed data-family and coverage matrix is
 
 | Priority | Frozen model | Universe / horizon / inputs | Best honest evidence | Current testing state | Exact reason if not advancing |
 |---:|---|---|---|---|---|
-| 1 | Technical context + unusual calls | Natural universe; 5 sessions; technical score then unusual call buying | Prospective: 5 signals, 80% wins, +1.8944% mean, +3.0803% median. Historical fixed slices were positive at three chronological splits. | **BLOCKED UNTIL AFTER-CLOSE CHAIN COLLECTION** | Only one prospective decision date. August 4 full-universe nonempty option chains must be collected after the close and joined to the frozen technical/call history before another payload can be frozen. |
-| 2 | Nasdaq-101 baseline | 101 symbols; 5 sessions; technical | Historical untouched top 0.25%: 20 rows, 70% >=10% winners. First completed prospective date: 2 signals, 100% wins, +6.7067% mean. | **READY FOR AUGUST 4 AFTER-CLOSE ATTEMPT** | All 101 symbols plus QQQ now share completed August 3 coverage. No backfill is allowed; refresh the final August 4 close and journal before the August 5 entry. |
-| 3 | Nasdaq-101 QQQ-relative | 101 symbols; 5 sessions; technical + QQQ-relative context | Historical untouched top 0.10%: 8/8 >=10% winners; top 0.25%: 65%. First prospective date: 2 signals, 50% wins, +2.3750% mean. | **READY FOR AUGUST 4 AFTER-CLOSE ATTEMPT** | Same verified 101+QQQ coverage as baseline; the dedicated journal must append its August 4 observation or abstention after the final close. |
-| 4 | AI/semi 20-minute technical + premarket | 17 symbols; 09:30 entry to 09:45 close; prior technical + 09:25 premarket | 20 held-out days, 28 trades, 70% positive days, +0.52% mean daily net, +10.62% compounded, -4.56% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Alpha Vantage lacked entitled pre-entry realtime data and its 09:25 interval is not complete before the frozen 09:30 entry. Cannot be repaired without a separately frozen timing/source model. |
-| 5 | AI/semi 60-minute technical + premarket + calls | 17 symbols; 09:30 to 10:25; prior technical/calls + 09:25 premarket | 20 held-out days, 28 trades, 65% positive days, +0.70% mean daily net, +14.28% compounded, -5.70% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Same Alpha Vantage 09:30-entry impossibility. Preserve frozen evidence; use the separate Schwab late-entry variants prospectively. |
-| 6 | Schwab late-entry 60-minute calls | 17 symbols; 09:35 to 10:30; Alpha prior technical/calls + Schwab 09:25 premarket | Untouched: 28 trades, 57.14% wins, +0.6325% mean, +11.2514% compounded, -5.7230% drawdown. | **PRIOR INPUTS REPAIRED; NEXT CAPTURE AUGUST 5** | Exact August 3 technical/call panels now contain all 17 symbols, nonempty chains, and at least 20 prior call observations; readiness passed. The August 4 09:30 capture window had already elapsed, so August 4 cannot be backfilled. |
-| 7 | Schwab late-entry 60-minute premarket | Same 17-symbol 09:35 program without call feature family | Untouched: 56 trades, 51.79% wins, +0.3895% mean, +4.6607% compounded, -7.1860% drawdown. | **PRIOR INPUTS REPAIRED; NEXT CAPTURE AUGUST 5** | Same verified readiness and missed-window constraint as the calls variant. |
-| 8 | AI/semi one-session narrative earnings context | 17 symbols; 1 session; technical + premarket + point-in-time earnings context | Exploratory frozen comparison: 37 selections, 62.16% wins, +0.7476% mean, +0.5398% median. | **BLOCKED ON AUGUST 4 PREMARKET COVERAGE** | Exact August 3 daily technical data is ready, but Alpha's historical current-month download produced 0/17 usable August 4 premarket rows and both realtime and delayed entitlements were denied. Retry historical data after the close; otherwise Jeff must resolve Alpha data entitlement. |
-| 9 | AI/semi technical + premarket | 17 symbols; 5 sessions | Validation-locked historical test: 31 selections, +1.7260% mean, -0.0638% median, 48.39% wins. Separate journal has 4 pending observations across 2 dates. | **BLOCKED ON AUGUST 4 PREMARKET COVERAGE** | Same 0/17 Alpha premarket blocker as the narrative model. Existing outcomes remain pending and do not excuse the new-day attempt. |
-| 10 | Nasdaq-80 champion | 80 symbols; 5 sessions; QQQ-context technical | Corrected historical test: 12 trades, +2.8700% mean, +1.6163% median, 58.33% wins. | **READY FOR AUGUST 4 AFTER-CLOSE ATTEMPT** | The frozen 80-symbol universe has completed August 3 coverage. Refresh the final August 4 close and append its next observation or abstention; the older PLTR outcome remains pending independently. |
+| 1 | Autonomous transparent Nasdaq-101 champion | 101 securities; 20 sessions; 126/60-session QQQ-relative momentum + inverse 60-session volatility | Frozen validation: 825 signals, +2.3893% mean, 55.88% wins, -4.9230% drawdown. One-time sealed test: 590 signals, +3.1682% mean, 55.59% wins, -6.0750% drawdown; all four observable non-overlap cohorts positive. | **OUTCOME PENDING; NEW-DAY ATTEMPT BLOCKED WITH EVIDENCE** | August 4 selections FTNT, DDOG, PANW, CSX, and CRWD remain pending. A fresh source-pure 103-symbol Alpha adjusted-daily archive completed before the August 6 open, but EA remained dated August 4 while every other frozen candidate had August 5. The complete-101 scorer rejected the mixed-date panel and wrote no August 5 observation. |
+| 2 | Technical context + unusual calls | Natural universe; 5 sessions; technical score then unusual call buying | First completed prospective date: 5 signals, 80% wins, +1.8944% mean, +3.0803% median. Historical fixed slices were positive at three chronological splits. | **NEW OBSERVATION; EARLIER OUTCOME PENDING** | The August 5 observation was frozen before the August 6 open: PAYC, AMD, WDC, CE, and HPE. Its source-pure panel has 478/478 technical rows, 478/478 nonempty option rows, 20 prior call observations per row, 18 manifest-explicit unavailable exclusions, zero missing common-universe rows, and the unchanged technical-model hash `5bfa5258...f7bedea`. The August 4 selections NRG, INTC, GPN, CAT, and IT remain pending. |
+| 3 | Nasdaq-101 baseline | 101 symbols; 5 sessions; technical | Historical untouched top 0.25%: 20 rows, 70% >=10% winners. First completed prospective date: 2 signals, 100% wins, +6.7067% mean. | **BLOCKED WITH EVIDENCE** | The journal has no attempt after July 27, so the August 4 decision opportunity was silently missed and cannot be backfilled. The source-pure Schwab refresh through the August 5 session added 96 rows with zero failures, but EA remains on stored date August 3 after an exact retry returned no newer candle; the complete-101 August 5 panel therefore fails closed. |
+| 4 | Nasdaq-101 QQQ-relative | 101 symbols; 5 sessions; technical + QQQ-relative context | Historical untouched top 0.10%: 8/8 >=10% winners; top 0.25%: 65%. First prospective date: 2 signals, 50% wins, +2.3750% mean. | **BLOCKED WITH EVIDENCE** | The same missed August 4 journal gap and exact EA coverage blocker prevent a complete source-pure August 5 observation. No source substitution or retrospective journal is allowed. |
+| 5 | AI/semi 20-minute technical + premarket | 17 symbols; 09:30 entry to 09:45 close; prior technical + 09:25 premarket | 20 held-out days, 28 trades, 70% positive days, +0.52% mean daily net, +10.62% compounded, -4.56% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Alpha Vantage lacked entitled pre-entry realtime data and its 09:25 interval is not complete before the frozen 09:30 entry. Cannot be repaired without a separately frozen timing/source model. |
+| 6 | AI/semi 60-minute technical + premarket + calls | 17 symbols; 09:30 to 10:25; prior technical/calls + 09:25 premarket | 20 held-out days, 28 trades, 65% positive days, +0.70% mean daily net, +14.28% compounded, -5.70% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Same Alpha Vantage 09:30-entry impossibility. Preserve frozen evidence; use the separate Schwab late-entry variants prospectively. |
+| 7 | Schwab late-entry 60-minute calls | 17 symbols; 09:35 to 10:30; Alpha prior technical/calls + Schwab 09:25 premarket | Untouched: 28 trades, 57.14% wins, +0.6325% mean, +11.2514% compounded, -5.7230% drawdown. First future date: 2 trades, 0% wins, -1.4876% mean net. | **OUTCOME COMPLETE PLUS NEW-DAY ATTEMPT READY** | August 5 META and AMAT both lost after cost. Exact August 5 Alpha technical/call inputs now contain all 17 symbols, nonempty chains, and at least 20 prior call observations; the August 6 readiness audit passed. Capture the exact Schwab 09:25 bars only in the frozen 09:30-09:34:59 decision window. |
+| 8 | Schwab late-entry 60-minute premarket | Same 17-symbol 09:35 program without call feature family | Untouched: 56 trades, 51.79% wins, +0.3895% mean, +4.6607% compounded, -7.1860% drawdown. First future date: 4 trades, 50% wins, -0.3193% mean net. | **OUTCOME COMPLETE PLUS NEW-DAY ATTEMPT READY** | August 5 AMAT and META lost while ORCL and MU won after cost. The same August 6 readiness audit passed; the required Schwab snapshot cannot exist until the frozen live window. |
+| 9 | AI/semi one-session narrative earnings context | 17 symbols; 1 session; technical + premarket + point-in-time earnings context | Exploratory frozen comparison: 37 selections, 62.16% wins, +0.7476% mean, +0.5398% median. | **NOT SCHEDULED YET; 09:25 INPUT NOT YET OBSERVABLE** | Exact August 5 daily technical data is ready for all 17 symbols. At the 05:31 Pacific pass, the required August 6 09:25 Eastern interval had not occurred; the attempt belongs in the frozen 06:31 pass and must still fail closed if Alpha cannot provide all 17 exact rows. |
+| 10 | AI/semi technical + premarket | 17 symbols; 5 sessions | Validation-locked historical test: 31 selections, +1.7260% mean, -0.0638% median, 48.39% wins. Separate journal has 4 pending observations across 2 dates. | **OUTCOME PENDING PLUS NEW-DAY ATTEMPT NOT YET SCHEDULED** | Exact August 5 daily technical data is ready. The required August 6 09:25 Eastern premarket interval had not occurred at 05:31 Pacific, so the complete-17 attempt remains scheduled for the 06:31 pass rather than being estimated early. |
+| 11 | Nasdaq-80 champion | 80 symbols; 5 sessions; QQQ-context technical | Corrected historical test: 12 trades, +2.8700% mean, +1.6163% median, 58.33% wins. | **OUTCOMES PENDING; BLOCKED WITH EVIDENCE** | PLTR and QCOM observations remain pending. EA also belongs to the frozen 80-symbol universe and lacks the completed August 5 Schwab candle after an exact retry, so the next complete-universe attempt fails closed rather than silently dropping it. |
 
 ## Secondary promising leads currently parked
 
@@ -37,14 +38,24 @@ The automatically refreshed data-family and coverage matrix is
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.
-- Any-time rolling 20-minute model: Jeff refined this to one-minute resolution.
-  The 103-symbol five-minute archive remains preserved and audited; the
-  separate 8,137-request one-minute archive is actively collecting. A
-  deliberately partial January-October 2020 pipeline pilot compiled 5,249,807
-  rows across 211 dates and correctly failed validation (best mean -0.2220%
-  net, 37.34% wins); its 38 test dates stayed sealed. This validates the
-  machinery but not the model. Complete-archive training and live-source
-  compatibility validation remain pending.
+- Any-time one-minute Nasdaq-101 horizon clones (5/10/20/30/60/90 minutes):
+  both the 8,137-request archive and its independent 82,425,431-row content
+  audit are complete. Schema v3 corrected executable-time labels, exit
+  timestamps, gap handling, abstention, calibration/policy separation, and
+  genuinely unloaded sealed tests. The earlier schema-v2 full 20-minute run is
+  immutable `RESEARCH_HOLD` (best validation -0.2238% mean net, 38.84% wins;
+  test sealed). Schema-v3 5/10/20/30-minute variants are now also
+  `RESEARCH_HOLD` with their tests sealed. The 60- and 90-minute builds are
+  not scheduled until the next development-work window; no compiler or
+  trainer is currently running.
+- Any-time one-minute AI/semiconductor-17 horizon clones
+  (5/10/20/30/60/90 minutes): the separate 869-request supplement is complete
+  and independently audited (793 valid files, 76 unavailable, 10,412,846 rows,
+  zero orphans). Exact combined coverage is 79/79 accounted months for every
+  one of the 17 symbols. All six corrected 5/10/20/30/60/90-minute variants
+  completed and returned `RESEARCH_HOLD`; every sealed test remained unloaded.
+  Each horizon has separate immutable panel/model roots. These remain negative
+  development evidence, and live-source compatibility validation is pending.
 - Five-day catalyst-momentum model: explicitly excluded from this promising
   list because its typical held-out selection lost money; status remains
   `RESEARCH_HOLD`.
