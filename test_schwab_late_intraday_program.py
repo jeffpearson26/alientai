@@ -5,7 +5,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from capture_schwab_intraday_snapshot import capture
-from evaluate_schwab_late_intraday_outcomes import completed_outcomes
+from evaluate_schwab_late_intraday_outcomes import (
+    completed_outcomes,
+    observations_for_archive,
+)
 from download_russell_2000_5m_schwab import read_symbols as read_schwab_symbols
 from journal_ai_semiconductor_late_intraday_models import (
     merge_inputs,
@@ -137,6 +140,19 @@ class SchwabLateIntradayProgramTests(unittest.TestCase):
             )
         self.assertEqual(outcomes[0]["label_entry_0935_open"], 102)
         self.assertEqual(outcomes[0]["label_exit_1030_close"], 106)
+
+    def test_outcome_snapshot_selects_its_date_from_cumulative_journal(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_archive(root, "2026-08-04T14:36:00+00:00")
+            selected = observations_for_archive(
+                [
+                    {"market_date": "2026-08-03", "symbol": "OLD"},
+                    {"market_date": "2026-08-04", "symbol": "NVDA"},
+                ],
+                root,
+            )
+        self.assertEqual([row["symbol"] for row in selected], ["NVDA"])
 
 
 if __name__ == "__main__":

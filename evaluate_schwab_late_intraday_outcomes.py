@@ -16,6 +16,26 @@ from journal_ai_semiconductor_intraday_models import append_unique, read_jsonl, 
 EASTERN = ZoneInfo("America/New_York")
 
 
+def observations_for_archive(
+    observations: Sequence[Mapping[str, Any]], archive: Path
+) -> list[Mapping[str, Any]]:
+    """Select only the cumulative-journal rows matching this outcome snapshot."""
+    manifest = json.loads((archive / "manifest.json").read_text(encoding="utf-8"))
+    decision_date = str(manifest.get("decision_date") or "")
+    if not decision_date:
+        raise ValueError("outcome snapshot has no decision date")
+    selected = [
+        row
+        for row in observations
+        if str(row.get("market_date") or "") == decision_date
+    ]
+    if not selected:
+        raise ValueError(
+            f"no journal observations match outcome date {decision_date}"
+        )
+    return selected
+
+
 def completed_outcomes(
     observations: Sequence[Mapping[str, Any]],
     archive: Path,
@@ -78,7 +98,8 @@ def main() -> None:
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--outcomes", type=Path, required=True)
     args = parser.parse_args()
-    rows = completed_outcomes(read_jsonl(args.journal), args.archive)
+    observations = observations_for_archive(read_jsonl(args.journal), args.archive)
+    rows = completed_outcomes(observations, args.archive)
     additions = append_unique(args.outcomes, rows)
     print(json.dumps({
         "status": "complete",
