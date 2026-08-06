@@ -1160,6 +1160,44 @@ dates, +0.105089% mean gross but -0.144911% mean net, -0.240700% median net,
 `SEALED_UNLOADED`. Never retune or open that test. Continue with the separate
 Nasdaq-101 30-minute schema-v3 panel, one logical job at a time.
 
+## Multi-resolution Nasdaq/S&P cross-sectional ranker (2026-08-06)
+
+Jeff specified two new research-only cross-sectional rankers: exact
+Nasdaq-101 candidates and the 483-symbol S&P data-ready list, with QQQ/SPY as
+context only. Both use the eleven requested daily technical features,
+completed regular/after-hours five-minute summaries, recent call-side activity,
+strictly lagged unusual-call baselines, and optional timestamped news. Separate
+LightGBM and XGBoost challengers target five- and twenty-session within-date
+return ranks. Decision is 20:00 Eastern, entry is the next complete open, exit
+is the fifth or twentieth subsequent close, and cost is 0.25%.
+
+The exact implementation is
+`alientai_v2/research/multiresolution_cross_sectional.py`,
+`build_multiresolution_cross_sectional_panel.py`,
+`audit_multiresolution_cross_sectional_panel.py`, and
+`train_multiresolution_cross_sectional.py`. Both panels passed independent
+content audits. Nasdaq contains 7,272 rows across 72 dates with exact 101-name
+coverage. S&P contains 43,869 rows across 92 dates; 481 of 483 reference
+symbols appear and every date has at least 467 candidates.
+
+Both five-session screens are `RESEARCH_HOLD` and their sealed tests remain
+`SEALED_UNLOADED`. The most relevant Nasdaq daily+five-minute+calls LightGBM
+slice had 336 selections across 56 development dates, +1.4217% mean net,
++0.1886% median, 52.08% wins, but -0.04984 mean rank IC and a -0.3216%
+date-clustered lower 95% bound. The comparable S&P result had 1,095 selections
+across 73 dates, +0.0834% mean, -0.3658% median, 46.30% wins, -0.04994 rank IC,
+and -0.5668% lower bound. No variant passed.
+
+News remains blocked: only 36 Nasdaq dates meet 75% coverage and 30 S&P dates
+meet 90%, versus 60 required. Both twenty-session variants are
+`BLOCKED_INSUFFICIENT_HISTORY`: 72 and 92 common dates respectively, versus
+the frozen 120-date minimum needed for defensible purge/embargo/test geometry.
+Do not weaken the gate, open the sealed five-session tests, start prospective
+journals, or connect execution. Continue collecting the exact same families
+and retry only in a new root after the stated date thresholds are met. The
+controlling report is
+`MULTIRESOLUTION_CROSS_SECTIONAL_REPORT_20260806.md`.
+
 ## Cross-sectional technical five-session model (2026-08-05)
 
 Jeff explicitly directed a separate implementation of the supplied

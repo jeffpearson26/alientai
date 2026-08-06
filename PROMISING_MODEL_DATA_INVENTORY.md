@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T15:35:51.804103+00:00`
+Automatically refreshed: `2026-08-06T18:00:00.963913+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -21,6 +21,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Any-time 5/10/20/30/60/90-minute Nasdaq-101 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Any-time 5/10/20/30/60/90-minute AI/semi-17 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Exact Nasdaq + AI semiconductor five-day roadmap (development) | **DEVELOPMENT_NOT_TESTING** | nasdaq_quarterly_point_in_time_membership, nasdaq_ai_roadmap_point_in_time_fundamentals, nasdaq_ai_roadmap_known_earnings_calendar, nasdaq_ai_roadmap_readiness_audit |
+| Nasdaq-100 daily + five-minute cross-sectional ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq-100 daily + five-minute cross-sectional ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready daily + five-minute cross-sectional ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready daily + five-minute cross-sectional ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 
 ## Data requirements
 
@@ -71,3 +75,15 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `nasdaq_ai_roadmap_point_in_time_fundamentals` | Revenue/EPS growth, gross-margin trend and earnings beat/miss streak | Timestamped filings and earnings facts | — | **BLOCKED** | no file matches D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_fundamentals.jsonl |
 | `nasdaq_ai_roadmap_known_earnings_calendar` | Historically known next-earnings dates | Timestamped earnings calendar archive | — | **BLOCKED** | no file matches D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_earnings_calendar.jsonl |
 | `nasdaq_ai_roadmap_readiness_audit` | Content- and timing-level fail-closed readiness result | audit_nasdaq_ai_roadmap_5d_readiness.py | — | **BLOCKED** | JSON status='BLOCKED'; required 'READY_TO_BUILD_PANEL' |
+| `multiresolution_nasdaq_daily` | Full adjusted daily OHLCV for 101 Nasdaq candidates plus QQQ/SPY context | Alpha Vantage | — | **READY** | Completed decision session only; adjusted ratios and next-open/horizon-close labels |
+| `multiresolution_sp500_daily` | Long daily OHLCV for the 483-symbol S&P data-ready list | Schwab candidates; Alpha Vantage QQQ/SPY context only | — | **READY** | Schwab stored key maps plus one calendar day to the U.S. session; context never supplies candidate labels |
+| `multiresolution_nasdaq_intraday` | Decision-session regular and 16:00-20:00 ET intraday OHLCV | Alpha Vantage one-minute archive aggregated to five-minute | — | **READY** | Completed bars only; bounded no-trade intervals carry the last known price with zero volume and expose observed-bar fractions |
+| `multiresolution_sp500_intraday` | Decision-session regular and 16:00-20:00 ET five-minute OHLCV | Alpha Vantage native five-minute archive | — | **READY** | Completed bars only; regular endpoints and at least one after-hours print required |
+| `multiresolution_options` | Recent call-side activity and strictly lagged unusual-call baselines | Alpha Vantage historical option-chain aggregates | — | **READY** | Nonempty chains only; unavailable is missing, never zero; aggregate activity is not claimed to prove buyer initiation |
+| `multiresolution_news` | Ticker-specific recent headline count, recency, and sentiment | Alpha Vantage NEWS_SENTIMENT archive | — | **READY** | Articles published after each request's as_of_utc are excluded; full news variant remains blocked below 60 adequately covered dates |
+| `multiresolution_nasdaq_panel` | Audited Nasdaq-100 cross-sectional panel with 5- and 20-session labels | Local point-in-time compiler | — | **READY** | Exact 101-symbol date-local ranks; decision at 20:00 ET; next-open entry; 0.25% cost |
+| `multiresolution_sp500_panel` | Audited S&P data-ready cross-sectional panel with 5- and 20-session labels | Local point-in-time compiler | — | **READY** | At least 90% cross-sectional coverage per date; decision at 20:00 ET; next-open entry; 0.25% cost |
+| `multiresolution_nasdaq_h05_report` | Purged LightGBM/XGBoost five-session ablation report | Local immutable historical screen | — | **READY** | Whole-date folds, five-session purge/embargo, unopened sealed test after validation failure |
+| `multiresolution_nasdaq_h20_report` | Twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common dates exist |
+| `multiresolution_sp500_h05_report` | Purged LightGBM/XGBoost five-session ablation report | Local immutable historical screen | — | **READY** | Whole-date folds, five-session purge/embargo, unopened sealed test after validation failure |
+| `multiresolution_sp500_h20_report` | Twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common dates exist |

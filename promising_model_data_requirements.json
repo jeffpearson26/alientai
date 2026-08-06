@@ -144,6 +144,58 @@
         "nasdaq_ai_roadmap_known_earnings_calendar",
         "nasdaq_ai_roadmap_readiness_audit"
       ]
+    },
+    {
+      "model_id": "multiresolution_nasdaq100_h05_20260806",
+      "display_name": "Nasdaq-100 daily + five-minute cross-sectional ranker, 5 sessions (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "multiresolution_nasdaq_intraday",
+        "multiresolution_options",
+        "multiresolution_news",
+        "multiresolution_nasdaq_panel",
+        "multiresolution_nasdaq_h05_report"
+      ]
+    },
+    {
+      "model_id": "multiresolution_nasdaq100_h20_20260806",
+      "display_name": "Nasdaq-100 daily + five-minute cross-sectional ranker, 20 sessions (blocked development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "multiresolution_nasdaq_intraday",
+        "multiresolution_options",
+        "multiresolution_news",
+        "multiresolution_nasdaq_panel",
+        "multiresolution_nasdaq_h20_report"
+      ]
+    },
+    {
+      "model_id": "multiresolution_sp500_h05_20260806",
+      "display_name": "S&P data-ready daily + five-minute cross-sectional ranker, 5 sessions (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "multiresolution_sp500_intraday",
+        "multiresolution_options",
+        "multiresolution_news",
+        "multiresolution_sp500_panel",
+        "multiresolution_sp500_h05_report"
+      ]
+    },
+    {
+      "model_id": "multiresolution_sp500_h20_20260806",
+      "display_name": "S&P data-ready daily + five-minute cross-sectional ranker, 20 sessions (blocked development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "multiresolution_sp500_intraday",
+        "multiresolution_options",
+        "multiresolution_news",
+        "multiresolution_sp500_panel",
+        "multiresolution_sp500_h20_report"
+      ]
     }
   ],
   "requirements": {
@@ -481,6 +533,90 @@
       "path": "data_v2/rcef_research/nasdaq_ai_roadmap_5d_readiness.json",
       "status_field": "status",
       "required_status": "READY_TO_BUILD_PANEL"
+    },
+    "multiresolution_nasdaq_daily": {
+      "data_type": "Full adjusted daily OHLCV for 101 Nasdaq candidates plus QQQ/SPY context",
+      "source": "Alpha Vantage",
+      "timing_contract": "Completed decision session only; adjusted ratios and next-open/horizon-close labels",
+      "kind": "directory",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/nasdaq101_qqq_spy_daily_adjusted_full_20260806_preopen"
+    },
+    "multiresolution_sp500_daily": {
+      "data_type": "Long daily OHLCV for the 483-symbol S&P data-ready list",
+      "source": "Schwab candidates; Alpha Vantage QQQ/SPY context only",
+      "timing_contract": "Schwab stored key maps plus one calendar day to the U.S. session; context never supplies candidate labels",
+      "kind": "directory",
+      "path": "data_v2/sp500_daily_schwab_max_history"
+    },
+    "multiresolution_nasdaq_intraday": {
+      "data_type": "Decision-session regular and 16:00-20:00 ET intraday OHLCV",
+      "source": "Alpha Vantage one-minute archive aggregated to five-minute",
+      "timing_contract": "Completed bars only; bounded no-trade intervals carry the last known price with zero volume and expose observed-bar fractions",
+      "kind": "directory",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/rolling_20m_nasdaq101_adjusted_1min_202001_202607"
+    },
+    "multiresolution_sp500_intraday": {
+      "data_type": "Decision-session regular and 16:00-20:00 ET five-minute OHLCV",
+      "source": "Alpha Vantage native five-minute archive",
+      "timing_contract": "Completed bars only; regular endpoints and at least one after-hours print required",
+      "kind": "directory",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/selective_natural_premarket_5min_2026"
+    },
+    "multiresolution_options": {
+      "data_type": "Recent call-side activity and strictly lagged unusual-call baselines",
+      "source": "Alpha Vantage historical option-chain aggregates",
+      "timing_contract": "Nonempty chains only; unavailable is missing, never zero; aggregate activity is not claimed to prove buyer initiation",
+      "kind": "file",
+      "path": "data_v2/rcef_research/natural_option_features_2026.jsonl"
+    },
+    "multiresolution_news": {
+      "data_type": "Ticker-specific recent headline count, recency, and sentiment",
+      "source": "Alpha Vantage NEWS_SENTIMENT archive",
+      "timing_contract": "Articles published after each request's as_of_utc are excluded; full news variant remains blocked below 60 adequately covered dates",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/multiresolution_cross_sectional_20260806/stratified_news_features_partial_15745.jsonl"
+    },
+    "multiresolution_nasdaq_panel": {
+      "data_type": "Audited Nasdaq-100 cross-sectional panel with 5- and 20-session labels",
+      "source": "Local point-in-time compiler",
+      "timing_contract": "Exact 101-symbol date-local ranks; decision at 20:00 ET; next-open entry; 0.25% cost",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/multiresolution_cross_sectional_20260806/nasdaq100_v2/content_audit.json"
+    },
+    "multiresolution_sp500_panel": {
+      "data_type": "Audited S&P data-ready cross-sectional panel with 5- and 20-session labels",
+      "source": "Local point-in-time compiler",
+      "timing_contract": "At least 90% cross-sectional coverage per date; decision at 20:00 ET; next-open entry; 0.25% cost",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/multiresolution_cross_sectional_20260806/sp500_v3/content_audit.json"
+    },
+    "multiresolution_nasdaq_h05_report": {
+      "data_type": "Purged LightGBM/XGBoost five-session ablation report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Whole-date folds, five-session purge/embargo, unopened sealed test after validation failure",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/multiresolution_nasdaq100_h05_20260806/training_report.json"
+    },
+    "multiresolution_nasdaq_h20_report": {
+      "data_type": "Twenty-session chronology-readiness report",
+      "source": "Local fail-closed historical screen",
+      "timing_contract": "Blocked until at least 120 common dates exist",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/multiresolution_nasdaq100_h20_20260806/training_report.json"
+    },
+    "multiresolution_sp500_h05_report": {
+      "data_type": "Purged LightGBM/XGBoost five-session ablation report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Whole-date folds, five-session purge/embargo, unopened sealed test after validation failure",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/multiresolution_sp500_h05_20260806/training_report.json"
+    },
+    "multiresolution_sp500_h20_report": {
+      "data_type": "Twenty-session chronology-readiness report",
+      "source": "Local fail-closed historical screen",
+      "timing_contract": "Blocked until at least 120 common dates exist",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/multiresolution_sp500_h20_20260806/training_report.json"
     }
   }
 }

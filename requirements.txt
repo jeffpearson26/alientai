@@ -8,5 +8,6 @@ psycopg[binary]
 numpy
 pandas
 lightgbm
+xgboost==3.0.2
 torch
 schwab-py

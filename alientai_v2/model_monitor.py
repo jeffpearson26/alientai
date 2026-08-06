@@ -191,6 +191,62 @@ MODEL_SPECS = (
         for horizon in (5, 10, 20, 30, 60, 90)
     ),
     ModelSpec(
+        "multiresolution_nasdaq100_h05_20260806",
+        "Nasdaq Multi-Resolution Ranker",
+        "Cross-sectional LightGBM/XGBoost research screen using daily, five-minute, after-hours and call activity.",
+        "5 sessions",
+        "Nasdaq-101",
+        "Ranked technicals, QQQ/SPY context, five-minute regular/after-hours summaries and call activity",
+        "development",
+        "Validation failed despite a positive selected-basket mean; rank IC and the lower confidence bound were negative, so the test remains sealed.",
+        aggregate_summary=Path(
+            r"D:\AlientAI\Models\multiresolution_nasdaq100_h05_20260806"
+            r"\training_report.json"
+        ),
+    ),
+    ModelSpec(
+        "multiresolution_sp500_h05_20260806",
+        "S&P Multi-Resolution Ranker",
+        "S&P cross-sectional LightGBM/XGBoost research screen using daily, five-minute, after-hours and call activity.",
+        "5 sessions",
+        "S&P data-ready 483",
+        "Ranked technicals, QQQ/SPY context, five-minute regular/after-hours summaries and call activity",
+        "development",
+        "Validation failed; median return, win rate, rank IC and the confidence bound were negative, so the test remains sealed.",
+        aggregate_summary=Path(
+            r"D:\AlientAI\Models\multiresolution_sp500_h05_20260806"
+            r"\training_report.json"
+        ),
+    ),
+    ModelSpec(
+        "multiresolution_nasdaq100_h20_20260806",
+        "Nasdaq Multi-Resolution 20-Session",
+        "Twenty-session clone of the multi-resolution cross-sectional ranker.",
+        "20 sessions",
+        "Nasdaq-101",
+        "Same daily, five-minute, after-hours, calls and optional-news contract",
+        "blocked",
+        "Only 72 common dates exist; 120 are required for the frozen purge, embargo and sealed-test geometry.",
+        aggregate_summary=Path(
+            r"D:\AlientAI\Models\multiresolution_nasdaq100_h20_20260806"
+            r"\training_report.json"
+        ),
+    ),
+    ModelSpec(
+        "multiresolution_sp500_h20_20260806",
+        "S&P Multi-Resolution 20-Session",
+        "Twenty-session clone of the S&P multi-resolution cross-sectional ranker.",
+        "20 sessions",
+        "S&P data-ready 483",
+        "Same daily, five-minute, after-hours, calls and optional-news contract",
+        "blocked",
+        "Only 92 common dates exist; 120 are required for the frozen purge, embargo and sealed-test geometry.",
+        aggregate_summary=Path(
+            r"D:\AlientAI\Models\multiresolution_sp500_h20_20260806"
+            r"\training_report.json"
+        ),
+    ),
+    ModelSpec(
         "grok_nasdaq101_5d_20260805",
         "Grok Nasdaq-101 Technical Preview",
         "External LightGBM implementation retrained locally on the exact 101-security list.",

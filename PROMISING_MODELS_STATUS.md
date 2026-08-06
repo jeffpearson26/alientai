@@ -59,6 +59,21 @@ The automatically refreshed data-family and coverage matrix is
 - Five-day catalyst-momentum model: explicitly excluded from this promising
   list because its typical held-out selection lost money; status remains
   `RESEARCH_HOLD`.
+- Multi-resolution Nasdaq-101 ranker, 5 sessions: 72-date panel and all
+  LightGBM/XGBoost ablations completed. The strongest requested
+  daily+five-minute+calls slice had +1.4217% mean across 336 selections, but
+  rank IC was -0.04984 and the date-clustered lower 95% bound was -0.3216%.
+  Status is `RESEARCH_HOLD`; the sealed test is unopened.
+- Multi-resolution S&P ranker, 5 sessions: 92-date panel and all
+  LightGBM/XGBoost ablations completed. The comparable LightGBM slice had
+  +0.0834% mean, -0.3658% median, 46.30% wins and -0.04994 rank IC. Status is
+  `RESEARCH_HOLD`; the sealed test is unopened.
+- Multi-resolution 20-session clones: Nasdaq has 72 and S&P has 92 common
+  point-in-time dates, below the frozen 120-date minimum. Both are visibly
+  `BLOCKED_INSUFFICIENT_HISTORY`; no misleading fit was run.
+- Multi-resolution timestamped-news ablation: only 36 Nasdaq and 30 S&P dates
+  meet their coverage thresholds, below 60 required. Missing news was not
+  treated as no news.
 
 ## Morning rules
 
