@@ -1146,6 +1146,20 @@ drawdown. Status is `RESEARCH_HOLD`; the 243-date test is explicitly
 schema-v3 panel is the next active artifact; continue the frozen horizon
 sequence one at a time.
 
+The Nasdaq-101 20-minute schema-v3 panel then completed at
+`D:\AlientAI\Data\Compiled\rolling_anytime_nasdaq101_schema3_h20_20260804`
+with 7,512 verified shards, 43,554,397 rows, zero failures, the exact frozen
+101-symbol hash, nanosecond timestamps, and next-minute-open entry. Its one
+permitted training run is preserved at
+`D:\AlientAI\Models\rolling_anytime_nasdaq101_schema3_h20_20260804`.
+All five policy-validation percentiles failed after 0.25% cost. The
+least-negative fixed slice was the 99.5th percentile: 180 signals across 23
+dates, +0.105089% mean gross but -0.144911% mean net, -0.240700% median net,
+42.78% wins, and -7.431377% capital-scaled drawdown. Status is
+`RESEARCH_HOLD`; no threshold was selected and the 243-date test remains
+`SEALED_UNLOADED`. Never retune or open that test. Continue with the separate
+Nasdaq-101 30-minute schema-v3 panel, one logical job at a time.
+
 ## Cross-sectional technical five-session model (2026-08-05)
 
 Jeff explicitly directed a separate implementation of the supplied

@@ -967,3 +967,12 @@ feature-family ablation order, chronological splits, and promotion gates.
   and zero orphans; the supplement passed 793 valid files, 76 unavailable,
   10,412,846 rows, and zero orphans. The first schema-v3 AI17 five-minute panel
   compilation then began in a new horizon-specific D-drive artifact.
+- 2026-08-05: Completed and trained the Nasdaq-101 schema-v3 20-minute
+  artifact without opening its sealed test. The panel has 7,512 verified
+  shards and 43,554,397 rows with zero failures. Every policy-validation
+  threshold lost money after the frozen 0.25% cost; the least-negative 99.5th
+  percentile slice had 180 signals across 23 dates, +0.105089% mean gross,
+  -0.144911% mean net, -0.240700% median, 42.78% wins, and -7.431377%
+  capital-scaled drawdown. Status `RESEARCH_HOLD`; preserve its model hashes
+  and `SEALED_UNLOADED` 243-date test, never retune, and advance the separate
+  Nasdaq-101 30-minute compile next.
