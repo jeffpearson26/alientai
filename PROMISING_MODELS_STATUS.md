@@ -74,6 +74,21 @@ The automatically refreshed data-family and coverage matrix is
 - Multi-resolution timestamped-news ablation: only 36 Nasdaq and 30 S&P dates
   meet their coverage thresholds, below 60 required. Missing news was not
   treated as no news.
+- Daily-only Nasdaq-101 technical + call-options ranker, 5 sessions: the
+  independently audited panel contains 72 dates and exactly 101 candidates per
+  date; QQQ/SPY are context-only. The strongest LightGBM call-enhanced slice
+  had +1.7547% mean, +0.5134% median, and 52.98% wins across 336 development
+  selections, but rank IC was -0.04921 and the date-clustered lower 95% bound
+  was -0.0891%. Status is `RESEARCH_HOLD`; the sealed test is unopened.
+- Daily-only S&P technical + call-options ranker, 5 sessions: the independently
+  audited panel contains 92 dates and exactly 483 candidates per date. Its
+  daily-technical baseline was stronger than the call-enhanced versions, but
+  still had negative median return and rank IC. Status is `RESEARCH_HOLD`; the
+  sealed test is unopened.
+- Daily-only 20-session rankers: Nasdaq has 72 and S&P has 92 common
+  point-in-time call-history dates, below the frozen 120-date minimum. Both
+  are `BLOCKED_INSUFFICIENT_HISTORY`; neither was fit. These variants read no
+  intraday, premarket, after-hours, or news source.
 
 ## Morning rules
 

@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T18:00:00.963913+00:00`
+Automatically refreshed: `2026-08-06T18:15:18.536791+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -25,6 +25,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-100 daily + five-minute cross-sectional ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready daily + five-minute cross-sectional ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready daily + five-minute cross-sectional ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq-100 daily-only technical + call-options ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq-100 daily-only technical + call-options ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready daily-only technical + call-options ranker, 5 sessions (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| S&P data-ready daily-only technical + call-options ranker, 20 sessions (blocked development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 
 ## Data requirements
 
@@ -87,3 +91,9 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `multiresolution_nasdaq_h20_report` | Twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common dates exist |
 | `multiresolution_sp500_h05_report` | Purged LightGBM/XGBoost five-session ablation report | Local immutable historical screen | — | **READY** | Whole-date folds, five-session purge/embargo, unopened sealed test after validation failure |
 | `multiresolution_sp500_h20_report` | Twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common dates exist |
+| `daily_options_nasdaq_panel` | Audited Nasdaq-100 daily-only technical and call-option panel | Local point-in-time compiler | — | **READY** | Exact 101-symbol date-local ranks; QQQ/SPY context-only; no intraday, after-hours, or news sources |
+| `daily_options_sp500_panel` | Audited S&P data-ready daily-only technical and call-option panel | Local point-in-time compiler | — | **READY** | Exact 483-symbol date-local ranks; QQQ/SPY context-only; no intraday, after-hours, or news sources |
+| `daily_options_nasdaq_h05_report` | Purged daily-only LightGBM/XGBoost five-session report | Local immutable historical screen | — | **READY** | Daily technical and daily-plus-calls same-sample comparison; unopened sealed test after validation failure |
+| `daily_options_nasdaq_h20_report` | Daily-only twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common call-history dates exist |
+| `daily_options_sp500_h05_report` | Purged daily-only LightGBM/XGBoost five-session report | Local immutable historical screen | — | **READY** | Daily technical and daily-plus-calls same-sample comparison; unopened sealed test after validation failure |
+| `daily_options_sp500_h20_report` | Daily-only twenty-session chronology-readiness report | Local fail-closed historical screen | — | **READY** | Blocked until at least 120 common call-history dates exist |

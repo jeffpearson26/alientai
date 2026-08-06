@@ -196,6 +196,50 @@
         "multiresolution_sp500_panel",
         "multiresolution_sp500_h20_report"
       ]
+    },
+    {
+      "model_id": "daily_options_nasdaq100_h05_20260806",
+      "display_name": "Nasdaq-100 daily-only technical + call-options ranker, 5 sessions (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "multiresolution_options",
+        "daily_options_nasdaq_panel",
+        "daily_options_nasdaq_h05_report"
+      ]
+    },
+    {
+      "model_id": "daily_options_nasdaq100_h20_20260806",
+      "display_name": "Nasdaq-100 daily-only technical + call-options ranker, 20 sessions (blocked development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_nasdaq_daily",
+        "multiresolution_options",
+        "daily_options_nasdaq_panel",
+        "daily_options_nasdaq_h20_report"
+      ]
+    },
+    {
+      "model_id": "daily_options_sp500_h05_20260806",
+      "display_name": "S&P data-ready daily-only technical + call-options ranker, 5 sessions (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "multiresolution_options",
+        "daily_options_sp500_panel",
+        "daily_options_sp500_h05_report"
+      ]
+    },
+    {
+      "model_id": "daily_options_sp500_h20_20260806",
+      "display_name": "S&P data-ready daily-only technical + call-options ranker, 20 sessions (blocked development)",
+      "lifecycle": "development",
+      "requirements": [
+        "multiresolution_sp500_daily",
+        "multiresolution_options",
+        "daily_options_sp500_panel",
+        "daily_options_sp500_h20_report"
+      ]
     }
   ],
   "requirements": {
@@ -617,6 +661,48 @@
       "timing_contract": "Blocked until at least 120 common dates exist",
       "kind": "file",
       "path": "D:/AlientAI/Models/multiresolution_sp500_h20_20260806/training_report.json"
+    },
+    "daily_options_nasdaq_panel": {
+      "data_type": "Audited Nasdaq-100 daily-only technical and call-option panel",
+      "source": "Local point-in-time compiler",
+      "timing_contract": "Exact 101-symbol date-local ranks; QQQ/SPY context-only; no intraday, after-hours, or news sources",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/daily_options_cross_sectional_20260806/nasdaq100/content_audit.json"
+    },
+    "daily_options_sp500_panel": {
+      "data_type": "Audited S&P data-ready daily-only technical and call-option panel",
+      "source": "Local point-in-time compiler",
+      "timing_contract": "Exact 483-symbol date-local ranks; QQQ/SPY context-only; no intraday, after-hours, or news sources",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/daily_options_cross_sectional_20260806/sp500/content_audit.json"
+    },
+    "daily_options_nasdaq_h05_report": {
+      "data_type": "Purged daily-only LightGBM/XGBoost five-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Daily technical and daily-plus-calls same-sample comparison; unopened sealed test after validation failure",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/daily_options_nasdaq100_h05_20260806/training_report.json"
+    },
+    "daily_options_nasdaq_h20_report": {
+      "data_type": "Daily-only twenty-session chronology-readiness report",
+      "source": "Local fail-closed historical screen",
+      "timing_contract": "Blocked until at least 120 common call-history dates exist",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/daily_options_nasdaq100_h20_20260806/training_report.json"
+    },
+    "daily_options_sp500_h05_report": {
+      "data_type": "Purged daily-only LightGBM/XGBoost five-session report",
+      "source": "Local immutable historical screen",
+      "timing_contract": "Daily technical and daily-plus-calls same-sample comparison; unopened sealed test after validation failure",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/daily_options_sp500_h05_20260806/training_report.json"
+    },
+    "daily_options_sp500_h20_report": {
+      "data_type": "Daily-only twenty-session chronology-readiness report",
+      "source": "Local fail-closed historical screen",
+      "timing_contract": "Blocked until at least 120 common call-history dates exist",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/daily_options_sp500_h20_20260806/training_report.json"
     }
   }
 }

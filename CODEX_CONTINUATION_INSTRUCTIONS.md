@@ -2,6 +2,24 @@
 
 Updated: 2026-08-02 Pacific time
 
+## Daily-only technical + call-option rankers (2026-08-06)
+
+Preserve the isolated research contract in
+`DAILY_OPTIONS_CROSS_SECTIONAL_SPEC_20260806.md`. These Nasdaq-101 and
+S&P-data-ready variants use completed daily OHLCV, QQQ/SPY context, and an
+optional recent call-activity feature family. They must never read intraday,
+premarket, after-hours, headline, sentiment, or news inputs. QQQ and SPY are
+reference-only and cannot be selected.
+
+The independently audited panels are under
+`D:\AlientAI\Data\Compiled\daily_options_cross_sectional_20260806`. Both
+five-session historical screens are `RESEARCH_HOLD` and their sealed tests
+remain `SEALED_UNLOADED`. The twenty-session variants were not fit: Nasdaq has
+72 and S&P has 92 common point-in-time call-history dates versus the frozen
+120-date minimum. Preserve the reports under
+`D:\AlientAI\Models\daily_options_*_20260806`; do not retune against these
+development results or open either test after a failed gate.
+
 ## Autonomous transparent Nasdaq-101 champion (2026-08-05)
 
 Treat the frozen transparent 20-session model documented in
