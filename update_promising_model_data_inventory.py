@@ -233,6 +233,23 @@ def audit_requirement(
         return audit_jsonl(path, spec, now_utc)
     if kind == "manifest_glob":
         return audit_manifest(path, spec)
+    if kind == "json_status":
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        actual = payload.get(str(spec.get("status_field", "status")))
+        expected = spec.get("required_status")
+        ready = actual == expected
+        return {
+            "state": "READY" if ready else "BLOCKED",
+            "latest_path": str(path),
+            "modified_at_utc": datetime.fromtimestamp(
+                path.stat().st_mtime, tz=timezone.utc
+            ).isoformat(),
+            "reason": (
+                None
+                if ready
+                else f"JSON status={actual!r}; required {expected!r}"
+            ),
+        }
     return {
         "state": "READY",
         "latest_path": str(path),

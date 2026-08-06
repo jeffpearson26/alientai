@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "model_id": "nasdaq_ai_roadmap_cross_sectional_5d_v1",
+  "status": "SETUP_BLOCKED_ON_EXACT_DATA",
+  "research_only": true,
+  "execution_enabled": false,
+  "thesis_source": "Jeff-supplied practical NASDAQ-100 plus AI-semiconductor five-day roadmap",
+  "universe": {
+    "nasdaq_membership": "quarterly point-in-time Nasdaq-100 membership",
+    "nasdaq_current_reference": "nasdaq100_2026-06_symbols.txt",
+    "ai_overlay": "research_universes/nasdaq_ai_roadmap_overlay_20260805.txt",
+    "ai_overlay_rule": "exact 22 explicitly named symbols; do not invent unnamed 'few others'",
+    "liquidity_gate": {
+      "minimum_adjusted_close_usd": 5.0,
+      "minimum_trailing_20_session_dollar_volume_usd": 20000000.0
+    },
+    "rebalance_frequency": "quarterly",
+    "survivorship_control": "candidate must belong to the dated Nasdaq membership or the fixed AI overlay on the decision date"
+  },
+  "timing": {
+    "decision": "after a completed regular-session close",
+    "entry": "next complete regular-session adjusted open",
+    "exit": "fifth subsequent complete regular-session adjusted close",
+    "horizon_sessions": 5,
+    "round_trip_cost_pct": 0.25,
+    "maximum_daily_selections": 15,
+    "candidate_top_fractions": [
+      0.15,
+      0.2
+    ],
+    "overlapping_observations": true,
+    "nonoverlap_rotations": 5
+  },
+  "mandatory_feature_families": {
+    "adjusted_daily_ohlcv": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "split_coefficient",
+      "dividend_amount"
+    ],
+    "technical": [
+      "return_1d",
+      "return_5d",
+      "return_10d",
+      "return_20d",
+      "rsi_14",
+      "macd",
+      "macd_histogram",
+      "bollinger_percent_b",
+      "bollinger_bandwidth",
+      "atr_14_pct",
+      "adx_14",
+      "relative_volume_20d",
+      "volume_roc_5d",
+      "moving_average_distance_5_10_20_50",
+      "moving_average_slope_5_10_20_50"
+    ],
+    "cross_sectional": [
+      "date_local_rank_or_zscore_for_stock_features",
+      "relative_strength_vs_nasdaq_100",
+      "relative_strength_vs_smh",
+      "relative_strength_vs_soxx",
+      "relative_strength_vs_nvda"
+    ],
+    "volatility_regime": [
+      "realized_volatility_10d",
+      "realized_volatility_20d",
+      "vix_level",
+      "vix_1d_change",
+      "vix_5d_change"
+    ],
+    "point_in_time_fundamentals": [
+      "revenue_growth_yoy",
+      "eps_growth_yoy",
+      "gross_margin",
+      "gross_margin_change",
+      "consecutive_earnings_beat_miss_streak"
+    ],
+    "calendar_events": [
+      "days_to_next_known_earnings",
+      "day_of_week",
+      "month"
+    ]
+  },
+  "optional_feature_families": {
+    "short_interest": [
+      "short_interest_change"
+    ],
+    "options": [
+      "prior_session_implied_move"
+    ],
+    "news": [
+      "point_in_time_recent_headline_finbert_score"
+    ]
+  },
+  "targets": {
+    "absolute": "five-session net percentage return after 0.25% cost",
+    "cross_sectional": "within-decision-date percentile rank of the five-session net return",
+    "classification_diagnostic": "probability return exceeds +1.5% or the date-local top quintile"
+  },
+  "model_sequence": [
+    "transparent weighted cross-sectional technical composite",
+    "LightGBM absolute-return regressor",
+    "LightGBM cross-sectional-rank regressor",
+    "sequence model only after a tree model independently improves policy validation",
+    "ensemble only if out-of-fold sequence predictions add independent validation value"
+  ],
+  "validation": {
+    "whole_decision_dates_only": true,
+    "random_shuffle": false,
+    "stages": [
+      "train",
+      "fit_validation",
+      "calibration",
+      "policy_validation",
+      "sealed_test"
+    ],
+    "purge_label_overlap": true,
+    "embargo_sessions_each_side": 5,
+    "final_holdout_months_minimum": 12,
+    "policy_selection_source": "calibration only",
+    "test_rule": "open exactly once only after the fixed policy passes independent policy validation"
+  },
+  "evaluation": [
+    "date-level Spearman rank information coefficient",
+    "top-quantile precision and hit rate",
+    "top-minus-bottom matched control",
+    "long-top and long-short after-cost results",
+    "capital-scaled max drawdown",
+    "annualized Sharpe",
+    "turnover",
+    "high/low volatility regime results",
+    "AI bull and broad risk-off regime results",
+    "five non-overlapping holding rotations"
+  ],
+  "portfolio": {
+    "primary_weighting": "equal weight",
+    "secondary_validation_candidate": "inverse ATR volatility weighting",
+    "idle_cash_scaled": true,
+    "maximum_single_name_weight_pct": 15.0,
+    "annualized_volatility_target_range_pct": [
+      15.0,
+      20.0
+    ]
+  },
+  "training_gate": "all mandatory readiness checks must pass; optional families may remain absent but must be reported",
+  "prohibited": [
+    "current-membership substitution for historical Nasdaq membership",
+    "features published after the decision cutoff",
+    "random row splits",
+    "row-level purge that separates symbols from the same decision date",
+    "opening the sealed test after failed policy validation",
+    "paper or live order creation"
+  ]
+}

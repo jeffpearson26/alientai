@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from update_promising_model_data_inventory import (
+    audit_requirement,
     audit_jsonl,
     audit_manifest,
     build_inventory,
@@ -111,6 +112,25 @@ class PromisingModelDataInventoryTests(unittest.TestCase):
             result = build_inventory(Path(directory), registry)
             self.assertEqual(result["models"][0]["state"], "BLOCKED")
             self.assertEqual(result["models"][0]["blocked_requirements"], ["missing"])
+
+    def test_json_status_requires_exact_ready_value(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "readiness.json"
+            path.write_text(
+                json.dumps({"status": "BLOCKED"}), encoding="utf-8"
+            )
+            result = audit_requirement(
+                root,
+                {
+                    "kind": "json_status",
+                    "path": "readiness.json",
+                    "required_status": "READY_TO_BUILD_PANEL",
+                },
+                datetime(2026, 8, 5, tzinfo=timezone.utc),
+            )
+            self.assertEqual(result["state"], "BLOCKED")
+            self.assertIn("required 'READY_TO_BUILD_PANEL'", result["reason"])
 
 
 if __name__ == "__main__":

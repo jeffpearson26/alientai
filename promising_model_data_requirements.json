@@ -109,6 +109,19 @@
         "one_minute_live_source_compatibility",
         "purged_rolling_20m_labels"
       ]
+    },
+    {
+      "model_id": "nasdaq_ai_roadmap_cross_sectional_5d_v1",
+      "display_name": "Exact Nasdaq + AI semiconductor five-day roadmap (development)",
+      "lifecycle": "development",
+      "requirements": [
+        "nasdaq_ai_roadmap_contract",
+        "nasdaq_quarterly_point_in_time_membership",
+        "nasdaq_ai_roadmap_adjusted_daily_context",
+        "nasdaq_ai_roadmap_point_in_time_fundamentals",
+        "nasdaq_ai_roadmap_known_earnings_calendar",
+        "nasdaq_ai_roadmap_readiness_audit"
+      ]
     }
   ],
   "requirements": {
@@ -372,6 +385,49 @@
       "source": "Audited one-minute archive",
       "timing_contract": "Last completed minute close to the twentieth subsequent regular-session minute close; no overnight crossing; purged chronological splits",
       "kind": "logical"
+    },
+    "nasdaq_ai_roadmap_contract": {
+      "data_type": "Immutable five-session model, feature, timing, validation and safety contract",
+      "source": "Jeff-supplied roadmap normalized into local machine-readable contract",
+      "timing_contract": "Five-session next-open to fifth-close label; 0.25% cost; whole-date purge and embargo; research only",
+      "kind": "file",
+      "path": "nasdaq_ai_roadmap_5d_contract.json"
+    },
+    "nasdaq_quarterly_point_in_time_membership": {
+      "data_type": "Quarterly historical Nasdaq-100 membership with provenance and known timestamps",
+      "source": "Authorized dated constituent source",
+      "timing_contract": "Use only membership publicly known by each decision date; never substitute current constituents",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/PointInTime/nasdaq100_quarterly_membership.jsonl"
+    },
+    "nasdaq_ai_roadmap_adjusted_daily_context": {
+      "data_type": "Full adjusted daily candidates plus QQQ, SMH, SOXX, VIX and NVDA regime context",
+      "source": "Alpha Vantage source-pure archive",
+      "timing_contract": "Completed decision close only; exact next-open/fifth-close path; split and dividend adjusted",
+      "kind": "logical"
+    },
+    "nasdaq_ai_roadmap_point_in_time_fundamentals": {
+      "data_type": "Revenue/EPS growth, gross-margin trend and earnings beat/miss streak",
+      "source": "Timestamped filings and earnings facts",
+      "timing_contract": "available_at_utc must not exceed the decision cutoff",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_fundamentals.jsonl"
+    },
+    "nasdaq_ai_roadmap_known_earnings_calendar": {
+      "data_type": "Historically known next-earnings dates",
+      "source": "Timestamped earnings calendar archive",
+      "timing_contract": "The scheduled event and its announcement must both be preserved; availability must precede decision",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/PointInTime/nasdaq_ai_roadmap_earnings_calendar.jsonl"
+    },
+    "nasdaq_ai_roadmap_readiness_audit": {
+      "data_type": "Content- and timing-level fail-closed readiness result",
+      "source": "audit_nasdaq_ai_roadmap_5d_readiness.py",
+      "timing_contract": "Must report READY_TO_BUILD_PANEL before panel construction or training",
+      "kind": "json_status",
+      "path": "data_v2/rcef_research/nasdaq_ai_roadmap_5d_readiness.json",
+      "status_field": "status",
+      "required_status": "READY_TO_BUILD_PANEL"
     }
   }
 }

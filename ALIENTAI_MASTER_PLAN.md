@@ -80,6 +80,22 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
   -12.869151% capital-scaled drawdown. Status `RESEARCH_HOLD`; the 160-date
   test remains `UNOPENED`. Evidence:
   `NASDAQ_AI_CROSS_SECTIONAL_TECHNICAL_5D_REPORT_20260805.md`.
+- 2026-08-05: Jeff supplied a broader practical Nasdaq-100 plus
+  AI-semiconductor five-session roadmap and directed that it be set up as
+  written. The isolated research contract
+  `nasdaq_ai_roadmap_5d_contract.json` freezes the exact 22 explicitly named
+  overlay securities, quarterly point-in-time Nasdaq membership, full
+  adjusted-daily technical/cross-sectional/volatility features, QQQ/SMH/SOXX/
+  NVDA relative context, VIX, lagged fundamentals, known earnings calendar,
+  next-open to fifth-close labels, 0.25% costs, and whole-date purged
+  validation. The current reference union is 103 securities (TSM and ON are
+  outside the current Nasdaq-101 file). A fail-closed readiness audit and five
+  tests are in place. Training is deliberately blocked because historical
+  Nasdaq membership, TSM/ON/SMH/SOXX/VIX full adjusted data, and complete
+  point-in-time fundamental/earnings tables are absent. Do not substitute the
+  already-failed fixed-104 technical model or current membership. Exact setup
+  evidence: `NASDAQ_AI_ROADMAP_5D_SETUP_20260805.md` and
+  `data_v2\rcef_research\nasdaq_ai_roadmap_5d_readiness.json`.
 - 2026-08-03: Activated the saved AI/semiconductor multi-horizon catalyst design as an isolated partial V1. A new 1,694-row point-in-time panel carries separate next-open-to-1/5/20-session-close labels with 0.25% costs. Fifteen nested LightGBM ablations tested technical, premarket, unusual-call, conservative analyst-headline, and available short-interest families using chronological label-purged splits and validation-only basket selection. The cleanest untouched results were technical+premarket: 1 session, 37 selections, +0.665156% mean, +0.483114% median, 59.46% positive; 5 sessions, 31 selections, +1.726041% mean, -0.063763% median, 48.39% positive. Calls did not improve those horizons; analyst proxy and short interest added no incremental result. Every 20-session variant remained negative. Preserve the 1- and 5-session candidates without retuning; build the missing point-in-time fundamentals/guidance, catalyst-calendar, structured analyst, general-news, and industry-demand families as separate future ablations. Full evidence: `AI_SEMICONDUCTOR_MULTI_HORIZON_CATALYST_REPORT_20260803.md`. Research only; no execution changes.
 - 2026-08-03: Jeff clarified that the intended future-model logic is the attached narrative combining accelerating fundamentals/guidance, a pullback within an intact trend, role-specific AI demand, and a horizon-aligned public catalyst. `AI_SEMICONDUCTOR_NARRATIVE_FEATURE_CONTRACT.md` now preserves that exact hypothesis without treating the narrative's named stocks, quoted prices, media picks, or opaque scores as evidence. A tested pure feature layer enforces publication cutoffs, explicit missingness, dated AI-stack roles, separate horizon-crossing indicators, and fundamental/demand/technical agreement interactions. It cannot score, select, or trade. Historical point-in-time source tables must be completed before training this full extension.
 - 2026-08-03: Audited the saved narrative data and completed two paired extensions without new API calls. Event-time Alpha Vantage earnings and target-specific news both cover all 1,694 panel rows. Earnings context modestly improved the exploratory one-session technical+premarket result to +0.747626% mean net, +0.539776% median, and 62.16% wins across 37 selections, but worsened five sessions. Broader news did not beat the simpler one- or five-session candidates, and every 20-session variant remained negative. The historical test was already observed, so freeze any future comparison rather than retuning. Current estimates, financial statements, overviews, and earnings calendar are not historical vintages and must not be backfilled. Evidence: `AI_SEMICONDUCTOR_NARRATIVE_DATA_AUDIT_20260803.md`.
@@ -515,6 +531,16 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `SETUP_COMPLETE_DATA_BLOCKED 2026-08-05`: Preserve the exact broader
+Nasdaq+AI five-session roadmap contract and its fail-closed readiness audit.
+Acquire only authorized, point-in-time quarterly Nasdaq membership; full
+adjusted TSM/ON/SMH/SOXX/VIX history; lagged fundamental facts; and historically
+known earnings-calendar records. Do not train, weaken the contract, substitute
+current membership, or reuse the earlier fixed-104 model's evidence until
+`audit_nasdaq_ai_roadmap_5d_readiness.py` returns
+`READY_TO_BUILD_PANEL`. Keep the singular schema-v3 compile/train sequence
+undisturbed.
+
 000. `COMPLETED RESEARCH_HOLD 2026-08-05`: Built and audited the isolated
 Nasdaq+AI/semi cross-sectional technical five-session model requested by Jeff.
 The 162,609-row panel passed its full content audit with zero errors.
@@ -786,6 +812,15 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-05: Jeff supplied and directed setup of a broader practical
+  Nasdaq-100 plus AI-semiconductor five-session model. This is a separate
+  development candidate, not a reinterpretation of the completed fixed-104
+  technical model. Its mandatory point-in-time membership, market/sector/VIX,
+  fundamental, and earnings-calendar inputs make honest training currently
+  data-blocked. The project now preserves the exact contract and reports those
+  blockers automatically rather than silently dropping feature families or
+  inheriting prior evidence. Existing frozen programs and the active singular
+  schema-v3 job retain priority and remain unchanged.
 - 2026-08-05: Jeff supplied a specific cross-sectional technical thesis and
   directed that it be built at a five-trading-day horizon. This is an explicit
   exception to the August 2 model-proliferation pause. Preserve every frozen

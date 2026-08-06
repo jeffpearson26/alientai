@@ -1228,6 +1228,38 @@ the model after observing this result. Status is `RESEARCH_HOLD`, and the
 that test, create a prospective journal, or enable execution. Controlling
 evidence: `NASDAQ_AI_CROSS_SECTIONAL_TECHNICAL_5D_REPORT_20260805.md`.
 
+## Exact Nasdaq + AI semiconductor five-day roadmap (2026-08-05)
+
+Jeff separately supplied the broader roadmap preserved in
+`nasdaq_ai_roadmap_5d_contract.json` and directed that it be set up as written.
+Do not merge it with or inherit evidence from
+`nasdaq_ai_cross_sectional_technical_5d_v1`. The exact current reference
+universe is the 101-security Nasdaq file union the 22 explicitly named symbols
+in `research_universes\nasdaq_ai_roadmap_overlay_20260805.txt`, producing 103
+current candidates; TSM and ON are the only overlay additions. The phrase
+"a few others" is not reproducible and must not be used to invent symbols.
+
+The model requires quarterly point-in-time Nasdaq membership, full adjusted
+daily history, QQQ/SMH/SOXX/NVDA relative context, VIX level/change, lagged
+revenue/EPS/gross-margin/earnings-streak facts, and a historically known
+earnings calendar. Optional short-interest, prior-session implied-move, and
+timestamped FinBERT news families may be added only with explicit missingness
+and timing audits. Entry is the next complete adjusted open, exit is the fifth
+subsequent adjusted close, cost is 0.25%, and validation uses whole dates,
+overlap purging, five-session embargoes, calibration-only policy choice, and a
+minimum twelve-month sealed holdout. Start with transparent and tree models;
+add a sequence model or ensemble only if out-of-fold sequence predictions add
+independent validation value.
+
+Run `audit_nasdaq_ai_roadmap_5d_readiness.py` before any panel or training
+work. Its first verified result is `BLOCKED`: dated Nasdaq membership is
+absent; TSM, ON, SMH, SOXX, and VIX are missing from the full adjusted model
+archive; and the point-in-time fundamental and earnings-calendar tables are
+absent. These are exact data blockers, not permission to weaken the contract.
+Preserve the active singular schema-v3 job and do not train this model until
+the audit returns `READY_TO_BUILD_PANEL`. No engine, settings, paper, live, or
+frozen prospective state changed.
+
 ## Five-session catalyst-momentum model (2026-08-04)
 
 `train_ai_semiconductor_catalyst_momentum_5d.py` and
