@@ -322,6 +322,8 @@
       "timing_contract": "All exact 09:25 interval-start candles captured 09:30-09:34:59 ET",
       "kind": "manifest_glob",
       "path": "D:/AlientAI/Data/Schwab_2026/ai_semiconductor_late_*/manifest.json",
+      "completed_field": "symbols",
+      "date_field": "decision_date",
       "required_completed": 17
     },
     "schwab_ai17_1030_outcomes": {

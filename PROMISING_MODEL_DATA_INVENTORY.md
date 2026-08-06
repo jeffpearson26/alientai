@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T12:45:33.486493+00:00`
+Automatically refreshed: `2026-08-06T13:35:46.187589+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -15,7 +15,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | AI/semiconductor technical + premarket | **BLOCKED** | alpha_ai17_premarket_0925 |
 | AI/semiconductor narrative earnings | **BLOCKED** | alpha_ai17_premarket_0925 |
 | Original Alpha AI/semiconductor intraday models | **BLOCKED** | alpha_ai17_realtime_premarket_0925 |
-| Schwab 09:35 late-entry models | **BLOCKED** | schwab_ai17_0925_snapshot |
+| Schwab 09:35 late-entry models | **DATA_PATH_PRESENT** | None in current local audit |
 | Autonomous transparent Nasdaq-101 champion | **DATA_PATH_PRESENT** | None in current local audit |
 | Defined-risk options model (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Any-time 5/10/20/30/60/90-minute Nasdaq-101 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
@@ -47,7 +47,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed required |
 | `alpha_ai17_exact_intraday_outcomes` | Exact 09:30-10:25 five-minute outcome path | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
 | `alpha_intraday_frozen_artifacts` | Six frozen intraday model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:30 timing contract must match |
-| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | — | **BLOCKED** | manifest status=complete, completed=0, unavailable=0, failed=0; 17 completed required |
+| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | 2026-08-06 | **READY** | All exact 09:25 interval-start candles captured 09:30-09:34:59 ET |
 | `schwab_ai17_1030_outcomes` | Exact 09:35-entry through 10:30-bar outcome path | Schwab | — | **CONTRACT** | validated when each observation reaches this stage |
 | `schwab_late_frozen_artifacts` | Frozen Schwab late-entry model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:35 timing contract must match |
 | `point_in_time_option_selection_chains` | Option chain observable at selection | Alpha Vantage archive | — | **READY** | Selection snapshot strictly before entry snapshot |

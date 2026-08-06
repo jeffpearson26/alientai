@@ -166,7 +166,8 @@ def audit_daily_csv_universe(
 def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     status = str(manifest.get("status") or "")
-    completed = len(manifest.get("completed") or [])
+    completed_field = str(spec.get("completed_field") or "completed")
+    completed = len(manifest.get(completed_field) or [])
     unavailable = len(manifest.get("unavailable") or [])
     failed = len(manifest.get("failed") or [])
     required = int(spec.get("required_completed") or 0)
@@ -192,7 +193,9 @@ def audit_manifest(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
         "unavailable": unavailable,
         "accounted": accounted,
         "failed": failed,
-        "latest_market_date": manifest.get("current_date"),
+        "latest_market_date": manifest.get(
+            str(spec.get("date_field") or "current_date")
+        ),
         "reason": None
         if ready
         else (

@@ -52,6 +52,31 @@ class PromisingModelDataInventoryTests(unittest.TestCase):
             self.assertIn("8137 accounted required", result["reason"])
             self.assertNotIn("0 completed", result["reason"])
 
+    def test_manifest_supports_snapshot_symbol_count_and_decision_date(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "status": "complete",
+                        "decision_date": "2026-08-06",
+                        "symbols": [{"symbol": f"S{i:02d}"} for i in range(17)],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = audit_manifest(
+                path,
+                {
+                    "completed_field": "symbols",
+                    "date_field": "decision_date",
+                    "required_completed": 17,
+                },
+            )
+            self.assertEqual(result["state"], "READY")
+            self.assertEqual(result["completed"], 17)
+            self.assertEqual(result["latest_market_date"], "2026-08-06")
+
     def test_boolean_coverage_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "panel.jsonl"
