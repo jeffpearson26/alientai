@@ -572,6 +572,22 @@ reported honestly rather than treated as failures. Do not launch a duplicate
 Alpha collector, weaken any frozen model source contract, or connect the
 archive to execution.
 
+000. `QUEUED 2026-08-07`: After the full adjusted-daily archive completes and
+passes its independent audit, archive five-minute adjusted extended-hours
+OHLCV for the same exact 6,247-symbol Nasdaq stock-and-ETF universe for
+2016-08 through 2026-07. This is 749,640 symbol-month contracts before reuse
+of the audited same-provider Nasdaq-101 2020-2026 seed. Use the single
+`run_full_nasdaq_5min_after_daily.py` queue and the scalable immutable-contract
+plus append-only-ledger collector; never overlap it with another Alpha
+provider job. Store only on D with a 300-GiB floor, pause provider calls around
+the frozen morning/outcome/after-close windows, and finish with the independent
+full content audit. The normalized schema contains timestamp, ticker, OHLCV,
+and optional VWAP/trade-count fields plus availability flags. Alpha Vantage
+does not document true VWAP or trade count for this endpoint, so never
+fabricate them. Explicit adjusted close, dividends, and splits remain in the
+paired adjusted-daily archive. This bulk archive is research data only and
+does not alter any frozen model or authorize execution.
+
 000. `ONGOING 2026-08-06`: Enforce the D-drive runtime policy before every
 large collector, compiler, trainer, or audit. New large outputs and temporary
 files go under `D:\AlientAI`; never silently fall back to C. Preserve existing

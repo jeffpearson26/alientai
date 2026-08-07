@@ -1,6 +1,6 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-08-06 Pacific time
+Updated: 2026-08-07 Pacific time
 
 ## Mandatory D-drive runtime policy (2026-08-06)
 
@@ -69,6 +69,50 @@ provider unavailability/staleness/coverage gaps; it is not permission to
 zero-fill or splice Schwab rows. Never run this collector concurrently with
 another Alpha Vantage collector or use the archive to alter a frozen model,
 journal, outcome, engine, or trading setting.
+
+## Full active-Nasdaq adjusted five-minute archive (queued 2026-08-07)
+
+Jeff explicitly directed a second D-drive archive after the adjusted-daily
+download finishes. It uses the same immutable 6,247-row active Nasdaq
+stock-and-ETF universe and 120 completed calendar months, 2016-08 through
+2026-07. The full contract is 749,640 symbol-month requests before reuse of
+the independently audited 2020-01 through 2026-07 Nasdaq-101 seed archive.
+Do not add SPY, truncate unusual listing symbols, change the month range, or
+start another provider stream.
+
+`run_full_nasdaq_5min_after_daily.py` is the only approved queue runner. It
+waits without provider calls for the daily manifest to complete, requires the
+daily independent content audit to pass, verifies that the daily collector
+has exited and no other Alpha collector exists, then launches
+`download_alpha_vantage_full_nasdaq_5min.py`. Output is
+`D:\AlientAI\Data\AlphaVantage_2026\full_nasdaq_active_stock_etf_adjusted_5min_201608_202607_20260807`.
+The collector uses `TIME_SERIES_INTRADAY`, `interval=5min`, `adjusted=true`,
+`extended_hours=true`, America/New_York interval-start timestamps, hashed
+files, an immutable `contract.json`, append-only `ledger.jsonl`, a small
+atomic `summary.json`, a 300-GiB D-drive free-space floor, and exact resume
+semantics. Treat a launcher and child as one logical collector. Never rewrite
+the full request ledger per request or launch a duplicate queue/collector.
+
+The normalized columns are exactly
+`timestamp,ticker,open,high,low,close,volume,vwap,number_of_trades,`
+`vwap_available,number_of_trades_available`. Alpha Vantage's documented
+intraday endpoint supplies OHLCV, not true per-bar VWAP or trade count. Keep
+those optional fields blank with `false` availability unless the source
+payload actually contains them; never calculate, estimate, or fabricate
+them. Adjusted intraday OHLCV reflects corporate actions. Explicit adjusted
+close, dividend amount, and split coefficient remain in the paired
+adjusted-daily archive; do not invent per-bar corporate-action columns.
+
+To preserve frozen prospective programs, the bulk intraday collector makes
+no provider calls during weekday Pacific windows 04:20-06:50, 08:20-08:45,
+and 13:20-14:50. After all 749,640 requests are explicitly completed or
+unavailable with zero final failures, run
+`audit_alpha_vantage_full_nasdaq_5min.py`. Require exact frozen contract and
+universe hashes, exact request accounting, normalized content hashes,
+symbol/month/five-minute-grid identity, valid OHLCV, honest optional-field
+flags, and zero orphan or missing files. `PASS_WITH_EXPLICIT_GAPS` preserves
+provider unavailability and is not permission to fill from Schwab or another
+source.
 
 ## External clean-rank research lead (2026-08-06)
 
