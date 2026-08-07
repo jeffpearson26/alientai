@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T06:13:22.212525+00:00`
+Automatically refreshed: `2026-08-07T07:17:19.854754+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -121,6 +121,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `external_lambdarank_alpha_vantage_model_audit` | Alpha Vantage LightGBM model and one-time sealed-test audit | AlienTAI source-pure trainer | — | **READY** | Fixed hyperparameters and top-10 policy; 497-date purged development followed by one 130-date sealed test; future eligibility begins after 2026-08-06 |
 | `external_lambdarank_alpha_vantage_future_snapshot` | Immutable prospective Alpha Vantage 120-name feature snapshot | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_alpha_vantage_v2_*/snapshot_manifest.json |
 | `external_lambdarank_alpha_vantage_twenty_session_outcomes` | Future-only Alpha Vantage twenty-session outcomes | The exact source-tagged Alpha Vantage observation archive | — | **CONTRACT** | validated when each observation reaches this stage |
+| `approved_source_fallback_registry` | Jeff-authorized source-pure Alpha Vantage/Schwab fallback routes | Immutable local routing registry and independent validator | — | **READY** | Route only between separately identified complete-provider model observations; never splice rows, rewrite frozen evidence, backfill, or shorten a frozen/prospective horizon |
 | `external_lambdarank_fallback_schwab_daily` | Same-provider long-history fallback for TSM and SPY | Schwab | — | **READY** | datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge |
 | `external_lambdarank_future_snapshot` | Immutable prospective 120-name feature snapshot | Corrected Schwab snapshot builder | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_corrected_v2_*/snapshot_manifest.json |
 | `external_lambdarank_twenty_session_outcomes` | Future-only twenty-session next-open-to-close outcomes | The exact frozen Schwab observation source | — | **CONTRACT** | validated when each observation reaches this stage |

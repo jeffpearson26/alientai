@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "authorized_by": "Jeff",
+  "authorized_date": "2026-08-07",
+  "research_only": true,
+  "execution_enabled": false,
+  "policy": {
+    "allowed_providers": [
+      "Alpha Vantage",
+      "Schwab"
+    ],
+    "fallback_trigger": "missing, duplicate, or conflicting provider rows",
+    "routing_unit": "one complete source-tagged model observation",
+    "row_level_provider_splicing_allowed": false,
+    "provider_substitution_inside_frozen_model_allowed": false,
+    "historical_final_day_policy": {
+      "allowed_only_before_model_or_test_freeze": true,
+      "action": "end the historical test on the latest prior fully complete session",
+      "excluded_dates_must_be_recorded": true
+    },
+    "frozen_or_prospective_final_day_policy": {
+      "action": "do not shorten the frozen horizon or backdate the decision",
+      "allowed_states": [
+        "outcome pending",
+        "source-blocked abstention",
+        "separate source-pure alternate model observation"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "route_id": "external_lambdarank_120_h20",
+      "state": "READY",
+      "primary": {
+        "provider": "Schwab",
+        "model_id": "external_lambdarank_120_h20_corrected_v2_20260806",
+        "audit_path": "D:/AlientAI/Models/external_lambdarank_120_h20_corrected_v2_20260806/independent_model_audit.json",
+        "audit_sha256": "50812c854cbfb1e681d5eefdaa0c8e1b0f96f47f93feae42c52e8ae84bfe20b6",
+        "journal_path": "data_v2/rcef_research/external_lambdarank_schwab_20d_prospective_journal.jsonl"
+      },
+      "alternate": {
+        "provider": "Alpha Vantage",
+        "model_id": "external_lambdarank_120_h20_alpha_vantage_v2_20260806",
+        "audit_path": "D:/AlientAI/Models/external_lambdarank_120_h20_alpha_vantage_v2_20260806/independent_model_audit.json",
+        "audit_sha256": "25481efa8c9247c22008f05311f58953433e00c40ac816b5d96e1120b16364da",
+        "journal_path": "data_v2/rcef_research/external_lambdarank_alpha_vantage_20d_prospective_journal.jsonl"
+      },
+      "shared_contract": {
+        "candidate_count": 120,
+        "context_only": [
+          "SPY"
+        ],
+        "horizon_sessions": 20,
+        "entry": "next complete regular-session open",
+        "exit": "twentieth subsequent regular-session close",
+        "round_trip_cost_pct": 0.25
+      },
+      "evidence_policy": "report the two source-specific models separately; never pool or inherit their historical or prospective evidence"
+    },
+    {
+      "route_id": "nasdaq101_baseline_h05",
+      "state": "ALTERNATE_CLONE_REQUIRED",
+      "primary": {
+        "provider": "Schwab",
+        "model_id": "nasdaq100_complete_101_baseline_v1",
+        "journal_path": "data_v2/rcef_research/nasdaq100_prospective/journal.jsonl"
+      },
+      "alternate": {
+        "provider": "Alpha Vantage",
+        "model_id": null,
+        "journal_path": null
+      },
+      "reason": "the existing Alpha Vantage scorer is a source-shift diagnostic, not an independently validated source-specific clone"
+    },
+    {
+      "route_id": "nasdaq101_qqq_relative_h05",
+      "state": "ALTERNATE_CLONE_REQUIRED",
+      "primary": {
+        "provider": "Schwab",
+        "model_id": "nasdaq100_complete_101_qqq_relative_v1",
+        "journal_path": "data_v2/rcef_research/nasdaq100_prospective/journal.jsonl"
+      },
+      "alternate": {
+        "provider": "Alpha Vantage",
+        "model_id": null,
+        "journal_path": null
+      },
+      "reason": "the existing Alpha Vantage scorer is a source-shift diagnostic, not an independently validated source-specific clone"
+    },
+    {
+      "route_id": "nasdaq80_champion_h05",
+      "state": "ALTERNATE_CLONE_REQUIRED",
+      "primary": {
+        "provider": "Schwab",
+        "model_id": "nasdaq100_technical_clone_v1",
+        "journal_path": "data_v2/rcef_research/nasdaq80_champion_prospective/journal.jsonl"
+      },
+      "alternate": {
+        "provider": "Alpha Vantage",
+        "model_id": null,
+        "journal_path": null
+      },
+      "reason": "no independently trained and validated Alpha Vantage clone exists yet"
+    }
+  ]
+}

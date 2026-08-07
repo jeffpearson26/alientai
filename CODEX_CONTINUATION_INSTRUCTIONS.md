@@ -711,9 +711,47 @@ The broad natural-news archive at `D:\AlientAI\Data\AlphaVantage_2026\natural_ev
 
 `build_natural_news_research_panel.py` is the exact-key post-collection join. Supply the existing natural base panel and the output of `compile_historical_news_features.py`; it keys both sources by `(symbol, as_of_utc)`, preserves missing archive responses explicitly, and rejects duplicate or extra feature rows. Use only after the complete archive has been compiled; then perform a timing/coverage audit before any pre-specified chronological ablation. It cannot score, train, contact a provider, change settings, or execute anything.
 
-## Default market-data source (July 30, 2026)
+## Default market-data source and approved fallback (updated August 7, 2026)
 
-Jeff directed that all new collection, feature-building, and research work use Alpha Vantage by default. Existing Schwab-based frozen prospective studies and historical artifacts remain source-isolated; never substitute Alpha Vantage candles into them. Do not start a new Schwab downloader or use Schwab as a fallback unless Jeff later explicitly changes this direction.
+Jeff directed that all new collection, feature-building, and research work use
+Alpha Vantage by default. Existing Schwab-based frozen prospective studies and
+historical artifacts remain source-isolated; never substitute Alpha Vantage
+candles inside them. Jeff later explicitly approved source-pure alternate
+models as described below; a new Schwab download is allowed only for an
+approved, predeclared Schwab model route and never as an improvised row patch.
+
+Jeff explicitly changed the fallback direction on August 7: Alpha Vantage and
+Schwab are both approved when the intended provider has missing, duplicate, or
+conflicting rows. The controlling machine-readable policy is
+`approved_source_fallback_registry.json`, validated by
+`validate_approved_source_fallback_registry.py`. Fallback is model routing,
+not row replacement: one observation must use one complete predeclared source
+contract, a distinct model ID and a distinct journal. Never splice providers
+inside an observation, relabel an existing frozen model, pool source-specific
+evidence, or switch after any outcome is visible.
+
+At the start of every model pass, run
+`validate_approved_source_fallback_registry.py --output
+data_v2\rcef_research\approved_source_fallback_registry_audit.json` before
+`update_promising_model_data_inventory.py`. Fail closed if the registry audit
+does not pass.
+
+The 120-stock twenty-session LambdaRank route is already `READY`: the
+conflicted Schwab candidate and the separately trained/audited Alpha Vantage
+clone remain independent programs, and the Alpha clone may attempt its own
+future observation when Schwab is unusable. Nasdaq-101 baseline,
+Nasdaq-101 QQQ-relative, and Nasdaq-80 remain
+`ALTERNATE_CLONE_REQUIRED`; their existing Alpha scorer is only a diagnostic
+and must not be promoted as a fallback observation. Build independently
+validated Alpha clones with new IDs and journals before routing those models.
+
+Jeff also directed that an unfrozen historical test whose only unavailable
+data is its final day may end on the latest prior fully complete session.
+Record every excluded date and apply this only before the model/test boundary
+is frozen or opened. Never shorten an already frozen test, an existing
+prospective horizon, or a pending outcome. Those must remain pending, record a
+source-blocked abstention, or proceed through a separately source-pure
+alternate model.
 
 `alientai_v2/alpha_vantage_quote_client.py` is the active-code replacement for the ignored legacy Schwab quote bridge. It uses the credential-safe shared HTTP layer and the premium `REALTIME_BULK_QUOTES` endpoint in chunks no larger than 100 symbols. `alientai_v2/schwab_client.py` remains only as a backward-compatible import adapter. Do not reintroduce dynamic loading from `old_system_reference`.
 

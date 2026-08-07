@@ -66,6 +66,15 @@ The automatically refreshed data-family and coverage matrix is
   appending anything. Fixed-universe bias, overlap, and adjusted-history
   revision risk mean this is promising evidence, not established
   profitability.
+- Approved Alpha Vantage/Schwab fallback routing: Jeff authorized either
+  provider when rows are missing, duplicated, or conflicting. The 120-stock
+  LambdaRank route is ready because both providers have separately identified,
+  independently audited models and journals. Nasdaq-101 baseline,
+  QQQ-relative, and Nasdaq-80 remain `ALTERNATE_CLONE_REQUIRED`; their
+  Schwab-trained models will not be fed Alpha rows. Provider rows are never
+  spliced. An unfrozen historical test may exclude an unusable final date and
+  end on the prior complete session, but frozen/prospective horizons are never
+  shortened.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

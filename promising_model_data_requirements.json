@@ -20,6 +20,7 @@
         "schwab_nasdaq101_daily",
         "qqq_daily",
         "nasdaq_frozen_artifacts",
+        "approved_source_fallback_registry",
         "five_session_daily_outcomes"
       ]
     },
@@ -30,6 +31,7 @@
         "schwab_nasdaq101_daily",
         "qqq_daily",
         "nasdaq_frozen_artifacts",
+        "approved_source_fallback_registry",
         "five_session_daily_outcomes"
       ]
     },
@@ -39,6 +41,7 @@
       "requirements": [
         "schwab_nasdaq80_daily",
         "nasdaq80_frozen_artifacts",
+        "approved_source_fallback_registry",
         "five_session_daily_outcomes"
       ]
     },
@@ -300,6 +303,7 @@
         "external_lambdarank_model_audit",
         "external_lambdarank_primary_schwab_daily",
         "external_lambdarank_fallback_schwab_daily",
+        "approved_source_fallback_registry",
         "external_lambdarank_future_snapshot",
         "external_lambdarank_twenty_session_outcomes"
       ]
@@ -313,6 +317,7 @@
         "external_lambdarank_alpha_vantage_daily_clone_input",
         "external_lambdarank_alpha_vantage_panel_audit",
         "external_lambdarank_alpha_vantage_model_audit",
+        "approved_source_fallback_registry",
         "external_lambdarank_alpha_vantage_future_snapshot",
         "external_lambdarank_alpha_vantage_twenty_session_outcomes"
       ]
@@ -909,6 +914,15 @@
       "source": "The exact source-tagged Alpha Vantage observation archive",
       "timing_contract": "Append only after each observation's twentieth subsequent session close; never backfill, retune, or substitute Schwab",
       "kind": "logical"
+    },
+    "approved_source_fallback_registry": {
+      "data_type": "Jeff-authorized source-pure Alpha Vantage/Schwab fallback routes",
+      "source": "Immutable local routing registry and independent validator",
+      "timing_contract": "Route only between separately identified complete-provider model observations; never splice rows, rewrite frozen evidence, backfill, or shorten a frozen/prospective horizon",
+      "kind": "json_status",
+      "path": "data_v2/rcef_research/approved_source_fallback_registry_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
     },
     "external_lambdarank_fallback_schwab_daily": {
       "data_type": "Same-provider long-history fallback for TSM and SPY",

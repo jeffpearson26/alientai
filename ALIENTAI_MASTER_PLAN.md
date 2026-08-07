@@ -724,7 +724,7 @@ loopback binding, control authorization, and a rollback plan. Starting the
 monitor is not itself permission to create new paper orders.
 
 0. `ACTIVE 2026-07-30`: Run a separate, research-only headline-news ablation without changing the frozen contextual-options study or any paper/live setting. Use a deterministic 48-date, complete-natural-universe sample from the existing January-July 2026 FINRA/options panel; collect point-in-time news only for that sample, validate timestamp coverage, then compare identical technical/options baselines with and without news using chronological partitions and validation-frozen selection. The earlier 2,131-request news archive is too early-period-concentrated for this test. Do not mix the result with the frozen prospective study or promote it to trading.
-0a. For new work, prefer Alpha Vantage raw archives and record the source in every report. Schwab is retained only for its existing source-isolated frozen studies and historical artifacts; do not begin new Schwab downloads or use Schwab data as a fallback without a new explicit direction from Jeff.
+0a. For new work, prefer Alpha Vantage raw archives and record the source in every report. On August 7 Jeff explicitly approved either Alpha Vantage or Schwab as an alternate when rows are missing, duplicated, or conflicting. Apply `approved_source_fallback_registry.json`: route only to a separately identified, fully source-pure model and journal; never splice providers into one observation or rewrite frozen evidence. The 120-stock LambdaRank route already has an audited Alpha clone. Nasdaq-101 baseline, QQQ-relative, and Nasdaq-80 still require independently validated Alpha clones.
 0b. `IMPLEMENTED, ACTIVATION DEFERRED 2026-07-30`: The active quote path now has a native Alpha Vantage `REALTIME_BULK_QUOTES` client and no longer depends on ignored `old_system_reference` source. The launcher is loopback-only, remote `/v2/` mutations fail closed unless `ALIENTAI_CONTROL_TOKEN` is configured, the duplicate root route is removed, and fresh-install ML dependencies are declared. Do not restart the running server or make a competing Alpha Vantage quote request while the stratified news collector is active. After that collector finishes, perform a controlled restart, restore the existing paper-engine state, and validate one bounded quote request without changing positions or settings.
 0c. Preserve the legacy `routes/`, patch/fix scripts, and backup-named files until a separate reachability and provenance audit identifies safe quarantine candidates. Their volume is technical debt, but it is not permission to delete user history.
 
@@ -1139,3 +1139,13 @@ feature-family ablation order, chronological splits, and promotion gates.
   returned `NOT_SCHEDULED_YET` for August 7 rather than downloading before
   that session existed. Twenty-two targeted
   model/downloader/audit/runner/monitor tests pass.
+- 2026-08-07: Jeff approved Alpha Vantage or Schwab as an alternate when
+  provider rows are missing, duplicated, or conflicting. Added the immutable
+  source-fallback registry and validator. The policy permits only whole,
+  separately identified source-pure model observations with independent
+  journals. The existing Alpha Vantage LambdaRank clone is a ready alternate
+  to the conflicted Schwab LambdaRank program. The three Nasdaq five-session
+  models remain `ALTERNATE_CLONE_REQUIRED`; their diagnostic Alpha scorer is
+  not evidence. Jeff also approved ending an unfrozen historical test on the
+  prior complete session when only its last day is unusable. Frozen and
+  prospective horizons may never be shortened.
