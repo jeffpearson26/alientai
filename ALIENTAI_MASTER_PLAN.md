@@ -1089,3 +1089,17 @@ feature-family ablation order, chronological splits, and promotion gates.
   duplicate-session exclusion, and automatic token refresh returns HTTP 400.
   Require fresh Schwab authorization, current all-121 coverage, an immutable
   pre-entry snapshot, and future-only 20-session outcomes. Never backfill.
+- 2026-08-06: Jeff completed fresh Schwab authorization at approximately
+  22:12 Pacific. The exact LambdaRank 120-candidate refresh and separate SPY
+  refresh completed with zero HTTP failures, but Schwab supplied two daily
+  rows mapping to the August 6 market session for every one of the 121
+  required series. NVDA's pair has conflicting closes (`218.99` and
+  `218.780147`), and many other pairs have different volume, so the rows
+  cannot be collapsed honestly. Both raw rows remain preserved; the session
+  is unavailable and no prospective snapshot or observation was written.
+  This did not miss an eligible observation because the immutable model
+  cutoff prohibited decisions through August 6. The incremental refresher
+  and living data inventory now explicitly fail closed on duplicate source
+  sessions. Retry after the provider payload settles and require a single
+  unambiguous candle for every series; never choose a duplicate, substitute a
+  provider, or backfill.

@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T04:49:09.816134+00:00`
+Automatically refreshed: `2026-08-07T05:23:03.287412+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -46,10 +46,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `call_history_10` | Lagged call-activity history | Same provider as the observation | — | **READY** | At least ten prior observations per symbol |
 | `five_session_daily_outcomes` | Five-session future daily OHLCV | Frozen model source | — | **CONTRACT** | validated when each observation reaches this stage |
 | `one_session_daily_outcomes` | One-session future daily OHLCV | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
-| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-06 |
+| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | duplicate source sessions are unusable for 46/102 symbols; examples: ADBE=2026-08-05, AMD=2026-08-05, GOOGL=2026-08-05, GOOG=2026-08-05, AMZN=2026-08-05 |
 | `qqq_daily` | QQQ benchmark daily OHLCV | Schwab | — | **READY** | Same completed session as Nasdaq universe |
 | `nasdaq_frozen_artifacts` | Frozen model/report/manifest hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-06 |
+| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | duplicate source sessions are unusable for 42/80 symbols; examples: AAPL=2026-08-05, ADBE=2026-08-05, ADI=2026-08-05, ADP=2026-08-05, AMAT=2026-08-05 |
 | `nasdaq80_frozen_artifacts` | Frozen model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
 | `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
@@ -114,7 +114,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |
 | `external_lambdarank_panel_audit` | Corrected source-pure 120-stock training panel audit | Schwab daily OHLCV with per-file date-schema mapping | — | **READY** | Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels |
 | `external_lambdarank_model_audit` | Safe LightGBM text-model and OOF evidence audit | AlienTAI corrected LambdaRank trainer | — | **READY** | Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06 |
-| `external_lambdarank_primary_schwab_daily` | Primary daily OHLCV for the exact 120-stock universe plus SPY | Schwab | 2026-08-05 | **BLOCKED** | missing symbols: TSM |
+| `external_lambdarank_primary_schwab_daily` | Primary daily OHLCV for the exact 120-stock universe plus SPY | Schwab | 2026-08-05 | **BLOCKED** | duplicate source sessions are unusable for 121/121 symbols; examples: AAPL=2026-08-05, MSFT=2026-08-05, NVDA=2026-08-05, AMZN=2026-08-05, META=2026-08-05 |
 | `external_lambdarank_fallback_schwab_daily` | Same-provider long-history fallback for TSM and SPY | Schwab | — | **READY** | datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge |
 | `external_lambdarank_future_snapshot` | Immutable prospective 120-name feature snapshot | Corrected Schwab snapshot builder | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_corrected_v2_*/snapshot_manifest.json |
 | `external_lambdarank_twenty_session_outcomes` | Future-only twenty-session next-open-to-close outcomes | The exact frozen Schwab observation source | — | **CONTRACT** | validated when each observation reaches this stage |

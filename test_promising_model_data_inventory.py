@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from update_promising_model_data_inventory import (
+    audit_daily_csv_universe,
     audit_requirement,
     audit_jsonl,
     audit_manifest,
@@ -156,6 +157,33 @@ class PromisingModelDataInventoryTests(unittest.TestCase):
             )
             self.assertEqual(result["state"], "BLOCKED")
             self.assertIn("required 'READY_TO_BUILD_PANEL'", result["reason"])
+
+    def test_daily_universe_rejects_duplicate_source_session(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            prices = root / "daily"
+            prices.mkdir()
+            (root / "symbols.txt").write_text("AAA\n", encoding="utf-8")
+            (prices / "AAA_schwab_1d_max.csv").write_text(
+                "date,open,high,low,close,volume\n"
+                "2026-08-04,10,11,9,10.5,100\n"
+                "2026-08-05,11,12,10,11.5,110\n"
+                "2026-08-05,11,12,10,11.4,111\n",
+                encoding="utf-8",
+            )
+            result = audit_daily_csv_universe(
+                root,
+                {
+                    "path": "daily",
+                    "symbols_file": "symbols.txt",
+                    "session_date_offset_days": 1,
+                    "expected_session": "latest_completed",
+                },
+                datetime(2026, 8, 6, 23, tzinfo=timezone.utc),
+            )
+            self.assertEqual(result["state"], "BLOCKED")
+            self.assertEqual(result["duplicate_session_symbol_count"], 1)
+            self.assertIn("duplicate source sessions", result["reason"])
 
 
 if __name__ == "__main__":

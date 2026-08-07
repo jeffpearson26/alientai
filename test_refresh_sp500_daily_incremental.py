@@ -45,6 +45,17 @@ class IncrementalDailyRefreshTests(unittest.TestCase):
             append_only(existing, recent, max_candle_date="2026-07-29"),
         )
 
+    def test_duplicate_new_provider_session_fails_closed(self):
+        existing = [{"date": "2026-08-04"}]
+        recent = [
+            {"date": "2026-08-05", "close": "218.99"},
+            {"date": "2026-08-05", "close": "218.780147"},
+        ]
+        with self.assertRaisesRegex(
+            ValueError, "duplicate provider candle date"
+        ):
+            append_only(existing, recent, max_candle_date="2026-08-05")
+
     def test_session_date_translates_to_prior_pacific_storage_key(self):
         self.assertEqual(
             "2026-08-03", stored_candle_date_for_session("2026-08-04")

@@ -9,6 +9,7 @@ import argparse
 import csv
 import json
 import time
+from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -54,6 +55,17 @@ def append_only(
         if str(row.get("date") or "") > newest
         and (not max_candle_date or str(row.get("date") or "") <= max_candle_date)
     ]
+    date_counts = Counter(str(row.get("date") or "") for row in additions)
+    duplicate_dates = sorted(
+        candle_date
+        for candle_date, count in date_counts.items()
+        if candle_date and count > 1
+    )
+    if duplicate_dates:
+        raise ValueError(
+            "duplicate provider candle date(s); refusing to choose between "
+            f"conflicting source rows: {', '.join(duplicate_dates)}"
+        )
     return existing + sorted(additions, key=lambda row: str(row.get("date") or ""))
 
 

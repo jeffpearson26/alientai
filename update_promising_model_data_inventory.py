@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+from collections import Counter
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -113,15 +114,37 @@ def audit_daily_csv_universe(
     directory = root / spec["path"]
     symbols_path = root / spec["symbols_file"]
     expected = read_symbols(symbols_path) + list(spec.get("include_symbols") or [])
+    expected_date = (
+        expected_session_date(now_utc, spec["expected_session"])
+        if spec.get("expected_session")
+        else None
+    )
     common: set[str] | None = None
     missing = []
+    duplicate_sessions: dict[str, list[str]] = {}
     for symbol in dict.fromkeys(expected):
         path = directory / f"{symbol}_schwab_1d_max.csv"
         if not path.exists():
             missing.append(symbol)
             continue
         with path.open(encoding="utf-8", newline="") as handle:
-            dates = {str(row.get("date") or "") for row in csv.DictReader(handle)}
+            date_counts = Counter(
+                str(row.get("date") or "")
+                for row in csv.DictReader(handle)
+                if row.get("date")
+            )
+        duplicates = sorted(
+            stored_date
+            for stored_date, count in date_counts.items()
+            if count > 1
+        )
+        if duplicates:
+            duplicate_sessions[symbol] = duplicates
+        dates = {
+            stored_date
+            for stored_date, count in date_counts.items()
+            if count == 1
+        }
         common = dates if common is None else common & dates
     latest_stored = max(common) if common else None
     latest_session = None
@@ -130,18 +153,24 @@ def audit_daily_csv_universe(
             date.fromisoformat(latest_stored)
             + timedelta(days=int(spec.get("session_date_offset_days") or 0))
         ).isoformat()
-    expected_date = (
-        expected_session_date(now_utc, spec["expected_session"])
-        if spec.get("expected_session")
-        else None
-    )
     ready = (
         not missing
+        and not duplicate_sessions
         and bool(common)
         and (not expected_date or latest_session == expected_date)
     )
     if missing:
         reason = "missing symbols: " + ", ".join(missing[:10])
+    elif duplicate_sessions:
+        examples = ", ".join(
+            f"{symbol}={dates[-1]}"
+            for symbol, dates in list(duplicate_sessions.items())[:5]
+        )
+        reason = (
+            "duplicate source sessions are unusable for "
+            f"{len(duplicate_sessions)}/{len(dict.fromkeys(expected))} "
+            f"symbols; examples: {examples}"
+        )
     elif not common:
         reason = "no common date"
     elif expected_date and latest_session != expected_date:
@@ -156,6 +185,11 @@ def audit_daily_csv_universe(
         "latest_path": str(directory),
         "expected_symbols": len(dict.fromkeys(expected)),
         "missing_symbols": missing,
+        "duplicate_session_symbol_count": len(duplicate_sessions),
+        "duplicate_session_examples": {
+            symbol: dates
+            for symbol, dates in list(duplicate_sessions.items())[:10]
+        },
         "latest_stored_date": latest_stored,
         "latest_market_date": latest_session,
         "expected_market_date": expected_date,

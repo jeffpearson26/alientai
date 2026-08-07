@@ -101,17 +101,22 @@ already exposed and was not reused as a sealed test.
 ## Exact blocker and recovery
 
 The model was frozen on 2026-08-06, so its first eligible decision date is
-later than 2026-08-06. The primary 120-name Schwab files currently end at the
-2026-08-05 session, while TSM ends at 2026-07-07 after a duplicate 2026-07-08
-source session was excluded. The future snapshot builder correctly refuses to
-create a partial observation.
+later than 2026-08-06. Jeff completed fresh Schwab authorization at
+approximately 2026-08-06 22:12 Pacific. The exact 120-candidate refresh then
+completed with zero HTTP failures and the separate SPY refresh also completed.
+However, Schwab returned two rows mapping to the 2026-08-06 market session for
+every one of the 121 required series. NVDA has conflicting close values
+(`218.99` and `218.780147`), and many other pairs have conflicting volumes.
+The raw rows remain preserved, but the entire duplicate session is unusable.
+No snapshot or observation was written.
 
-The existing Schwab token was saved at 2026-08-06 08:33 Pacific with a
-30-minute access lifetime. Its automatic refresh now returns HTTP 400. Jeff
-must complete a fresh Schwab authorization. After authorization:
+The first legitimate decision date was not missed because the frozen cutoff
+already prohibited a 2026-08-06 decision. Recovery:
 
-1. Append completed daily candles through the decision session for all 120
-   candidates and SPY, including a new primary TSM file.
+1. Retry the exact Schwab request after the provider payload settles and
+   require one unambiguous completed row for every required symbol/session.
+   Never choose arbitrarily between duplicate rows or rewrite preserved raw
+   history.
 2. Run `build_external_lambdarank_20d_snapshot.py` before the next-session
    entry.
 3. Require exactly 120 candidates, a current SPY context series, complete

@@ -42,10 +42,13 @@ The automatically refreshed data-family and coverage matrix is
   non-overlap rotations. This is promising development evidence only: the
   fixed current universe has survivorship bias and the sample begins in late
   2023. The future test is unopened. Its first prospective snapshot is
-  blocked because primary Schwab histories end at August 5, TSM ends at July
-  7 after a duplicate row was excluded, and automatic token refresh returns
-  HTTP 400. Fresh Schwab authorization and current all-121 coverage are
-  required; no backfill is allowed.
+  blocked by provider data, not authorization: the renewed Schwab session
+  completed all 121 requests with zero HTTP failures but returned two
+  conflicting rows for the August 6 session on every series. The duplicate
+  session is unusable and no observation was written. August 6 was still
+  inside the frozen cutoff, so no eligible decision was missed. Retry after
+  the provider payload settles; require one unambiguous completed candle for
+  all 121 series and never backfill.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

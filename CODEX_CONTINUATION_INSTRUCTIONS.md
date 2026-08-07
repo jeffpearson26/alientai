@@ -1518,8 +1518,15 @@ stored Pacific key plus one calendar day, while
 `datetime_ms/datetime_utc` files use the stored U.S. session date with no
 offset. Never apply one mapping to both. Same-provider component merges are
 allowed only when overlaps match exactly and every component hash is recorded.
-Current blocker: primary histories end at the August 5 session; TSM ends July
-7 after a duplicate July 8 session was excluded; the token saved August 6 at
-08:33 Pacific is expired and automatic refresh returns HTTP 400. Jeff must
-complete a fresh Schwab authorization, then refresh all 121 series before the
+Jeff completed fresh Schwab authorization at approximately August 6 22:12
+Pacific. The exact 120-candidate refresh and separate SPY refresh completed
+with zero HTTP failures, but Schwab returned two rows mapping to the August 6
+market session for all 121 required series. NVDA has conflicting closes
+(`218.99` versus `218.780147`), and many other pairs have conflicting volume.
+Preserve both raw rows, treat the complete duplicate session as unavailable,
+and write no snapshot or observation from it. The frozen cutoff already made
+August 6 ineligible, so no legitimate decision was missed. The incremental
+refresher and living inventory now fail closed on duplicate provider session
+keys. Retry the exact source request only after the provider payload settles;
+require one unambiguous completed candle for every required series before the
 first eligible snapshot. No missed date may be backfilled.
