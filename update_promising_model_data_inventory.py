@@ -326,12 +326,53 @@ def build_inventory(root: Path, registry: dict[str, Any]) -> dict[str, Any]:
                 },
             }
         )
+    settings_path = root / "data_v2" / "v2_settings.json"
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    enabled = [str(value) for value in settings.get("enabled_engines") or []]
+    buy_allowlist = [
+        str(value) for value in settings.get("main_account_enabled_buy_engines") or []
+    ]
+    paper_model_id = "nasdaq100_complete_101_baseline_v1"
+    live_flags = {
+        key: bool(settings.get(key, False))
+        for key in (
+            "options_live_trading_enabled",
+            "options_real_trading_enabled",
+            "live_options_trading_enabled",
+            "similarity_engine_sandbox_real_trading_enabled",
+        )
+    }
+    payloads = sorted((
+        root / "data_v2" / "rcef_research" / "nasdaq101_baseline_paper"
+    ).glob("nasdaq101_baseline_paper_payload_????-??-??.json"))
+    exact_single_model = enabled == [paper_model_id] and buy_allowlist == [paper_model_id]
+    input_state = requirements.get("schwab_nasdaq101_daily", {}).get("state")
+    paper_state = (
+        "DISABLED"
+        if not settings.get("paper_trading_enabled") or not exact_single_model
+        else ("READY_TO_SCORE" if payloads else "ENABLED_ABSTAINING")
+    )
     return {
         "schema_version": 1,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "research_only": True,
         "models": models,
         "requirements": requirements,
+        "paper_control": {
+            "state": paper_state,
+            "paper_trading_enabled": bool(settings.get("paper_trading_enabled")),
+            "sole_enabled_model": paper_model_id if exact_single_model else None,
+            "enabled_engines": enabled,
+            "main_account_enabled_buy_engines": buy_allowlist,
+            "all_live_flags_false": not any(live_flags.values()),
+            "latest_payload": str(payloads[-1]) if payloads else None,
+            "input_state": input_state,
+            "blocker": (
+                requirements.get("schwab_nasdaq101_daily", {}).get("reason")
+                if not payloads
+                else None
+            ),
+        },
     }
 
 
@@ -344,6 +385,20 @@ def render_markdown(inventory: dict[str, Any]) -> str:
         "This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` "
         "means no required local dependency is missing; each dated observation must "
         "still pass its exact freshness, timing, universe, and hash checks.",
+        "",
+        "## Paper control readiness",
+        "",
+        "| State | Sole enabled model | Paper buys | Live trading | Current payload / blocker |",
+        "|---|---|---|---|---|",
+        (
+            f"| **{inventory['paper_control']['state']}** | "
+            f"`{inventory['paper_control']['sole_enabled_model'] or 'configuration mismatch'}` | "
+            f"{'enabled' if inventory['paper_control']['paper_trading_enabled'] else 'disabled'} | "
+            f"{'disabled' if inventory['paper_control']['all_live_flags_false'] else 'CONFIGURATION ERROR'} | "
+            f"{str(inventory['paper_control']['latest_payload'] or inventory['paper_control']['blocker'] or 'none').replace('|', '/')} |"
+        ),
+        "",
+        "Paper-account actions are simulation evidence and are never merged into prospective model evidence.",
         "",
         "## Model readiness",
         "",

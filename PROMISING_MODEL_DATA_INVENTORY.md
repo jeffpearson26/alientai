@@ -1,8 +1,16 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T19:47:39.477028+00:00`
+Automatically refreshed: `2026-08-07T20:00:47.584721+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
+
+## Paper control readiness
+
+| State | Sole enabled model | Paper buys | Live trading | Current payload / blocker |
+|---|---|---|---|---|
+| **ENABLED_ABSTAINING** | `nasdaq100_complete_101_baseline_v1` | enabled | disabled | duplicate source sessions are unusable for 46/102 symbols; examples: ADBE=2026-08-05, AMD=2026-08-05, GOOGL=2026-08-05, GOOG=2026-08-05, AMZN=2026-08-05 |
+
+Paper-account actions are simulation evidence and are never merged into prospective model evidence.
 
 ## Model readiness
 

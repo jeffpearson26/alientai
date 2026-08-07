@@ -1872,3 +1872,39 @@ contract before scoring. Current status is
 same-cutoff market-cap coverage is absent for the full 4,952-stock base. Never
 use the Nasdaq-wide Alpha daily archive as numerical fill, compile a partial
 screen, inherit evidence, or backfill. No prospective observation exists.
+
+## Nasdaq-101 baseline paper authorization (2026-08-07)
+
+Jeff explicitly replaced the paper-control-panel model list with the frozen
+Nasdaq-101 technical baseline. The sole enabled and main-account-buy-allowlisted
+engine is `nasdaq100_complete_101_baseline_v1`; paper trading is enabled and all
+live/real/options/similarity execution flags are false. The local app is
+loopback-only on port 8010. Preserve the prior paper account: positions opened
+by removed engines may be managed and exited, but their engines may not open or
+add positions.
+
+Use `build_nasdaq101_baseline_paper_payload.py` and
+`alientai_v2.engines.nasdaq101_baseline_paper`. Require the exact 101-symbol
+hash `d52cd998...f40e420`, model hash `5410de1e...5b08b77`, report hash
+`aca314e9...e752d62`, frozen score cutoff `0.20886314398519493`, source-pure
+Schwab daily history, one unambiguous session per symbol, a complete 101-row
+panel, no more than five candidates, a recent market-session date, and
+`live_trading_enabled: false`. Any mismatch or absent payload is `AVOID`.
+
+For newly opened baseline paper positions, preserve the original-entry risk
+anchor, exit at a 1% loss from that anchor, and trail the highest observed quote
+by 5%. The adapter may request one additional share for an already-open
+baseline symbol no more often than every 300 seconds, only while that symbol
+remains in the frozen daily payload and its current quote is above both the
+original entry and a quote sampled at least five minutes earlier. Cash,
+single-share-price, open-position, and total-exposure caps remain mandatory.
+Never apply these add rules to another engine. Paper activity is simulation
+evidence only and must not update, retune, backfill, or validate the separate
+append-only prospective research journal.
+
+The first post-install payload attempt failed closed with exact evidence:
+46/101 histories contain duplicate source sessions (first examples ADBE, AMD,
+GOOGL, GOOG, AMZN). No payload or paper buy was created. Continue the frozen
+prospective test as usual and fix/audit the source archive before a new-day
+paper payload; do not drop symbols, splice providers, or use the paper account
+as research evidence.

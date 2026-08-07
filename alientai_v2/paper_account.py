@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import time
 from typing import Any, Dict, Optional
 
 from alientai_v2.settings import load_settings
@@ -109,10 +110,20 @@ def buy_position(account: Dict[str, Any], candidate: Dict[str, Any], settings: D
 
     open_positions = account.setdefault("open_positions", {})
 
-    if symbol in open_positions:
+    existing_position = open_positions.get(symbol)
+    pyramid = bool(
+        isinstance(existing_position, dict)
+        and approval
+        and approval.get("approved")
+        and approval.get("pyramid") is True
+        and candidate.get("paper_pyramid_allowed") is True
+        and str(existing_position.get("engine_id") or "")
+        == str(candidate.get("engine_id") or "")
+    )
+    if isinstance(existing_position, dict) and not pyramid:
         return None
 
-    if len(open_positions) >= int(settings.get("max_open_positions", 25)):
+    if not pyramid and len(open_positions) >= int(settings.get("max_open_positions", 25)):
         return None
 
     small_position_dollars = safe_float(settings.get("small_position_dollars"), 500.0)
@@ -157,15 +168,60 @@ def buy_position(account: Dict[str, Any], candidate: Dict[str, Any], settings: D
         safe_float(settings.get("minimum_hold_minutes"), prediction_horizon_minutes),
     )
 
+    if pyramid:
+        old_shares = int(safe_float(existing_position.get("shares"), 0.0))
+        add_shares = int(safe_float(approval.get("shares"), 0.0))
+        if old_shares < 1 or add_shares != 1:
+            return None
+        old_cost = safe_float(
+            existing_position.get("cost"),
+            old_shares * safe_float(existing_position.get("entry_price"), 0.0),
+        )
+        new_cost = round(old_cost + cost, 2)
+        new_shares = old_shares + add_shares
+        existing_position["shares"] = new_shares
+        existing_position["entry_price"] = round(new_cost / new_shares, 6)
+        existing_position["cost"] = new_cost
+        existing_position["last_price"] = price
+        existing_position["highest_price"] = max(
+            safe_float(existing_position.get("highest_price"), price), price
+        )
+        existing_position["last_add_time"] = now_iso()
+        existing_position["last_add_epoch"] = time.time()
+        existing_position["pyramid_add_count"] = int(
+            safe_float(existing_position.get("pyramid_add_count"), 0.0)
+        ) + 1
+        account["cash"] = round(cash - cost, 2)
+        trade = {
+            "time": now_iso(),
+            "action": "ADD",
+            "symbol": symbol,
+            "engine_id": engine_id,
+            "shares": add_shares,
+            "price": price,
+            "value": cost,
+            "total_shares_after": new_shares,
+            "average_entry_price_after": existing_position["entry_price"],
+            "reason": str(candidate.get("reason") or "Five-minute paper uptrend add."),
+            "manager_approval_reason": approval.get("reason"),
+            "engine": "ALIENTAI_V2_REFACTORED",
+        }
+        account.setdefault("trade_log", []).append(trade)
+        return trade
+
     position = {
         "symbol": symbol,
         "engine_id": engine_id,
         "side": "LONG",
         "shares": shares,
         "entry_price": price,
+        "risk_entry_price": price,
         "last_price": price,
         "highest_price": price,
         "entry_time": now_iso(),
+        "last_add_time": now_iso(),
+        "last_add_epoch": time.time(),
+        "pyramid_add_count": 0,
         "entry_score": candidate["score"],
         "entry_confidence_rank_1_to_100": candidate.get("confidence_rank_1_to_100"),
         "entry_reason": str(candidate.get("reason") or f"V2 entry with {prediction_horizon_days:g}-day prediction horizon"),
@@ -174,9 +230,14 @@ def buy_position(account: Dict[str, Any], candidate: Dict[str, Any], settings: D
         "minimum_hold_minutes": minimum_hold_minutes,
         "scheduled_exit_time": candidate.get("scheduled_exit_time"),
         "exit_rule": candidate.get("exit_rule"),
-        "allow_stop_before_min_hold": bool(settings.get("allow_stop_before_min_hold", False)),
-        "allow_trailing_before_min_hold": bool(settings.get("allow_trailing_before_min_hold", False)),
+        "allow_stop_before_min_hold": bool(candidate.get("allow_stop_before_min_hold", settings.get("allow_stop_before_min_hold", False))),
+        "allow_trailing_before_min_hold": bool(candidate.get("allow_trailing_before_min_hold", settings.get("allow_trailing_before_min_hold", False))),
         "allow_take_profit_before_min_hold": bool(settings.get("allow_take_profit_before_min_hold", False)),
+        "emergency_stop_enabled": bool(candidate.get("emergency_stop_enabled", settings.get("emergency_stop_enabled", True))),
+        "emergency_stop_loss_pct": safe_float(candidate.get("emergency_stop_loss_pct"), safe_float(settings.get("emergency_stop_loss_pct"), -5.0)),
+        "stop_loss_pct": safe_float(candidate.get("stop_loss_pct"), safe_float(settings.get("stop_loss_pct"), -1.5)),
+        "trailing_stop_pct": safe_float(candidate.get("trailing_stop_pct"), safe_float(settings.get("trailing_stop_pct"), 1.0)),
+        "trailing_stop_activation_pct": safe_float(candidate.get("trailing_stop_activation_pct"), safe_float(settings.get("trailing_stop_activation_pct"), 1.0)),
         "cost": cost,
         "manager_approval_reason": approval.get("reason") if approval else "",
     }

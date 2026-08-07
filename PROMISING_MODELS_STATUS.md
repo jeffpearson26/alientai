@@ -2,10 +2,34 @@
 
 Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)
 Purpose: permanent morning operating list for every legitimate research lead.
-Safety: research only; no model listed here is authorized for paper or live trading.
+Safety: prospective research evidence remains separate from execution. Only the
+Nasdaq-101 technical baseline is explicitly authorized for the local V2 paper
+account; no model is authorized for live trading.
 
 The automatically refreshed data-family and coverage matrix is
 `PROMISING_MODEL_DATA_INVENTORY.md`.
+
+## Paper control panel (August 7)
+
+The V2 paper control panel now has exactly one enabled and buy-authorized
+engine: `nasdaq100_complete_101_baseline_v1`. All other paper-model entries and
+buy allowlists are disabled; all live/real-trading flags remain false. The
+engine uses the immutable 101-symbol file, model/report hashes, frozen
+`0.20886314398519493` cutoff, complete source-pure Schwab payloads, at most five
+daily candidates, and one-share initial entries. New positions carry a hard
+1% stop from their original entry and a 5% trailing stop. An existing selected
+position may add exactly one share no more often than every five minutes only
+when its current price is above both the original entry and a quote sampled at
+least five minutes earlier; the account cash and exposure caps still apply.
+
+The app is loopback-only at `http://127.0.0.1:8010/v2/monitor` and its engine is
+running. The first scan at 12:58 Pacific correctly returned `AVOID`: no current
+paper payload was written because 46/101 frozen Schwab histories contain
+duplicate source sessions (ADBE, AMD, GOOGL, GOOG, and AMZN are the first five
+examples). Existing positions from removed engines remain in the paper account
+for orderly management, but those engines cannot open or add positions. Paper
+trades, add-ons, stops, and P/L must never be merged into the append-only
+prospective journal or cited as model-validation evidence.
 
 ## August 7 storage incident
 
@@ -42,7 +66,7 @@ automatic resume without new explicit authorization.
 |---:|---|---|---|---|---|
 | 1 | Autonomous transparent Nasdaq-101 champion | 101 securities; 20 sessions; 126/60-session QQQ-relative momentum + inverse 60-session volatility | Frozen validation: 825 signals, +2.3893% mean, 55.88% wins, -4.9230% drawdown. One-time sealed test: 590 signals, +3.1682% mean, 55.59% wins, -6.0750% drawdown; all four observable non-overlap cohorts positive. | **OUTCOME PENDING; NEW-DAY ATTEMPT BLOCKED WITH EVIDENCE** | August 4 selections FTNT, DDOG, PANW, CSX, and CRWD remain pending. A fresh source-pure 103-symbol Alpha adjusted-daily archive completed before the August 6 open, but EA remained dated August 4 while every other frozen candidate had August 5. The complete-101 scorer rejected the mixed-date panel and wrote no August 5 observation. |
 | 2 | Technical context + unusual calls | Natural universe; 5 sessions; technical score then unusual call buying | First completed prospective date: 5 signals, 80% wins, +1.8944% mean, +3.0803% median. Historical fixed slices were positive at three chronological splits. | **NEW OBSERVATION; EARLIER OUTCOME PENDING** | The August 5 observation was frozen before the August 6 open: PAYC, AMD, WDC, CE, and HPE. Its source-pure panel has 478/478 technical rows, 478/478 nonempty option rows, 20 prior call observations per row, 18 manifest-explicit unavailable exclusions, zero missing common-universe rows, and the unchanged technical-model hash `5bfa5258...f7bedea`. The August 4 selections NRG, INTC, GPN, CAT, and IT remain pending. |
-| 3 | Nasdaq-101 baseline | 101 symbols; 5 sessions; technical | Historical untouched top 0.25%: 20 rows, 70% >=10% winners. First completed prospective date: 2 signals, 100% wins, +6.7067% mean. | **BLOCKED WITH EVIDENCE** | The journal has no attempt after July 27, so the August 4 decision opportunity was silently missed and cannot be backfilled. The source-pure Schwab refresh through the August 5 session added 96 rows with zero failures, but EA remains on stored date August 3 after an exact retry returned no newer candle; the complete-101 August 5 panel therefore fails closed. |
+| 3 | Nasdaq-101 baseline | 101 symbols; 5 sessions; technical | Historical untouched top 0.25%: 20 rows, 70% >=10% winners. First completed prospective date: 2 signals, 100% wins, +6.7067% mean. | **PAPER ENABLED; NEW PAPER/RESEARCH OBSERVATION BLOCKED WITH EVIDENCE** | The paper adapter and unchanged prospective journal both fail closed without a complete source-pure 101-symbol input. The current Schwab archive has duplicate source sessions for 46/101 model symbols, so the August 7 payload attempt wrote no file and the running engine returned `AVOID`. Earlier missed dates are never backfilled; paper results remain separate from the tiny prospective sample. |
 | 4 | Nasdaq-101 QQQ-relative | 101 symbols; 5 sessions; technical + QQQ-relative context | Historical untouched top 0.10%: 8/8 >=10% winners; top 0.25%: 65%. First prospective date: 2 signals, 50% wins, +2.3750% mean. | **BLOCKED WITH EVIDENCE** | The same missed August 4 journal gap and exact EA coverage blocker prevent a complete source-pure August 5 observation. No source substitution or retrospective journal is allowed. |
 | 5 | AI/semi 20-minute technical + premarket | 17 symbols; 09:30 entry to 09:45 close; prior technical + 09:25 premarket | 20 held-out days, 28 trades, 70% positive days, +0.52% mean daily net, +10.62% compounded, -4.56% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Alpha Vantage lacked entitled pre-entry realtime data and its 09:25 interval is not complete before the frozen 09:30 entry. Cannot be repaired without a separately frozen timing/source model. |
 | 6 | AI/semi 60-minute technical + premarket + calls | 17 symbols; 09:30 to 10:25; prior technical/calls + 09:25 premarket | 20 held-out days, 28 trades, 65% positive days, +0.70% mean daily net, +14.28% compounded, -5.70% drawdown. | **BLOCKED BY ORIGINAL SOURCE/TIMING CONTRACT** | Same Alpha Vantage 09:30-entry impossibility. Preserve frozen evidence; use the separate Schwab late-entry variants prospectively. |

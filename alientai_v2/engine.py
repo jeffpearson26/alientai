@@ -229,6 +229,7 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
             continue
 
         entry_price = safe_float(pos.get("entry_price"), 0.0)
+        risk_entry_price = safe_float(pos.get("risk_entry_price"), entry_price)
         new_price = safe_float(quote.get("price"), 0.0)
 
         if entry_price <= 0 or new_price <= 0:
@@ -244,6 +245,11 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
         pos["quote_source"] = quote.get("source", "alpha_vantage_realtime_bulk_quote")
 
         pnl_pct = ((new_price - entry_price) / entry_price) * 100.0
+        risk_loss_pct = (
+            ((new_price - risk_entry_price) / risk_entry_price) * 100.0
+            if risk_entry_price > 0
+            else pnl_pct
+        )
         trail_drop_pct = ((new_price - highest) / highest) * 100.0 if highest else 0.0
         age_minutes = minutes_since_iso(pos.get("entry_time"))
 
@@ -291,6 +297,13 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
             pos.get("emergency_stop_loss_pct"),
             default_emergency_stop_loss_pct,
         )
+        position_stop_loss_pct = safe_float(pos.get("stop_loss_pct"), stop_loss_pct)
+        position_trailing_stop_pct = safe_float(
+            pos.get("trailing_stop_pct"), trailing_stop_pct
+        )
+        position_trailing_activation_pct = safe_float(
+            pos.get("trailing_stop_activation_pct"), trailing_stop_activation_pct
+        )
 
         # The prediction horizon controls the planned hold, not the maximum
         # acceptable loss. This hard stop is intentionally evaluated before
@@ -298,13 +311,13 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
         if (
             position_emergency_stop_enabled
             and emergency_stop_loss_pct < 0.0
-            and pnl_pct <= emergency_stop_loss_pct
+            and risk_loss_pct <= emergency_stop_loss_pct
         ):
             trade = sell_position(
                 account,
                 symbol,
                 new_price,
-                f"V2 emergency stop at {round(pnl_pct, 2)}% (limit {emergency_stop_loss_pct}%)",
+                f"V2 hard entry stop at {round(risk_loss_pct, 2)}% (limit {emergency_stop_loss_pct}%)",
             )
             if trade:
                 actions.append(trade)
@@ -322,15 +335,29 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
             continue
 
         if not min_hold_complete:
+            if (
+                allow_trailing_before
+                and pnl_pct >= position_trailing_activation_pct
+                and trail_drop_pct <= -abs(position_trailing_stop_pct)
+            ):
+                trade = sell_position(
+                    account,
+                    symbol,
+                    new_price,
+                    f"V2 {abs(position_trailing_stop_pct):g}% trailing stop before minimum hold",
+                )
+                if trade:
+                    actions.append(trade)
+                continue
             blocked = []
 
-            if pnl_pct <= stop_loss_pct and not allow_stop_before:
+            if pnl_pct <= position_stop_loss_pct and not allow_stop_before:
                 blocked.append("stop loss blocked before minimum hold")
 
             if pnl_pct >= take_profit_pct and not allow_take_profit_before:
                 blocked.append("take profit blocked before minimum hold")
 
-            if pnl_pct >= trailing_stop_activation_pct and trail_drop_pct <= -abs(trailing_stop_pct) and not allow_trailing_before:
+            if pnl_pct >= position_trailing_activation_pct and trail_drop_pct <= -abs(position_trailing_stop_pct) and not allow_trailing_before:
                 blocked.append("trailing stop blocked before minimum hold")
 
             if blocked:
@@ -350,12 +377,12 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
             if trade:
                 actions.append(trade)
 
-        elif pnl_pct <= stop_loss_pct:
+        elif pnl_pct <= position_stop_loss_pct:
             trade = sell_position(account, symbol, new_price, "V2 stop loss after minimum hold")
             if trade:
                 actions.append(trade)
 
-        elif pnl_pct >= trailing_stop_activation_pct and trail_drop_pct <= -abs(trailing_stop_pct):
+        elif pnl_pct >= position_trailing_activation_pct and trail_drop_pct <= -abs(position_trailing_stop_pct):
             trade = sell_position(account, symbol, new_price, "V2 trailing stop after minimum hold")
             if trade:
                 actions.append(trade)

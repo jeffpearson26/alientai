@@ -88,3 +88,4 @@ dist/
 *.egg-info/
 data_v2/sec_form4_purchases/
 data_v2/rcef_research/
+data_v2/nasdaq101_baseline_paper_trend_state.json

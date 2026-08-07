@@ -3,7 +3,7 @@
 from typing import Any, Dict, List, Optional
 
 from alientai_v2.paper_account import calculate_account_metrics
-from alientai_v2.utils import safe_float
+from alientai_v2.utils import minutes_since_iso, safe_float
 
 
 def candidate_strength_bucket(candidate: Dict[str, Any]) -> str:
@@ -92,12 +92,28 @@ def approve_candidate_buy(
 
     open_positions = account.setdefault("open_positions", {})
 
-    if symbol in open_positions:
-        return {
-            "approved": False,
-            "symbol": symbol,
-            "reason": "Symbol already has an open V2 position.",
-        }
+    existing_position = open_positions.get(symbol)
+    pyramid = False
+    if isinstance(existing_position, dict):
+        interval_seconds = max(
+            300.0,
+            safe_float(candidate.get("paper_pyramid_interval_seconds"), 300.0),
+        )
+        elapsed_minutes = minutes_since_iso(
+            existing_position.get("last_add_time") or existing_position.get("entry_time")
+        )
+        pyramid = bool(
+            candidate.get("paper_pyramid_allowed") is True
+            and str(existing_position.get("engine_id") or "")
+            == str(candidate.get("engine_id") or "")
+            and elapsed_minutes * 60.0 >= interval_seconds
+        )
+        if not pyramid:
+            return {
+                "approved": False,
+                "symbol": symbol,
+                "reason": "Symbol is already open and no eligible five-minute uptrend add exists.",
+            }
 
     max_open = int(settings.get("max_open_positions", 25))
     if len(open_positions) >= max_open:
@@ -110,7 +126,10 @@ def approve_candidate_buy(
     metrics = calculate_account_metrics(account, settings)
 
     cash = safe_float(metrics.get("cash"), 0.0)
-    invested = safe_float(metrics.get("total_invested_dollars"), 0.0)
+    invested = safe_float(
+        metrics.get("total_invested_dollars"),
+        safe_float(metrics.get("open_position_cost"), 0.0),
+    )
     account_value = safe_float(metrics.get("account_value"), 0.0)
 
     target_invested = safe_float(settings.get("target_invested_dollars"), 9000.0)
@@ -144,7 +163,7 @@ def approve_candidate_buy(
             "needs_rotation": True,
         }
 
-    requested_dollars = requested_dollars_for_candidate(candidate, settings)
+    requested_dollars = price if pyramid else requested_dollars_for_candidate(candidate, settings)
 
     if requested_dollars <= 0:
         return {
@@ -165,7 +184,9 @@ def approve_candidate_buy(
         dollars_to_use = max(0.0, cash - target_cash)
 
     # Whole-share sizing.
-    if dollars_to_use >= price:
+    if pyramid:
+        shares = 1
+    elif dollars_to_use >= price:
         shares = int(dollars_to_use // price)
     else:
         # If stock is expensive but allowed, buy exactly 1 share.
@@ -207,10 +228,11 @@ def approve_candidate_buy(
         "approved_dollars": cost,
         "price": price,
         "engine_id": candidate.get("engine_id"),
+        "pyramid": pyramid,
         "strength": strength,
         "reason": (
             f"Approved by portfolio manager. "
-            f"Strength={strength}, invested={round(invested, 2)}, "
+            f"Strength={strength}, pyramid={pyramid}, invested={round(invested, 2)}, "
             f"target={round(target_invested, 2)}, max={round(max_invested, 2)}."
         ),
         "portfolio_before": {
