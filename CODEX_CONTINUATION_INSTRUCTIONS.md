@@ -1719,3 +1719,60 @@ it writes exact redacted evidence and a safe recovery action; never weaken the
 gate or backfill. The first possible decision date is 2026-08-07. A verified
 check at 2026-08-06 23:13 Pacific correctly returned `NOT_SCHEDULED_YET`
 rather than making provider calls.
+
+## Calibrated first-passage barrier model (2026-08-07)
+
+Jeff supplied `D:\Downloads\barrier_prob_model.zip`. Its SHA-256 is
+`acfce81f6e6faa4b79dbcbb6f6a9fd0b2277cd57b21a01ee977636a559f55bba`.
+The safe extraction is under
+`D:\AlientAI\ExternalModels\barrier_prob_model_20260807_acfce81f`.
+Never load the bundled joblib. The supplied reports and test predictions are
+fully exposed development evidence, and the source has unpurged chronology,
+row-level calibration leakage, truncated end labels, a non-executable
+same-close reference, and a mismatched/wrong-sign GBM baseline. The controlling
+review is `EXTERNAL_BARRIER_PROBABILITY_AUDIT_20260807.md`.
+
+The corrected model is
+`barrier_probability_48_h10_alpha_vantage_v1_20260807`, controlled by
+`BARRIER_PROBABILITY_MODEL_SPEC_20260807.md` and
+`BARRIER_PROBABILITY_MODEL_REPORT_20260807.md`. Its exact source-pure Alpha
+Vantage universe is
+`research_universes\barrier_probability_48_20260807.txt`. MS and NOW were
+excluded before results because only unadjusted compact files were locally
+available; never mix them into this adjusted model. The decision is the
+completed close, the reference entry is the next adjusted open, barriers are
++1.5%/-0.5%, and the maximum horizon is ten sessions. Daily double touches
+remain probability bounds: ambiguity is failure for the conservative lower
+head and success for the optimistic upper head.
+
+The independently audited panel is
+`D:\AlientAI\Data\Compiled\barrier_probability_48_h10_alpha_vantage_v1_20260807`.
+It contains 188,667 verified stage rows over 4,172 dates, with 24,243
+same-session ambiguous paths and one incomplete unresolved row excluded. The
+model root is
+`D:\AlientAI\Models\barrier_probability_48_h10_alpha_vantage_v1_20260807`.
+Every frozen policy gate passed, so the sealed test opened once. Conservative
+sealed evidence is AUC 0.54999, +0.6156% Brier skill, 0.00828 ECE, and a
+positive date-clustered Brier-improvement interval. The optimistic bound has
+AUC 0.60775 and +3.7183% Brier skill. The independent audit re-scored and
+verified all 29,516 sealed predictions. This is promising calibration evidence,
+not a trade-return or profitability result.
+
+The first eligible future decision session is 2026-08-07. Use
+`build_barrier_probability_snapshot.py` only with a new exact-48
+`TIME_SERIES_DAILY_ADJUSTED` archive whose independent content audit passes and
+whose latest date equals the decision date. Then use
+`score_barrier_probability_snapshot.py` before the next open to append all 48
+probability intervals to
+`data_v2\rcef_research\barrier_probability_48_h10_alpha_vantage_v1_20260807\journal.jsonl`.
+Every row remains `execution_decision: AVOID`; there is no selection or order
+policy. Use `evaluate_barrier_probability_future_outcomes.py` only with a later
+independently audited source-pure Alpha archive. Append definite early
+resolutions when observable and timeouts only after ten complete sessions.
+Pending paths never suppress a new eligible daily snapshot. Never backfill,
+retune, change barriers/features/universe/source, or splice Schwab rows.
+
+At freeze time, the singular full-Nasdaq Alpha collector and its queued
+five-minute successor still owned provider capacity. Do not launch a duplicate
+future-snapshot collector. Record the exact active-collector blocker and retry
+at the next safe pre-entry opportunity when provider capacity is free.

@@ -347,6 +347,20 @@
         "external_lambdarank_alpha_vantage_future_snapshot",
         "external_lambdarank_alpha_vantage_twenty_session_outcomes"
       ]
+    },
+    {
+      "model_id": "barrier_probability_48_h10_alpha_vantage_v1_20260807",
+      "display_name": "Calibrated first-passage probability bounds, 10 sessions",
+      "lifecycle": "future_test_candidate",
+      "requirements": [
+        "external_barrier_probability_bundle",
+        "barrier_probability_frozen_spec",
+        "barrier_probability_alpha_daily_inputs",
+        "barrier_probability_panel_audit",
+        "barrier_probability_model_audit",
+        "barrier_probability_future_snapshot",
+        "barrier_probability_ten_session_outcomes"
+      ]
     }
   ],
   "requirements": {
@@ -923,6 +937,58 @@
       "timing_contract": "Development evidence only; exact defects must be corrected before any new prospective contract",
       "kind": "file",
       "path": "EXTERNAL_CLEAN_RANK_MODEL_AUDIT_20260806.md"
+    },
+    "external_barrier_probability_bundle": {
+      "data_type": "Jeff-supplied barrier-probability source bundle",
+      "source": "Immutable external ZIP",
+      "timing_contract": "SHA256 acfce81f6e6faa4b79dbcbb6f6a9fd0b2277cd57b21a01ee977636a559f55bba; bundled joblib remains quarantined and unloaded; exposed reports are development evidence only",
+      "kind": "file",
+      "path": "D:/Downloads/barrier_prob_model.zip"
+    },
+    "barrier_probability_frozen_spec": {
+      "data_type": "Frozen corrected first-passage probability contract",
+      "source": "AlienTAI research specification",
+      "timing_contract": "Completed decision close; next-session adjusted-open reference; +1.5%/-0.5% barriers; maximum ten sessions; daily ambiguity represented as probability bounds",
+      "kind": "file",
+      "path": "BARRIER_PROBABILITY_MODEL_SPEC_20260807.md"
+    },
+    "barrier_probability_alpha_daily_inputs": {
+      "data_type": "Full adjusted-daily histories for the exact 48-symbol barrier universe",
+      "source": "Alpha Vantage TIME_SERIES_DAILY_ADJUSTED",
+      "timing_contract": "One source file per symbol; same-row adjusted OHLC and raw point-in-time volume; MS/NOW unadjusted compact rows excluded; every source hash frozen in the panel manifest",
+      "kind": "file",
+      "path": "barrier_probability_model_config_20260807.json"
+    },
+    "barrier_probability_panel_audit": {
+      "data_type": "Independent source, label, feature-sample, chronology, and sealed-partition audit",
+      "source": "AlienTAI local auditor",
+      "timing_contract": "188,667 labels reconstructed; two-sided ten-session development embargoes; label information must end within its assigned stage",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/Compiled/barrier_probability_48_h10_alpha_vantage_v1_20260807/content_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "barrier_probability_model_audit": {
+      "data_type": "Independent LightGBM text-model, calibration, validation-gate, and one-time sealed-test audit",
+      "source": "AlienTAI local auditor",
+      "timing_contract": "Both bound heads rescored; 29,516 sealed probabilities verified; prospective eligibility begins with the completed 2026-08-07 session",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Models/barrier_probability_48_h10_alpha_vantage_v1_20260807/independent_model_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "barrier_probability_future_snapshot": {
+      "data_type": "Outcome-free exact-48 barrier feature snapshot and append-only probability journal",
+      "source": "New independently audited Alpha Vantage adjusted-daily archive",
+      "timing_contract": "Build after each completed eligible decision close and before the next open; score all 48 names even while earlier ten-session paths remain pending; no backfill or provider splice",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/Prospective/barrier_probability_48_h10_alpha_vantage_v1_*/snapshot_manifest.json"
+    },
+    "barrier_probability_ten_session_outcomes": {
+      "data_type": "Append-only prospective first-passage outcomes",
+      "source": "Exact source-tagged Alpha Vantage adjusted-daily observation route",
+      "timing_contract": "Append on definite early resolution or after ten complete sessions; same-session double touches retain lower/upper labels; never retune",
+      "kind": "logical"
     },
     "external_lambdarank_bundle": {
       "data_type": "Jeff-supplied LambdaRank source bundle",

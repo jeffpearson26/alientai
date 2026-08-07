@@ -35,6 +35,20 @@ The automatically refreshed data-family and coverage matrix is
 
 ## Development and future-test candidates without prospective evidence yet
 
+- Calibrated first-passage barrier model, 10 sessions: the corrected
+  source-pure Alpha Vantage build covers 48 liquid names and estimates a
+  conservative/optimistic probability interval for reaching +1.5% before
+  -0.5% from the next open. Its 188,667-row panel and saved text models passed
+  independent audits. Every frozen development gate passed; the one-time
+  29,516-row sealed test retained AUC `0.54999` and `+0.6156%` Brier skill for
+  the conservative bound, AUC `0.60775` and `+3.7183%` Brier skill for the
+  optimistic bound, with calibration errors `0.00828` and `0.01251`.
+  **Future test: NOT_STARTED.** The first eligible decision is the completed
+  August 7 session. A new exact-48 adjusted-daily source snapshot must be
+  journaled before the next open. The current singular full-Nasdaq Alpha
+  collector/queued five-minute archive owns provider capacity, so no duplicate
+  collector or August 6 backfill is permitted. This is probability evidence,
+  not a validated trade-return policy.
 - Corrected external LambdaRank 120-stock ranker, 20 sessions: the immutable
   `v2` panel passed an independent 75,000-row/625-date content audit, and its
   purged out-of-fold development gate passed with `0.08552` mean Rank IC,

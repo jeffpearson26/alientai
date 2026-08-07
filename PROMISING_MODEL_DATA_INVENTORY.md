@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T08:27:46.794366+00:00`
+Automatically refreshed: `2026-08-07T08:52:58.498555+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -38,6 +38,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |
+| Calibrated first-passage probability bounds, 10 sessions | **BLOCKED** | barrier_probability_future_snapshot |
 
 ## Data requirements
 
@@ -121,6 +122,13 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `full_archive_multiresolution_model_audit` | Independent validation-decision and model-artifact audit for both full-archive horizons | AlienTAI independent local auditor | — | **BLOCKED** | no file matches D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_v1_20260807_model_audit.json |
 | `external_clean_rank_bundle` | External scripts and saved S&P-style predictions | Jeff-supplied ZIP | — | **READY** | Immutable source hash only; all outcomes through 2026-07-09 are exposed and cannot become a sealed test |
 | `external_clean_rank_audit` | Independent integrity, metric, purge, and robustness audit | AlienTAI local read-only review | — | **READY** | Development evidence only; exact defects must be corrected before any new prospective contract |
+| `external_barrier_probability_bundle` | Jeff-supplied barrier-probability source bundle | Immutable external ZIP | — | **READY** | SHA256 acfce81f6e6faa4b79dbcbb6f6a9fd0b2277cd57b21a01ee977636a559f55bba; bundled joblib remains quarantined and unloaded; exposed reports are development evidence only |
+| `barrier_probability_frozen_spec` | Frozen corrected first-passage probability contract | AlienTAI research specification | — | **READY** | Completed decision close; next-session adjusted-open reference; +1.5%/-0.5% barriers; maximum ten sessions; daily ambiguity represented as probability bounds |
+| `barrier_probability_alpha_daily_inputs` | Full adjusted-daily histories for the exact 48-symbol barrier universe | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **READY** | One source file per symbol; same-row adjusted OHLC and raw point-in-time volume; MS/NOW unadjusted compact rows excluded; every source hash frozen in the panel manifest |
+| `barrier_probability_panel_audit` | Independent source, label, feature-sample, chronology, and sealed-partition audit | AlienTAI local auditor | — | **READY** | 188,667 labels reconstructed; two-sided ten-session development embargoes; label information must end within its assigned stage |
+| `barrier_probability_model_audit` | Independent LightGBM text-model, calibration, validation-gate, and one-time sealed-test audit | AlienTAI local auditor | — | **READY** | Both bound heads rescored; 29,516 sealed probabilities verified; prospective eligibility begins with the completed 2026-08-07 session |
+| `barrier_probability_future_snapshot` | Outcome-free exact-48 barrier feature snapshot and append-only probability journal | New independently audited Alpha Vantage adjusted-daily archive | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/barrier_probability_48_h10_alpha_vantage_v1_*/snapshot_manifest.json |
+| `barrier_probability_ten_session_outcomes` | Append-only prospective first-passage outcomes | Exact source-tagged Alpha Vantage adjusted-daily observation route | — | **CONTRACT** | validated when each observation reaches this stage |
 | `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |
 | `external_lambdarank_panel_audit` | Corrected source-pure 120-stock training panel audit | Schwab daily OHLCV with per-file date-schema mapping | — | **READY** | Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels |
 | `external_lambdarank_model_audit` | Safe LightGBM text-model and OOF evidence audit | AlienTAI corrected LambdaRank trainer | — | **READY** | Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06 |
