@@ -39,6 +39,37 @@ The original physical copy is retained on D at
 The model monitor was restarted and returned HTTP 200, and the promising-model
 inventory regenerated successfully through the unchanged logical path.
 
+## Full active-Nasdaq adjusted-daily archive (started 2026-08-07)
+
+Jeff explicitly directed collection of the entire active Nasdaq stock-and-ETF
+universe from Alpha Vantage, with at least ten years where listing age permits.
+The preserved fresh source is
+`D:\AlientAI\Data\AlphaVantage_2026\current_reference_20260807\2026-08-07\listing_status_active.csv.gz`.
+It contains 6,247 unique active Nasdaq rows: 4,952 Alpha-classified stocks and
+1,295 ETFs. Do not truncate this to the approximate 4,500 originally expected
+or silently discard unusual provider-listed symbols.
+
+Use `download_alpha_vantage_full_nasdaq_daily.py` with
+`TIME_SERIES_DAILY_ADJUSTED`, `outputsize=full`, expected latest completed
+session 2026-08-06, and output only under
+`D:\AlientAI\Data\AlphaVantage_2026`. It freezes the listing and universe
+hashes, stores hashed per-symbol gzip files, checkpoints after every request,
+and distinguishes completed/current, completed/stale, unavailable, and failed
+symbols. It may reuse a same-provider, same-session seed file only after
+content-level symbol/date/adjusted-field validation and records seed
+provenance. New listings are expected to have less than ten years; do not
+fabricate or substitute older rows.
+
+Run `audit_alpha_vantage_full_nasdaq_daily.py` only after the manifest accounts
+for all 6,247 symbols with zero failures. Require content hashes, exact symbol
+identity, valid adjusted OHLCV/dividend/split rows, no files outside the frozen
+manifest, explicit latest-session gaps, and listing-age-aware ten-year
+coverage. `PASS_WITH_EXPLICIT_GAPS` is an honest integrity pass with preserved
+provider unavailability/staleness/coverage gaps; it is not permission to
+zero-fill or splice Schwab rows. Never run this collector concurrently with
+another Alpha Vantage collector or use the archive to alter a frozen model,
+journal, outcome, engine, or trading setting.
+
 ## External clean-rank research lead (2026-08-06)
 
 Preserve the source audit in

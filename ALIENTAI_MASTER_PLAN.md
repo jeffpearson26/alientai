@@ -560,6 +560,18 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `ACTIVE 2026-08-07`: At Jeff's explicit direction, archive the complete
+current Alpha Vantage active Nasdaq stock-and-ETF universe on drive D using
+`TIME_SERIES_DAILY_ADJUSTED`, `outputsize=full`. The fresh August 7 listing
+snapshot contains 6,247 unique rows: 4,952 stocks and 1,295 ETFs. Freeze that
+source file and universe hash, checkpoint every symbol, preserve explicit
+provider unavailability, and independently audit file identity, adjusted
+OHLCV content, latest completed session, listing-age-aware ten-year coverage,
+and orphan/missing files. Newer listings cannot have ten years and must be
+reported honestly rather than treated as failures. Do not launch a duplicate
+Alpha collector, weaken any frozen model source contract, or connect the
+archive to execution.
+
 000. `ONGOING 2026-08-06`: Enforce the D-drive runtime policy before every
 large collector, compiler, trainer, or audit. New large outputs and temporary
 files go under `D:\AlientAI`; never silently fall back to C. Preserve existing
@@ -856,6 +868,14 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-07: Jeff explicitly requested the entire active Nasdaq stock-and-ETF
+  universe from Alpha Vantage with full available adjusted-daily history on
+  drive D. The fresh provider listing contains 6,247 rows, above the
+  approximate 4,500 expected. This is a source archive, not a new model or
+  execution authorization. The collection includes every provider-listed
+  active Nasdaq Stock/ETF row, preserves unusual or unavailable symbols
+  explicitly, and applies the ten-year requirement only where listing age
+  permits.
 - 2026-08-06: Jeff directed AlienTAI to use drive D. New large downloads,
   panels, model artifacts, logs, caches, and temporary files now use the
   guarded `D:\AlientAI` runtime roots. Existing frozen evidence and logical
