@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T19:37:55.223252+00:00`
+Automatically refreshed: `2026-08-07T19:45:14.653060+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -33,8 +33,8 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-100 pure daily-technical ranker, 20 sessions (sealed-test failure) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
-| Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (queued) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h05_report, full_archive_multiresolution_model_audit |
-| Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (queued) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h20_report, full_archive_multiresolution_model_audit |
+| Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (cancelled partial archive) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h05_report, full_archive_multiresolution_model_audit |
+| Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (cancelled partial archive) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h20_report, full_archive_multiresolution_model_audit |
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |

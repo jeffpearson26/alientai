@@ -286,7 +286,7 @@
     },
     {
       "model_id": "full_archive_multiresolution_nasdaq101_h05_v1_20260807",
-      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (queued)",
+      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (cancelled partial archive)",
       "lifecycle": "development",
       "requirements": [
         "full_nasdaq_adjusted_daily_audit",
@@ -299,7 +299,7 @@
     },
     {
       "model_id": "full_archive_multiresolution_nasdaq101_h20_v1_20260807",
-      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (queued)",
+      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (cancelled partial archive)",
       "lifecycle": "development",
       "requirements": [
         "full_nasdaq_adjusted_daily_audit",

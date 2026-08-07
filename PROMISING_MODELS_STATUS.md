@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 12:38 Pacific (active queue and new-clone readiness audit)
+Generated: 2026-08-07 12:44 Pacific (user-authorized archive cancellation)
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -27,15 +27,14 @@ The singular five-minute queue initially failed before provider access because
 its recovery command referenced a nonexistent seed alias. It was safely
 restarted with the exact independently audited 8,137-request five-minute seed;
 no five-minute payload or contract was altered. At the 11:31 Pacific
-verification, the production contract remained singular and healthy. By the
-12:12 Pacific downstream-readiness audit it had 2,080/749,640 requests
-accounted for (558 completed, 1,522 explicitly unavailable, 0 failed), an
-empty active stderr log, and 832.74 GiB free on D.
-The required provider blackout windows remain encoded, and no competing
-collector, compiler, audit, or trainer was launched. The post-download
-orchestrator's capacity detector was hardened to ignore non-Python monitoring
-command text, preventing a false wait before panel/training work; 21 focused
-archive, queue, and multiresolution-model tests plus compilation passed.
+verification, the production contract remained singular and healthy. Jeff
+then explicitly cancelled it at 12:43 Pacific because the measured completion
+estimate was too long. All queue/collector launcher and child processes are
+stopped. The preserved partial archive has 3,027/749,640 requests accounted
+for (830 completed, 2,197 explicitly unavailable, 0 request failures, and
+746,613 pending). Nothing was deleted or relabeled complete; the immutable
+cancellation record blocks content audit, downstream compilation/training, and
+automatic resume without new explicit authorization.
 
 ## Primary models
 
@@ -85,10 +84,10 @@ archive, queue, and multiresolution-model tests plus compilation passed.
   optimistic bound, with calibration errors `0.00828` and `0.01251`.
   **Future test: NOT_STARTED.** The first eligible decision is the completed
   August 7 session. A new exact-48 adjusted-daily source snapshot must be
-  journaled before the next open. The current singular full-Nasdaq Alpha
-  collector/queued five-minute archive owns provider capacity, so no duplicate
-  collector or August 6 backfill is permitted. This is probability evidence,
-  not a validated trade-return policy.
+  journaled after that close and before the next open. The cancelled bulk
+  archive no longer owns provider capacity, but no August 6 backfill is
+  permitted. This is probability evidence, not a validated trade-return
+  policy.
 - Corrected external LambdaRank 120-stock ranker, 20 sessions: the immutable
   `v2` panel passed an independent 75,000-row/625-date content audit, and its
   purged out-of-fold development gate passed with `0.08552` mean Rank IC,

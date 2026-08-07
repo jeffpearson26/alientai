@@ -89,7 +89,7 @@ zero-fill or splice Schwab rows. Never run this collector concurrently with
 another Alpha Vantage collector or use the archive to alter a frozen model,
 journal, outcome, engine, or trading setting.
 
-## Full active-Nasdaq adjusted five-minute archive (queued 2026-08-07)
+## Full active-Nasdaq adjusted five-minute archive (cancelled 2026-08-07)
 
 Jeff explicitly directed a second D-drive archive after the adjusted-daily
 download finishes. It uses the same immutable 6,247-row active Nasdaq
@@ -139,6 +139,18 @@ symbol/month/five-minute-grid identity, valid OHLCV, honest optional-field
 flags, and zero orphan or missing files. `PASS_WITH_EXPLICIT_GAPS` preserves
 provider unavailability and is not permission to fill from Schwab or another
 source.
+
+Jeff explicitly cancelled this long-running download at 12:43 Pacific on
+August 7 after reviewing its measured completion estimate. The singular queue
+and collector launcher/child processes were stopped, and no Alpha Vantage
+collector remained. Preserve the partial archive exactly: 3,027/749,640
+requests accounted for, 830 completed files, 2,197 explicit unavailables,
+zero request failures, and 746,613 pending. The immutable cancellation record
+is `CANCELLED_BY_USER_20260807T194355Z.json` inside the archive root. The stale
+`running` summary is the last atomic collector checkpoint and must not be
+rewritten or mistaken for a complete archive. Do not audit, compile, train,
+resume, delete, or raise a stopped-collector alarm for this user-authorized
+cancellation unless Jeff gives new explicit authorization.
 
 After that audit passes, the same queue must complete the isolated prior-model
 run defined in
@@ -1798,10 +1810,10 @@ resolutions when observable and timeouts only after ten complete sessions.
 Pending paths never suppress a new eligible daily snapshot. Never backfill,
 retune, change barriers/features/universe/source, or splice Schwab rows.
 
-At freeze time, the singular full-Nasdaq Alpha collector and its queued
-five-minute successor still owned provider capacity. Do not launch a duplicate
-future-snapshot collector. Record the exact active-collector blocker and retry
-at the next safe pre-entry opportunity when provider capacity is free.
+The singular full-Nasdaq five-minute collector was later cancelled by Jeff and
+no longer owns provider capacity. This does not authorize a backfill: attempt a
+new exact future snapshot only after its requested completed session reaches
+the normal after-close eligibility time and before the next-entry deadline.
 
 ## All-market small-cap range/volume baseline clone (2026-08-07)
 
@@ -1831,6 +1843,8 @@ Use `audit_us_smallcap_range_volume_clone_readiness.py` before
 same-cutoff market-cap snapshots for all 8,570 stocks are absent. The partial
 July 21 fundamental cache and Nasdaq-only Alpha archive are ineligible. Do not
 splice numerical providers, compile a partial universe, backfill, or launch an
-unrelated collector beside the active singular full-Nasdaq five-minute job.
+unrelated collector in the cancellation turn. The five-minute job is now a
+preserved user-cancelled partial archive and must not be resumed without new
+explicit authorization.
 Every output is D-drive-only, immutable, research-only, and declares
 `execution_decision: AVOID`.

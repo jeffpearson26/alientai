@@ -73,8 +73,9 @@ shares, is dated July 21, and does not contain the required market-cap field;
 it is not eligible. The completed Alpha archive covers Nasdaq rather than the
 entire market and cannot be numerically spliced into this Schwab clone.
 
-The singular full-Nasdaq five-minute Alpha collector remains active. No
-unrelated collector is launched beside it. The clone stays blocked, produces
-no universe or picks, and will not be backfilled. Once exact full-market
-Schwab inputs exist, run the readiness audit and create the first eligible
-snapshot before its next-session observation window closes.
+The full-Nasdaq five-minute Alpha collector was subsequently cancelled by Jeff
+and its partial evidence was preserved. No replacement collection was launched
+in that cancellation turn. The clone stays blocked, produces no universe or
+picks, and will not be backfilled. Once exact full-market Schwab inputs exist,
+run the readiness audit and create the first eligible snapshot before its
+next-session observation window closes.
