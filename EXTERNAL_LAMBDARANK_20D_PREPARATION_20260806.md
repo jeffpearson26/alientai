@@ -168,3 +168,25 @@ compact or full adjusted archive, content-audit it, build the immutable
 snapshot before next-session entry, and append the top-10 observation to the
 separate future journal. Never inherit Schwab observations or retune from
 future outcomes.
+
+The canonical future-attempt command is:
+
+```powershell
+. .\scripts\use_alientai_d_runtime.ps1
+.\.venv\Scripts\python.exe `
+  .\run_external_lambdarank_alpha_vantage_20d_future_attempt.py `
+  --decision-date YYYY-MM-DD
+```
+
+Run it only after that decision session has completed and before the next
+regular-session entry. It collects a new date-tagged compact adjusted archive
+for the exact 120 candidates plus SPY, requires the independent content audit
+to pass, builds a new immutable snapshot, scores the fixed top-10 policy, and
+appends the source-hashed observation to
+`data_v2\rcef_research\external_lambdarank_alpha_vantage_20d_prospective_journal.jsonl`.
+It refuses frozen dates, premature attempts, conservative missed-entry
+windows, duplicate collectors, low D-drive space, missing credentials,
+incomplete/stale provider content, and duplicate journal dates. Blocked
+attempt evidence is written separately under
+`D:\AlientAI\Data\Prospective\external_lambdarank_120_h20_alpha_vantage_v2_attempts`.
+Pending twenty-session outcomes never prevent a later day's new attempt.

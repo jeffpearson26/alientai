@@ -59,8 +59,13 @@ The automatically refreshed data-family and coverage matrix is
   and all 20 non-overlap rotations positive. **Future test: NOT_STARTED.**
   Decisions through August 6 are blocked by the immutable cutoff; the next
   eligible session needs a new audited Alpha Vantage archive and pre-entry
-  snapshot. Fixed-universe bias, overlap, and adjusted-history revision risk
-  mean this is promising evidence, not established profitability.
+  snapshot. The fail-closed one-command future runner is ready and correctly
+  reports August 7 as `NOT_SCHEDULED_YET` until 16:15 Eastern; it checks the
+  cutoff, duplicate collectors, D-drive space, credentials, exact 121-series
+  coverage, content audit, snapshot hashes, and duplicate journal dates before
+  appending anything. Fixed-universe bias, overlap, and adjusted-history
+  revision risk mean this is promising evidence, not established
+  profitability.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

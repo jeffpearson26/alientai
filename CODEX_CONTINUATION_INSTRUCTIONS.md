@@ -1567,3 +1567,18 @@ root, run `audit_alpha_vantage_adjusted_daily_archive.py`, then use
 Keep its journal, snapshots, outcomes, thresholds, and source completely
 separate from the Schwab model. Pending 20-session outcomes never suppress a
 new eligible daily observation.
+
+Use
+`run_external_lambdarank_alpha_vantage_20d_future_attempt.py --decision-date
+YYYY-MM-DD` as the canonical fail-closed orchestrator for that sequence. It
+must be launched only after the requested session reaches 16:15 Eastern and
+before the next-entry deadline. It checks the immutable cutoff, existing
+journal, other Python Alpha Vantage collectors/queues, D-drive free space,
+credential presence, exact source audit, snapshot/model hashes, and duplicate
+dates. On a valid session it collects a new exact 121-series compact adjusted
+archive, audits it, snapshots it, scores it, journals the top ten, refreshes
+the inventory, and writes append-only attempt evidence. On a blocked attempt
+it writes exact redacted evidence and a safe recovery action; never weaken the
+gate or backfill. The first possible decision date is 2026-08-07. A verified
+check at 2026-08-06 23:13 Pacific correctly returned `NOT_SCHEDULED_YET`
+rather than making provider calls.

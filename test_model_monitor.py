@@ -50,6 +50,15 @@ class ModelMonitorTests(unittest.TestCase):
         self.assertEqual(contextual["win_rate_pct"], 80.0)
         self.assertAlmostEqual(contextual["final_pl_pct"], 1.894382)
 
+        alpha_clone = by_id[
+            "external_lambdarank_120_h20_alpha_vantage_v2_20260806"
+        ]
+        self.assertEqual(alpha_clone["state"], "active")
+        self.assertEqual(alpha_clone["horizon"], "20 sessions")
+        self.assertEqual(alpha_clone["completed_signals"], 0)
+        self.assertIsNone(alpha_clone["final_pl_pct"])
+        self.assertEqual(alpha_clone["latest_picks"], [])
+
     def test_page_and_json_routes_are_read_only(self):
         client = TestClient(app)
         page = client.get("/v2/models")

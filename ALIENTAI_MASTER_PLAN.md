@@ -1130,3 +1130,12 @@ feature-family ablation order, chronological splits, and promotion gates.
   and adjusted-history revisions remain material limitations. Freeze the
   model and begin only future Alpha Vantage observations after August 6;
   never mix its evidence or source with the Schwab model.
+- 2026-08-06: Added the canonical fail-closed Alpha Vantage future-attempt
+  runner. It verifies the immutable cutoff and decision window, refuses
+  duplicate collectors and journal dates, enforces the D-drive space gate,
+  collects and audits a new exact 121-series compact archive, builds an
+  immutable source-hashed snapshot, scores the frozen top-10 policy, and
+  appends a future-only observation. Its first live timing probe correctly
+  returned `NOT_SCHEDULED_YET` for August 7 rather than downloading before
+  that session existed. Twenty-two targeted
+  model/downloader/audit/runner/monitor tests pass.

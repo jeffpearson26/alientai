@@ -54,6 +54,26 @@ MODEL_SPECS = (
         RESEARCH_ROOT / "autonomous_champion_20session_prospective_summary.json",
     ),
     ModelSpec(
+        "external_lambdarank_120_h20_alpha_vantage_v2_20260806",
+        "Alpha Vantage LambdaRank Candidate",
+        "Leakage-corrected cross-sectional ranker frozen after independent development and one-time sealed-test audits.",
+        "20 sessions",
+        "120 liquid stocks; SPY context only",
+        "Thirteen date-ranked daily technical features from source-pure Alpha Vantage adjusted OHLC and raw volume",
+        "active",
+        "Future test is not started; the first possible attempt is after the completed August 7 close and before the next session entry.",
+        RESEARCH_ROOT
+        / "external_lambdarank_alpha_vantage_20d_prospective_journal.jsonl",
+        RESEARCH_ROOT
+        / "external_lambdarank_alpha_vantage_20d_prospective_outcomes.jsonl",
+        "jsonl",
+        Path(
+            r"D:\AlientAI\Models"
+            r"\external_lambdarank_120_h20_alpha_vantage_v2_20260806"
+            r"\training_report.json"
+        ),
+    ),
+    ModelSpec(
         "contextual_options_top_quarter",
         "Technical Context + Unusual Calls",
         "Selects technically strong candidates only when prior-session call buying is unusually elevated.",
