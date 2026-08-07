@@ -105,6 +105,13 @@ daily independent content audit to pass, verifies that the daily collector
 has exited and no other Alpha collector exists, then launches
 `download_alpha_vantage_full_nasdaq_5min.py`. Output is
 `D:\AlientAI\Data\AlphaVantage_2026\full_nasdaq_active_stock_etf_adjusted_5min_201608_202607_20260807`.
+The exact audited five-minute seed is
+`D:\AlientAI\Data\AlphaVantage_2026\rolling_20m_nasdaq101_adjusted_202001_202607`;
+its controlling audit is
+`data_v2\rcef_research\rolling_20m_nasdaq101_adjusted_archive_audit_20260804.json`
+(8,137 accounted requests, 7,670 valid files, 467 unavailable, zero failures,
+20,089,201 rows, zero orphans). Do not invent or use an `_adjusted_5min_`
+path alias: that directory does not exist.
 The collector uses `TIME_SERIES_INTRADAY`, `interval=5min`, `adjusted=true`,
 `extended_hours=true`, America/New_York interval-start timestamps, hashed
 files, an immutable `contract.json`, append-only `ledger.jsonl`, a small

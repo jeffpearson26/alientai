@@ -20,8 +20,13 @@ and their pending outcomes remain intact.
 The interrupted full-Nasdaq Alpha Vantage adjusted-daily collector resumed
 from its exact manifest after duplicate-process, disk, source, and credential
 checks. It reached all 6,247 frozen symbols with 6,245 completed files, 2
-explicitly unavailable symbols, and 0 failures. Its independent content audit
-must pass before the singular five-minute queue may begin.
+explicitly unavailable symbols, and 0 failures. Its independent audit passed
+as `PASS_WITH_EXPLICIT_GAPS`: 5,775 current files, 470 provider-stale symbols,
+and one ten-year-eligible coverage gap, all preserved without substitution.
+The singular five-minute queue initially failed before provider access because
+its recovery command referenced a nonexistent seed alias. It was safely
+restarted with the exact independently audited 8,137-request five-minute seed;
+no five-minute payload or contract was altered.
 
 ## Primary models
 

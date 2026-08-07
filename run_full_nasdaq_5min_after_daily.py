@@ -54,9 +54,12 @@ def read_json(path: Path) -> dict[str, Any]:
 def active_alpha_collectors() -> list[dict[str, Any]]:
     active: list[dict[str, Any]] = []
     own_pid = os.getpid()
-    for process in psutil.process_iter(["pid", "cmdline"]):
+    for process in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
             if process.info["pid"] == own_pid:
+                continue
+            process_name = str(process.info.get("name") or "").casefold()
+            if not process_name.startswith("python"):
                 continue
             command = " ".join(process.info.get("cmdline") or [])
             lowered = command.casefold()
