@@ -125,3 +125,18 @@ already prohibited a 2026-08-06 decision. Recovery:
    entry.
 5. Evaluate only after that observation's twentieth subsequent regular-session
    close. Never backfill a missed decision date.
+
+## Separate Alpha Vantage archive
+
+At Jeff's direction, a source-pure Alpha Vantage archive was collected at
+`D:\AlientAI\Data\AlphaVantage_2026\external_lambdarank_120_plus_spy_adjusted_daily_full_20260806`.
+It contains all exact 120 candidates plus SPY from
+`TIME_SERIES_DAILY_ADJUSTED` with `outputsize=full`. The independent content
+audit passed 121/121 files, zero failures, exact coverage through 2026-08-06,
+and 726 common dates from 2023-09-14 through 2026-08-06. Individual histories
+contain 726 to 6,731 rows.
+
+This archive does not unblock, extend, score, or evaluate the frozen Schwab
+model. It is input for a separately identified Alpha Vantage clone that must
+be rebuilt and validated from the beginning with new source-specific panels,
+training artifacts, thresholds, sealed-test identity, and future journal.

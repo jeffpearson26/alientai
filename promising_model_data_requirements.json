@@ -303,6 +303,15 @@
         "external_lambdarank_future_snapshot",
         "external_lambdarank_twenty_session_outcomes"
       ]
+    },
+    {
+      "model_id": "external_lambdarank_120_h20_alpha_vantage_clone_candidate_20260806",
+      "display_name": "Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions",
+      "lifecycle": "development",
+      "requirements": [
+        "external_lambdarank_bundle",
+        "external_lambdarank_alpha_vantage_daily_clone_input"
+      ]
     }
   ],
   "requirements": {
@@ -856,6 +865,15 @@
       ],
       "session_date_offset_days": 1,
       "expected_session": "latest_completed"
+    },
+    "external_lambdarank_alpha_vantage_daily_clone_input": {
+      "data_type": "Source-pure full adjusted-daily archive for the exact 120-stock universe plus SPY",
+      "source": "Alpha Vantage",
+      "timing_contract": "Separate clone input only; full TIME_SERIES_DAILY_ADJUSTED through 2026-08-06; never substitute into or evaluate the frozen Schwab model",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/external_lambdarank_120_plus_spy_adjusted_daily_full_20260806/content_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
     },
     "external_lambdarank_fallback_schwab_daily": {
       "data_type": "Same-provider long-history fallback for TSM and SPY",

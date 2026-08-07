@@ -49,6 +49,13 @@ The automatically refreshed data-family and coverage matrix is
   inside the frozen cutoff, so no eligible decision was missed. Retry after
   the provider payload settles; require one unambiguous completed candle for
   all 121 series and never backfill.
+- Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions: the exact
+  120-stock universe plus SPY now has a full adjusted-daily archive on drive D.
+  Its independent audit passed 121/121 files, zero failures, 726 common dates
+  from September 14, 2023 through August 6, 2026, and 726-6,731 rows per
+  series. This is data readiness, not model evidence. A new Alpha
+  Vantage-specific panel, model, thresholds, sealed test, and prospective
+  journal must be built; it cannot inherit or update the frozen Schwab model.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

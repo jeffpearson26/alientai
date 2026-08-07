@@ -1103,3 +1103,12 @@ feature-family ablation order, chronological splits, and promotion gates.
   sessions. Retry after the provider payload settles and require a single
   unambiguous candle for every series; never choose a duplicate, substitute a
   provider, or backfill.
+- 2026-08-06: At Jeff's direction, collected a new source-pure Alpha Vantage
+  full adjusted-daily archive for the exact external LambdaRank 120-stock
+  universe plus SPY. All 121 requests completed with zero failures. The
+  independent content audit passed exact coverage through August 6, 726 common
+  dates from September 14, 2023 through August 6, 2026, and 726-6,731 rows per
+  series. The archive is on drive D and remains strictly separate from the
+  frozen Schwab model. It may support a newly trained Alpha Vantage clone, but
+  it cannot unblock, score, extend, or evaluate the Schwab model and inherits
+  none of that model's evidence or thresholds.

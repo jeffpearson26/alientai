@@ -1530,3 +1530,13 @@ refresher and living inventory now fail closed on duplicate provider session
 keys. Retry the exact source request only after the provider payload settles;
 require one unambiguous completed candle for every required series before the
 first eligible snapshot. No missed date may be backfilled.
+
+At Jeff's later direction, a separate source-pure Alpha Vantage full
+adjusted-daily archive was collected for the exact 120 candidates plus SPY at
+`D:\AlientAI\Data\AlphaVantage_2026\external_lambdarank_120_plus_spy_adjusted_daily_full_20260806`.
+Its content audit passed 121/121 files with zero failures, exact latest date
+2026-08-06, 726 common dates beginning 2023-09-14, and 726-6,731 rows per
+series. Preserve this as input to a new Alpha Vantage clone only. Never use it
+to unblock, score, extend, or evaluate the frozen Schwab model. A clone needs
+new source-specific panels, training, thresholds, sealed-test identity,
+model ID, and append-only future journal before it can make any observation.
