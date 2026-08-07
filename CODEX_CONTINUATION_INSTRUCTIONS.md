@@ -2,6 +2,25 @@
 
 Updated: 2026-08-07 Pacific time
 
+## Mandatory audible critical-blocker alarm (2026-08-07)
+
+Jeff explicitly requires an audible alarm whenever a newly detected failure
+prevents research testing/progress or requires his prompt action. Use
+`scripts\raise_alientai_critical_alarm.ps1` with a unique, timestamped incident
+ID and a concise non-secret message. The topmost alarm repeats until Jeff
+clicks **Acknowledge**. Acknowledgment means only that he saw the alert; the
+underlying fail-closed audit must still pass before work resumes. The named
+mutex prevents duplicate alarms for the same incident.
+
+Raise the alarm for D-drive loss/free-space failure, a stopped required
+singular collector, imminent missed frozen decision windows, credentials that
+Jeff must renew, corruption/hash mismatch, or duplicate collectors requiring
+intervention. Do not raise it for honest abstentions, normal pending outcomes,
+scheduled waits, negative model-validation results, or a contained
+model-specific blocker when unaffected programs can continue and Jeff need not
+act. Never place credentials or secrets in an alarm. Full operating and
+acknowledgment instructions are in `CRITICAL_BLOCKER_ALARM.md`.
+
 ## Mandatory D-drive runtime policy (2026-08-06)
 
 Jeff directed that AlienTAI use drive D for new storage. Before every

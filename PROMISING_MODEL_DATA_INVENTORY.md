@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T08:52:58.498555+00:00`
+Automatically refreshed: `2026-08-07T17:49:34.214828+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 

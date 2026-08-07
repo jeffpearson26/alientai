@@ -1,11 +1,27 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-06 08:35 Pacific
+Generated: 2026-08-07 10:55 Pacific (storage-recovery audit)
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
 The automatically refreshed data-family and coverage matrix is
 `PROMISING_MODEL_DATA_INVENTORY.md`.
+
+## August 7 storage incident
+
+The external AlienTAI SSD was absent from Windows during the 04:31, 05:31,
+06:31, and 08:31 Pacific passes and remained absent at 10:32 Pacific. It was
+restored as healthy `D:` storage with more than 832 GiB free before 10:51
+Pacific. Because `data_v2` and the immutable D-drive artifacts were
+unavailable during the frozen morning cutoffs, no August 7 daily or Schwab
+09:35-entry observation may be backfilled. Existing valid earlier journals
+and their pending outcomes remain intact.
+
+The interrupted full-Nasdaq Alpha Vantage adjusted-daily collector resumed
+from its exact manifest after duplicate-process, disk, source, and credential
+checks. It reached all 6,247 frozen symbols with 6,245 completed files, 2
+explicitly unavailable symbols, and 0 failures. Its independent content audit
+must pass before the singular five-minute queue may begin.
 
 ## Primary models
 
