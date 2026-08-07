@@ -1071,3 +1071,21 @@ feature-family ablation order, chronological splits, and promotion gates.
   capital-scaled drawdown. Status `RESEARCH_HOLD`; preserve its model hashes
   and `SEALED_UNLOADED` 243-date test, never retune, and advance the separate
   Nasdaq-101 30-minute compile next.
+- 2026-08-06: Prepared Jeff's external `lambdarank_ready.zip` as the isolated
+  research candidate
+  `external_lambdarank_120_h20_corrected_v2_20260806`. Never load its bundled
+  joblib or reuse its exposed holdout as a sealed test. The corrected contract
+  uses a fixed 120-stock universe plus SPY context, same-date ranked daily
+  technicals, next-session-open entry, twentieth subsequent close, 0.25% cost,
+  exact label-interval purging, and a 20-session embargo. Its independent
+  panel audit passed 75,000 labeled rows across 625 dates. Purged OOF
+  development passed with 0.08552 mean Rank IC and +3.4520% mean net across
+  the exact top-10 policy; this remains optimistic development evidence
+  because the current fixed universe has survivorship bias and starts in late
+  2023. The LightGBM text model is frozen and the future test is unopened.
+  Start no observation until every one of the 120 candidates and SPY has a
+  complete same-source decision-session candle. The first snapshot is
+  currently blocked: primary Schwab data ends August 5, TSM ends July 7 after
+  duplicate-session exclusion, and automatic token refresh returns HTTP 400.
+  Require fresh Schwab authorization, current all-121 coverage, an immutable
+  pre-entry snapshot, and future-only 20-session outcomes. Never backfill.

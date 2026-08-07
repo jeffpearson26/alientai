@@ -1488,3 +1488,38 @@ per frozen symbol, Alpha Vantage technical provenance, at least ten historical
 call observations per symbol, and the frozen research-only manifest.
 `journal_ai_semiconductor_late_intraday_models.py` also requires an explicit
 `--prior-session-date` and independently rejects stale technical/call inputs.
+
+## Corrected external LambdaRank future-test candidate (2026-08-06)
+
+Preserve `D:\Downloads\lambdarank_ready.zip` and its isolated extraction. Never
+load the bundled joblib. The only controlling implementation is model ID
+`external_lambdarank_120_h20_corrected_v2_20260806`, documented in
+`EXTERNAL_LAMBDARANK_20D_PREPARATION_20260806.md`. Its safe panel and model
+roots are respectively
+`D:\AlientAI\Data\Compiled\external_lambdarank_120_h20_corrected_v2_20260806`
+and
+`D:\AlientAI\Models\external_lambdarank_120_h20_corrected_v2_20260806`.
+Preserve the 120-stock universe, SPY context-only role, 13 ranked technical
+features, next-session-open entry, twentieth subsequent close, 0.25% cost,
+five exact purged folds, 20-session embargo, top-10 policy, model hash, and
+all historical evidence. Do not retune.
+
+The future test is `NOT_STARTED`. A future decision must be later than
+2026-08-06 and must use a new immutable snapshot from
+`build_external_lambdarank_20d_snapshot.py`; never score from the training
+panel. Require all 120 candidates and SPY to have the exact completed decision
+session, no outcomes attached, matching source/model hashes, and journal
+before next-session entry. Fail closed and record an abstention/blocker for
+stale, duplicate, malformed, partial, or mismatched data. Evaluate only after
+that observation's twentieth subsequent regular-session close.
+
+Schwab has two daily date schemas: `schwab_symbol/datetime` files use the
+stored Pacific key plus one calendar day, while
+`datetime_ms/datetime_utc` files use the stored U.S. session date with no
+offset. Never apply one mapping to both. Same-provider component merges are
+allowed only when overlaps match exactly and every component hash is recorded.
+Current blocker: primary histories end at the August 5 session; TSM ends July
+7 after a duplicate July 8 session was excluded; the token saved August 6 at
+08:33 Pacific is expired and automatic refresh returns HTTP 400. Jeff must
+complete a fresh Schwab authorization, then refresh all 121 series before the
+first eligible snapshot. No missed date may be backfilled.

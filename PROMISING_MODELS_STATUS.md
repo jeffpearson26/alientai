@@ -33,8 +33,19 @@ The automatically refreshed data-family and coverage matrix is
 | Selective two-session large-move head | 57 test rows, +0.8709% mean, 57.89% wins | AUC weakened from 0.6506 validation to 0.5705 test; not yet frozen into a prospective program. |
 | Corrected Nasdaq-80 two-session model | 12 trades, +5.6345% mean, +3.8915% median, 83.33% wins | Sample is only 12; preserved as a fragile lead rather than treated as established. |
 
-## Development candidates without promising performance evidence yet
+## Development and future-test candidates without prospective evidence yet
 
+- Corrected external LambdaRank 120-stock ranker, 20 sessions: the immutable
+  `v2` panel passed an independent 75,000-row/625-date content audit, and its
+  purged out-of-fold development gate passed with `0.08552` mean Rank IC,
+  `+3.4520%` mean net across the exact top-10 policy, and 20/20 positive
+  non-overlap rotations. This is promising development evidence only: the
+  fixed current universe has survivorship bias and the sample begins in late
+  2023. The future test is unopened. Its first prospective snapshot is
+  blocked because primary Schwab histories end at August 5, TSM ends at July
+  7 after a duplicate row was excluded, and automatic token refresh returns
+  HTTP 400. Fresh Schwab authorization and current all-121 coverage are
+  required; no backfill is allowed.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

@@ -289,6 +289,20 @@
         "external_clean_rank_bundle",
         "external_clean_rank_audit"
       ]
+    },
+    {
+      "model_id": "external_lambdarank_120_h20_corrected_v2_20260806",
+      "display_name": "Corrected external LambdaRank 120-stock model, 20 sessions",
+      "lifecycle": "future_test_candidate",
+      "requirements": [
+        "external_lambdarank_bundle",
+        "external_lambdarank_panel_audit",
+        "external_lambdarank_model_audit",
+        "external_lambdarank_primary_schwab_daily",
+        "external_lambdarank_fallback_schwab_daily",
+        "external_lambdarank_future_snapshot",
+        "external_lambdarank_twenty_session_outcomes"
+      ]
     }
   ],
   "requirements": {
@@ -808,6 +822,60 @@
       "timing_contract": "Development evidence only; exact defects must be corrected before any new prospective contract",
       "kind": "file",
       "path": "EXTERNAL_CLEAN_RANK_MODEL_AUDIT_20260806.md"
+    },
+    "external_lambdarank_bundle": {
+      "data_type": "Jeff-supplied LambdaRank source bundle",
+      "source": "Immutable external ZIP",
+      "timing_contract": "SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded",
+      "kind": "file",
+      "path": "D:/Downloads/lambdarank_ready.zip"
+    },
+    "external_lambdarank_panel_audit": {
+      "data_type": "Corrected source-pure 120-stock training panel audit",
+      "source": "Schwab daily OHLCV with per-file date-schema mapping",
+      "timing_contract": "Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels",
+      "kind": "file",
+      "path": "D:/AlientAI/Data/Compiled/external_lambdarank_120_h20_corrected_v2_20260806/independent_content_audit.json"
+    },
+    "external_lambdarank_model_audit": {
+      "data_type": "Safe LightGBM text-model and OOF evidence audit",
+      "source": "AlienTAI corrected LambdaRank trainer",
+      "timing_contract": "Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/external_lambdarank_120_h20_corrected_v2_20260806/independent_model_audit.json"
+    },
+    "external_lambdarank_primary_schwab_daily": {
+      "data_type": "Primary daily OHLCV for the exact 120-stock universe plus SPY",
+      "source": "Schwab",
+      "timing_contract": "Completed regular sessions only; schwab_symbol/datetime schema maps the stored Pacific key plus one day; every candidate must equal the decision date",
+      "kind": "daily_csv_universe",
+      "path": "data_v2/sp500_daily_schwab_max_history",
+      "symbols_file": "research_universes/external_lambdarank_120_20260806.txt",
+      "include_symbols": [
+        "SPY"
+      ],
+      "session_date_offset_days": 1,
+      "expected_session": "latest_completed"
+    },
+    "external_lambdarank_fallback_schwab_daily": {
+      "data_type": "Same-provider long-history fallback for TSM and SPY",
+      "source": "Schwab",
+      "timing_contract": "datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge",
+      "kind": "directory",
+      "path": "data_v2/daily_schwab_max_history"
+    },
+    "external_lambdarank_future_snapshot": {
+      "data_type": "Immutable prospective 120-name feature snapshot",
+      "source": "Corrected Schwab snapshot builder",
+      "timing_contract": "Build only after the frozen cutoff and before next-session entry; all 121 source series must be current and complete; outcomes forbidden",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_corrected_v2_*/snapshot_manifest.json"
+    },
+    "external_lambdarank_twenty_session_outcomes": {
+      "data_type": "Future-only twenty-session next-open-to-close outcomes",
+      "source": "The exact frozen Schwab observation source",
+      "timing_contract": "Append only after each observation's twentieth subsequent regular-session close; never backfill or substitute a provider",
+      "kind": "logical"
     }
   }
 }

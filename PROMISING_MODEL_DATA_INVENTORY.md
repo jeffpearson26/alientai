@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T03:04:53.527924+00:00`
+Automatically refreshed: `2026-08-07T04:49:09.816134+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -34,6 +34,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | S&P data-ready pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 
 ## Data requirements
 
@@ -110,3 +111,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `technical_only_sp500_h20_report` | Purged pure-technical S&P twenty-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
 | `external_clean_rank_bundle` | External scripts and saved S&P-style predictions | Jeff-supplied ZIP | — | **READY** | Immutable source hash only; all outcomes through 2026-07-09 are exposed and cannot become a sealed test |
 | `external_clean_rank_audit` | Independent integrity, metric, purge, and robustness audit | AlienTAI local read-only review | — | **READY** | Development evidence only; exact defects must be corrected before any new prospective contract |
+| `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |
+| `external_lambdarank_panel_audit` | Corrected source-pure 120-stock training panel audit | Schwab daily OHLCV with per-file date-schema mapping | — | **READY** | Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels |
+| `external_lambdarank_model_audit` | Safe LightGBM text-model and OOF evidence audit | AlienTAI corrected LambdaRank trainer | — | **READY** | Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06 |
+| `external_lambdarank_primary_schwab_daily` | Primary daily OHLCV for the exact 120-stock universe plus SPY | Schwab | 2026-08-05 | **BLOCKED** | missing symbols: TSM |
+| `external_lambdarank_fallback_schwab_daily` | Same-provider long-history fallback for TSM and SPY | Schwab | — | **READY** | datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge |
+| `external_lambdarank_future_snapshot` | Immutable prospective 120-name feature snapshot | Corrected Schwab snapshot builder | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_corrected_v2_*/snapshot_manifest.json |
+| `external_lambdarank_twenty_session_outcomes` | Future-only twenty-session next-open-to-close outcomes | The exact frozen Schwab observation source | — | **CONTRACT** | validated when each observation reaches this stage |
