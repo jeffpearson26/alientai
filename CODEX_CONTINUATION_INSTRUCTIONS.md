@@ -1802,3 +1802,35 @@ At freeze time, the singular full-Nasdaq Alpha collector and its queued
 five-minute successor still owned provider capacity. Do not launch a duplicate
 future-snapshot collector. Record the exact active-collector blocker and retry
 at the next safe pre-entry opportunity when provider capacity is free.
+
+## All-market small-cap range/volume baseline clone (2026-08-07)
+
+Jeff directed an isolated clone of the frozen Nasdaq-101 five-session baseline
+with only its candidate universe changed. Preserve
+`us_smallcap_range_volume_baseline_clone_contract.json` and
+`US_SMALLCAP_RANGE_VOLUME_BASELINE_CLONE_SPEC_20260807.md`. Model ID
+`us_smallcap_range_volume_baseline_clone_h05_v1_20260807` reuses the exact
+source LightGBM artifact, 22-feature order, five-session close-to-close
+horizon, 10% winner target, validation-locked score cutoff
+`0.20886314398519493`, five-position cap, and 0.25% research cost. Never
+retrain it under this model ID or inherit the source model's evidence.
+
+The starting membership is every active U.S. `Stock` in the preserved Alpha
+Vantage listing file, across all exchanges; ETFs are excluded. The August 7
+snapshot has 14,277 listings and exactly 8,570 stocks. Each decision-date
+universe requires source-pure Schwab numerical inputs available by the cutoff:
+market cap strictly below $2 billion, close strictly below $50, completed-day
+volume at least 2.0 times the prior-20-session mean, EMA bullish alignment with
+close above EMA(9), EMA(21), and EMA(50), and ATR(14)/close at least 3.0%.
+This is Jeff's "has range" definition unless he explicitly changes it before
+the first observation; any later threshold change requires a new model ID.
+
+Use `audit_us_smallcap_range_volume_clone_readiness.py` before
+`build_us_smallcap_range_volume_clone_snapshot.py`. The current audit is
+`BLOCKED_WITH_EXACT_DATA_EVIDENCE`: complete Schwab daily technical and
+same-cutoff market-cap snapshots for all 8,570 stocks are absent. The partial
+July 21 fundamental cache and Nasdaq-only Alpha archive are ineligible. Do not
+splice numerical providers, compile a partial universe, backfill, or launch an
+unrelated collector beside the active singular full-Nasdaq five-minute job.
+Every output is D-drive-only, immutable, research-only, and declares
+`execution_decision: AVOID`.

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "model_id": "us_smallcap_range_volume_baseline_clone_h05_v1_20260807",
+  "source_model_id": "nasdaq100_complete_101_baseline_v1",
+  "clone_rule": "Reuse the frozen source model, feature order, score cutoff, horizon, cost and capacity. Change only the point-in-time candidate universe.",
+  "source_provider": "Schwab",
+  "universe_membership_source": "Alpha Vantage LISTING_STATUS active U.S. listings",
+  "universe_screen": {
+    "asset_type": "Stock",
+    "exchanges": "all active U.S. exchanges in the preserved listing snapshot",
+    "exclude_etfs": true,
+    "maximum_market_cap_usd_exclusive": 2000000000.0,
+    "maximum_close_usd_exclusive": 50.0,
+    "minimum_relative_volume_20": 2.0,
+    "relative_volume_definition": "completed decision-session volume divided by the mean volume of the prior 20 completed sessions",
+    "uptrend_definition": "EMA bullish alignment is true and the completed close is above EMA(9), EMA(21), and EMA(50)",
+    "minimum_atr14_pct": 3.0,
+    "range_definition": "ATR(14) divided by completed close is at least 3 percent",
+    "screen_availability": "Every price, volume, technical and market-cap value must be source-pure Schwab data available no later than the frozen decision cutoff"
+  },
+  "horizon_sessions": 5,
+  "label": "completed decision close to fifth subsequent regular-session close",
+  "winner_return_threshold_pct": 10.0,
+  "selected_fraction_reference": 0.0025,
+  "locked_score_cutoff": 0.20886314398519493,
+  "maximum_selections": 5,
+  "round_trip_cost_pct": 0.25,
+  "source_artifacts": {
+    "model_path": "data_v2/rcef_research/nasdaq100_complete_clone/model_10pct/natural_technical_context_classifier.txt",
+    "model_sha256": "5410de1e68f002ad46d3cb20f484753657a116f62c562aed8f515b7245b08b77",
+    "report_path": "data_v2/rcef_research/nasdaq100_complete_clone/model_10pct/natural_technical_context_report.json",
+    "report_sha256": "aca314e9b21f0d0b47f93314b460394f78b168f5733fa2f14a0924978e752d62",
+    "portfolio_report_path": "data_v2/rcef_research/nasdaq100_complete_clone/portfolio_validation.json",
+    "portfolio_report_sha256": "671bec3814fc7608d67251cb8ce563159530863b1aa6394dc3ea5cd5f4a2bb79"
+  },
+  "evidence_inherited_from_source_model": false,
+  "prospective_only": true,
+  "research_only": true,
+  "execution_enabled": false
+}

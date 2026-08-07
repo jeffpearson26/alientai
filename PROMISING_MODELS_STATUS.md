@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 12:13 Pacific (active-queue and downstream-readiness audit)
+Generated: 2026-08-07 12:38 Pacific (active queue and new-clone readiness audit)
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -65,6 +65,16 @@ archive, queue, and multiresolution-model tests plus compilation passed.
 
 ## Development and future-test candidates without prospective evidence yet
 
+- All-market small-cap range/volume baseline clone, 5 sessions: this isolated
+  setup keeps model 3's frozen LightGBM artifact, 22-feature order, 5-session
+  horizon, `0.20886314398519493` cutoff, five-position cap, and 0.25% cost;
+  only the candidate universe changes. The preserved entire-market listing has
+  14,277 active listings and 8,570 stocks. The screen requires market cap below
+  $2 billion, close below $50, relative volume at least 2.0, EMA-aligned
+  uptrend, and ATR(14) at least 3% of price. **BLOCKED WITH EXACT EVIDENCE:**
+  source-pure Schwab technical and same-cutoff market-cap snapshots for all
+  8,570 stocks do not exist, so no partial universe or observation was written.
+  It inherits none of the Nasdaq baseline's performance evidence.
 - Calibrated first-passage barrier model, 10 sessions: the corrected
   source-pure Alpha Vantage build covers 48 liquid names and estimates a
   conservative/optimistic probability interval for reaching +1.5% before
