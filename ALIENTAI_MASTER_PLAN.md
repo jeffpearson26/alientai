@@ -588,6 +588,20 @@ fabricate them. Explicit adjusted close, dividends, and splits remain in the
 paired adjusted-daily archive. This bulk archive is research data only and
 does not alter any frozen model or authorize execution.
 
+000. `QUEUED 2026-08-07`: Once both full-Nasdaq archives pass their independent
+content audits, automatically complete the prior multi-resolution Nasdaq
+research model as a new isolated run. Preserve exact Nasdaq-101 candidates,
+QQQ/SPY context-only roles, technical inputs only, daily-only versus
+daily-plus-five-minute ablations, 5- and 20-session next-open horizons, 0.25%
+cost, independent LightGBM/XGBoost challengers, purged whole-date validation,
+and separately hashed sealed tests. Use raw daily volume so later split factors
+cannot enter volume features. Run only through
+`complete_full_archive_multiresolution_technical_model.py`, wait behind any
+existing schema-v3 compiler/trainer, audit the panel and final validation/test
+decisions independently, preserve `SEALED_UNLOADED` whenever validation fails,
+and update the central model/data dashboards. Never alter the August 6 model,
+reuse its evidence, tune against a sealed result, or authorize execution.
+
 000. `ONGOING 2026-08-06`: Enforce the D-drive runtime policy before every
 large collector, compiler, trainer, or audit. New large outputs and temporary
 files go under `D:\AlientAI`; never silently fall back to C. Preserve existing

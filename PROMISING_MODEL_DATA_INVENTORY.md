@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T07:17:19.854754+00:00`
+Automatically refreshed: `2026-08-07T08:27:46.794366+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -33,6 +33,8 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-100 pure daily-technical ranker, 20 sessions (sealed-test failure) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 5 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (queued) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_daily_audit, full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h05_report, full_archive_multiresolution_model_audit |
+| Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (queued) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_daily_audit, full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h20_report, full_archive_multiresolution_model_audit |
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |
@@ -110,6 +112,13 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `technical_only_nasdaq_h20_report` | Purged pure-technical Nasdaq twenty-session report | Local immutable historical screen | — | **READY** | Development passed; sealed test opened once and failed; never retune against opened period |
 | `technical_only_sp500_h05_report` | Purged pure-technical S&P five-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
 | `technical_only_sp500_h20_report` | Purged pure-technical S&P twenty-session report | Local immutable historical screen | — | **READY** | Development gate failed; sealed test remains unloaded |
+| `full_nasdaq_adjusted_daily_audit` | Full active-Nasdaq adjusted-daily content audit | Alpha Vantage | — | **BLOCKED** | no file matches D:/AlientAI/Data/AlphaVantage_2026/full_nasdaq_active_stock_etf_adjusted_daily_20260807/content_audit.json |
+| `full_nasdaq_adjusted_5min_audit` | Full active-Nasdaq adjusted five-minute content audit | Alpha Vantage | — | **BLOCKED** | no file matches D:/AlientAI/Data/AlphaVantage_2026/full_nasdaq_active_stock_etf_adjusted_5min_201608_202607_20260807/content_audit.json |
+| `full_archive_multiresolution_technical_spec` | Pre-result frozen full-archive technical model specification | AlienTAI research contract | — | **READY** | Exact Nasdaq-101 candidates, QQQ/SPY context only, technicals only, 5/20 sessions, next-open entry, 0.25% cost |
+| `full_archive_multiresolution_panel_audit` | Full-archive multi-resolution panel and sealed-shard audit | AlienTAI compiler over independently audited Alpha Vantage archives | — | **BLOCKED** | no file matches D:/AlientAI/Data/Compiled/full_archive_multiresolution_nasdaq101_v1_20260807/content_audit.json |
+| `full_archive_multiresolution_h05_report` | Purged full-archive Nasdaq five-session training report | AlienTAI LightGBM/XGBoost technical trainer | — | **BLOCKED** | no file matches D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_h05_v1_20260807/training_report.json |
+| `full_archive_multiresolution_h20_report` | Purged full-archive Nasdaq twenty-session training report | AlienTAI LightGBM/XGBoost technical trainer | — | **BLOCKED** | no file matches D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_h20_v1_20260807/training_report.json |
+| `full_archive_multiresolution_model_audit` | Independent validation-decision and model-artifact audit for both full-archive horizons | AlienTAI independent local auditor | — | **BLOCKED** | no file matches D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_v1_20260807_model_audit.json |
 | `external_clean_rank_bundle` | External scripts and saved S&P-style predictions | Jeff-supplied ZIP | — | **READY** | Immutable source hash only; all outcomes through 2026-07-09 are exposed and cannot become a sealed test |
 | `external_clean_rank_audit` | Independent integrity, metric, purge, and robustness audit | AlienTAI local read-only review | — | **READY** | Development evidence only; exact defects must be corrected before any new prospective contract |
 | `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |

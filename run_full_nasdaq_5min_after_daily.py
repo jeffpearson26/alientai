@@ -202,11 +202,55 @@ def main() -> None:
         run_checked(
             [
                 sys.executable,
+                str(
+                    ROOT
+                    / "complete_full_archive_multiresolution_technical_model.py"
+                ),
+                "--symbols",
+                str(ROOT / "nasdaq100_2026-06_symbols.txt"),
+                "--daily-archive",
+                str(args.daily_archive),
+                "--intraday-archive",
+                str(args.intraday_output),
+                "--spy-daily-file",
+                str(
+                    Path(
+                        r"D:\AlientAI\Data\AlphaVantage_2026"
+                        r"\external_lambdarank_120_plus_spy_adjusted_daily_full_20260806"
+                        r"\SPY_daily.json"
+                    )
+                ),
+                "--panel-root",
+                str(
+                    Path(
+                        r"D:\AlientAI\Data\Compiled"
+                        r"\full_archive_multiresolution_nasdaq101_v1_20260807"
+                    )
+                ),
+                "--models-root",
+                str(Path(r"D:\AlientAI\Models")),
+                "--output",
+                str(
+                    Path(
+                        r"D:\AlientAI\Models"
+                        r"\full_archive_multiresolution_nasdaq101_v1_20260807"
+                        r"_completion.json"
+                    )
+                ),
+            ],
+            cwd=ROOT,
+        )
+        run_checked(
+            [
+                sys.executable,
                 str(ROOT / "update_promising_model_data_inventory.py"),
             ],
             cwd=ROOT,
         )
-        print("FULL NASDAQ DAILY + FIVE-MINUTE ARCHIVE: COMPLETE", flush=True)
+        print(
+            "FULL NASDAQ DAILY + FIVE-MINUTE ARCHIVE + PRIOR MODEL: COMPLETE",
+            flush=True,
+        )
     finally:
         release_lock(lock)
 

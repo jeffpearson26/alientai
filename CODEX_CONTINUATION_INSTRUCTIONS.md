@@ -114,6 +114,30 @@ flags, and zero orphan or missing files. `PASS_WITH_EXPLICIT_GAPS` preserves
 provider unavailability and is not permission to fill from Schwab or another
 source.
 
+After that audit passes, the same queue must complete the isolated prior-model
+run defined in
+`FULL_ARCHIVE_MULTIRESOLUTION_TECHNICAL_MODEL_SPEC_20260807.md`. This is not a
+retune of the already-observed August 6 model. It uses the exact 101 candidates
+in `nasdaq100_2026-06_symbols.txt`, QQQ/SPY as daily context only, technical
+features only, daily-only versus daily-plus-five-minute ablations, independent
+LightGBM/XGBoost challengers, and separate 5- and 20-session labels. Daily
+adjusted OHLC uses same-date scaling while volume remains raw; never apply a
+later split factor to historical volume.
+
+`complete_full_archive_multiresolution_technical_model.py` is the only
+approved post-data orchestrator. It waits for any existing schema-v3 compiler
+or trainer, builds a new panel at
+`D:\AlientAI\Data\Compiled\full_archive_multiresolution_nasdaq101_v1_20260807`,
+requires the independent panel audit, and then trains into new horizon-specific
+roots under `D:\AlientAI\Models`. The compiler freezes separate hashed
+development and sealed-test shards for each horizon. The trainer may not read
+a sealed-test shard unless that horizon/feature/algorithm passes every
+predeclared validation gate. If no variant passes, require
+`SEALED_UNLOADED`; never invert, lower thresholds, or retune. Finish with
+`audit_full_archive_multiresolution_technical_models.py`, preserve both
+positive and negative results, refresh the living model inventory, and never
+connect the result to execution.
+
 ## External clean-rank research lead (2026-08-06)
 
 Preserve the source audit in

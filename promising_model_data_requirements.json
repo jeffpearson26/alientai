@@ -285,6 +285,32 @@
       ]
     },
     {
+      "model_id": "full_archive_multiresolution_nasdaq101_h05_v1_20260807",
+      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 5 sessions (queued)",
+      "lifecycle": "development",
+      "requirements": [
+        "full_nasdaq_adjusted_daily_audit",
+        "full_nasdaq_adjusted_5min_audit",
+        "full_archive_multiresolution_technical_spec",
+        "full_archive_multiresolution_panel_audit",
+        "full_archive_multiresolution_h05_report",
+        "full_archive_multiresolution_model_audit"
+      ]
+    },
+    {
+      "model_id": "full_archive_multiresolution_nasdaq101_h20_v1_20260807",
+      "display_name": "Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (queued)",
+      "lifecycle": "development",
+      "requirements": [
+        "full_nasdaq_adjusted_daily_audit",
+        "full_nasdaq_adjusted_5min_audit",
+        "full_archive_multiresolution_technical_spec",
+        "full_archive_multiresolution_panel_audit",
+        "full_archive_multiresolution_h20_report",
+        "full_archive_multiresolution_model_audit"
+      ]
+    },
+    {
       "model_id": "external_clean_rank_sp120_h20_20260806",
       "display_name": "External clean-rank S&P-120-style 20-session model (audit hold)",
       "lifecycle": "development",
@@ -826,6 +852,63 @@
       "timing_contract": "Development gate failed; sealed test remains unloaded",
       "kind": "file",
       "path": "D:/AlientAI/Models/technical_only_sp500_h20_20260806/training_report.json"
+    },
+    "full_nasdaq_adjusted_daily_audit": {
+      "data_type": "Full active-Nasdaq adjusted-daily content audit",
+      "source": "Alpha Vantage",
+      "timing_contract": "Exact frozen 6,247-symbol listing, explicit gaps, adjusted OHLC plus raw volume/dividend/split records; no source splice",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/full_nasdaq_active_stock_etf_adjusted_daily_20260807/content_audit.json",
+      "status_field": "integrity_pass",
+      "required_status": true
+    },
+    "full_nasdaq_adjusted_5min_audit": {
+      "data_type": "Full active-Nasdaq adjusted five-minute content audit",
+      "source": "Alpha Vantage",
+      "timing_contract": "2016-08 through 2026-07, adjusted extended-hours five-minute interval-start OHLCV, explicit gaps, zero fabricated VWAP/trade count",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/full_nasdaq_active_stock_etf_adjusted_5min_201608_202607_20260807/content_audit.json",
+      "status_field": "integrity_pass",
+      "required_status": true
+    },
+    "full_archive_multiresolution_technical_spec": {
+      "data_type": "Pre-result frozen full-archive technical model specification",
+      "source": "AlienTAI research contract",
+      "timing_contract": "Exact Nasdaq-101 candidates, QQQ/SPY context only, technicals only, 5/20 sessions, next-open entry, 0.25% cost",
+      "kind": "file",
+      "path": "FULL_ARCHIVE_MULTIRESOLUTION_TECHNICAL_MODEL_SPEC_20260807.md"
+    },
+    "full_archive_multiresolution_panel_audit": {
+      "data_type": "Full-archive multi-resolution panel and sealed-shard audit",
+      "source": "AlienTAI compiler over independently audited Alpha Vantage archives",
+      "timing_contract": "Same-date ranks, raw daily volume, exact labels, horizon-specific pre-test embargo, independently hashed sealed shards",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/Compiled/full_archive_multiresolution_nasdaq101_v1_20260807/content_audit.json",
+      "status_field": "integrity_pass",
+      "required_status": true
+    },
+    "full_archive_multiresolution_h05_report": {
+      "data_type": "Purged full-archive Nasdaq five-session training report",
+      "source": "AlienTAI LightGBM/XGBoost technical trainer",
+      "timing_contract": "Daily-only and daily-plus-five-minute ablations; test remains unloaded unless the frozen validation gate passes",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_h05_v1_20260807/training_report.json"
+    },
+    "full_archive_multiresolution_h20_report": {
+      "data_type": "Purged full-archive Nasdaq twenty-session training report",
+      "source": "AlienTAI LightGBM/XGBoost technical trainer",
+      "timing_contract": "Daily-only and daily-plus-five-minute ablations; test remains unloaded unless the frozen validation gate passes",
+      "kind": "file",
+      "path": "D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_h20_v1_20260807/training_report.json"
+    },
+    "full_archive_multiresolution_model_audit": {
+      "data_type": "Independent validation-decision and model-artifact audit for both full-archive horizons",
+      "source": "AlienTAI independent local auditor",
+      "timing_contract": "Only validation-passing variants may open one sealed test; failed variants retain SEALED_UNLOADED",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Models/full_archive_multiresolution_nasdaq101_v1_20260807_model_audit.json",
+      "status_field": "integrity_pass",
+      "required_status": true
     },
     "external_clean_rank_bundle": {
       "data_type": "External scripts and saved S&P-style predictions",
