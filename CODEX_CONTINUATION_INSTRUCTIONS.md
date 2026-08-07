@@ -1848,3 +1848,27 @@ preserved user-cancelled partial archive and must not be resumed without new
 explicit authorization.
 Every output is D-drive-only, immutable, research-only, and declares
 `execution_decision: AVOID`.
+
+Jeff subsequently narrowed the scope to Nasdaq only before this all-market
+setup produced any observation. Preserve its contract and
+`superseded.json` as `SUPERSEDED_BEFORE_OBSERVATION`; never resume or score the
+8,570-stock version under its old model ID.
+
+## Nasdaq small-cap range/volume baseline clone (2026-08-07)
+
+The active replacement is model ID
+`nasdaq_smallcap_range_volume_baseline_clone_h05_v1_20260807`, controlled by
+`nasdaq_smallcap_range_volume_baseline_clone_contract.json` and
+`NASDAQ_SMALLCAP_RANGE_VOLUME_BASELINE_CLONE_SPEC_20260807.md`. Preserve the
+same source model artifact, feature order, five-session horizon, 10% target,
+locked cutoff, five-position cap, 0.25% cost, Schwab numerical provider, and
+screen thresholds. Only membership changes: use exactly the active Nasdaq
+`Stock` rows in the preserved listing snapshot. The August 7 base has 6,247
+Nasdaq listings, of which 4,952 are stocks and 1,295 excluded ETFs.
+
+Run `audit_us_smallcap_range_volume_clone_readiness.py` with the Nasdaq
+contract before scoring. Current status is
+`BLOCKED_WITH_EXACT_DATA_EVIDENCE`: source-pure Schwab technical and
+same-cutoff market-cap coverage is absent for the full 4,952-stock base. Never
+use the Nasdaq-wide Alpha daily archive as numerical fill, compile a partial
+screen, inherit evidence, or backfill. No prospective observation exists.

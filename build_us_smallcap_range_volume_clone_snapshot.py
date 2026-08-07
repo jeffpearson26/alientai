@@ -41,7 +41,10 @@ def main() -> None:
     )
     cutoff = parse_utc(args.decision_cutoff_utc)
     report = json.loads(args.training_report.read_text(encoding="utf-8"))
-    listing = active_stock_symbols(args.listing_status)
+    listing = active_stock_symbols(
+        args.listing_status,
+        allowed_exchanges=contract["universe_screen"].get("allowed_exchanges"),
+    )
     eligible, counts = screen_universe(
         listing,
         read_jsonl(args.technical_snapshot),

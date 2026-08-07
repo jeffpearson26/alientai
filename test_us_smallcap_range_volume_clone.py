@@ -12,6 +12,7 @@ import numpy as np
 
 from alientai_v2.research.us_smallcap_range_volume_clone import (
     MODEL_ID,
+    NASDAQ_MODEL_ID,
     SOURCE_MODEL_ID,
     active_stock_symbols,
     score_candidates,
@@ -101,6 +102,10 @@ class SmallCapRangeVolumeCloneTests(unittest.TestCase):
                     ]
                 )
             self.assertEqual(["AME", "NAS", "NYS"], active_stock_symbols(path))
+            self.assertEqual(
+                ["NAS"],
+                active_stock_symbols(path, allowed_exchanges=["NASDAQ"]),
+            )
 
     def test_screen_requires_every_declared_rule(self) -> None:
         names = ["PASS", "CAP", "PRICE", "RV", "TREND", "RANGE"]
@@ -178,6 +183,12 @@ class SmallCapRangeVolumeCloneTests(unittest.TestCase):
                     "report_sha256": sha256(report_path),
                 },
             }
+            validate_clone_contract(
+                contract,
+                model_path=model_path,
+                report_path=report_path,
+            )
+            contract["model_id"] = NASDAQ_MODEL_ID
             validate_clone_contract(
                 contract,
                 model_path=model_path,

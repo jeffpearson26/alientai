@@ -30,7 +30,10 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         model_path=model_path,
         report_path=report_path,
     )
-    symbols = active_stock_symbols(args.listing_status)
+    symbols = active_stock_symbols(
+        args.listing_status,
+        allowed_exchanges=contract["universe_screen"].get("allowed_exchanges"),
+    )
     blockers: list[str] = []
     counts: dict[str, Any] | None = None
     if args.technical_snapshot is None or not args.technical_snapshot.is_file():

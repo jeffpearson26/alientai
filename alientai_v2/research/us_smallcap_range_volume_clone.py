@@ -12,6 +12,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 MODEL_ID = "us_smallcap_range_volume_baseline_clone_h05_v1_20260807"
+NASDAQ_MODEL_ID = "nasdaq_smallcap_range_volume_baseline_clone_h05_v1_20260807"
 SOURCE_MODEL_ID = "nasdaq100_complete_101_baseline_v1"
 
 
@@ -38,7 +39,11 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     ]
 
 
-def active_stock_symbols(path: Path) -> list[str]:
+def active_stock_symbols(
+    path: Path,
+    *,
+    allowed_exchanges: Sequence[str] | None = None,
+) -> list[str]:
     opener = gzip.open if path.suffix.casefold() == ".gz" else open
     with opener(path, "rt", encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
@@ -50,12 +55,20 @@ def active_stock_symbols(path: Path) -> list[str]:
     }
     if not rows or not required.issubset(rows[0]):
         raise ValueError("listing file is empty or missing required columns")
+    allowed = (
+        {value.strip().upper() for value in allowed_exchanges}
+        if allowed_exchanges
+        else None
+    )
     output: list[str] = []
     seen: set[str] = set()
     for row in rows:
         if str(row.get("status") or "").strip().casefold() != "active":
             continue
         if str(row.get("assetType") or "").strip().casefold() != "stock":
+            continue
+        exchange = str(row.get("exchange") or "").strip().upper()
+        if allowed is not None and exchange not in allowed:
             continue
         symbol = str(row.get("symbol") or "").strip().upper()
         if not symbol:
@@ -209,7 +222,7 @@ def validate_clone_contract(
     model_path: Path,
     report_path: Path,
 ) -> None:
-    if contract.get("model_id") != MODEL_ID:
+    if contract.get("model_id") not in {MODEL_ID, NASDAQ_MODEL_ID}:
         raise ValueError("clone model ID mismatch")
     if contract.get("source_model_id") != SOURCE_MODEL_ID:
         raise ValueError("source model ID mismatch")

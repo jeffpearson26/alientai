@@ -364,13 +364,22 @@
     },
     {
       "model_id": "us_smallcap_range_volume_baseline_clone_h05_v1_20260807",
-      "display_name": "All-market small-cap range/volume baseline clone, 5 sessions",
+      "display_name": "Superseded all-market small-cap baseline clone (zero observations)",
       "lifecycle": "development",
       "requirements": [
         "us_smallcap_clone_contract",
-        "us_smallcap_clone_readiness",
-        "us_smallcap_clone_future_snapshot",
-        "us_smallcap_clone_five_session_outcomes"
+        "us_smallcap_clone_superseded"
+      ]
+    },
+    {
+      "model_id": "nasdaq_smallcap_range_volume_baseline_clone_h05_v1_20260807",
+      "display_name": "Nasdaq small-cap range/volume baseline clone, 5 sessions",
+      "lifecycle": "development",
+      "requirements": [
+        "nasdaq_smallcap_clone_contract",
+        "nasdaq_smallcap_clone_readiness",
+        "nasdaq_smallcap_clone_future_snapshot",
+        "nasdaq_smallcap_clone_five_session_outcomes"
       ]
     }
   ],
@@ -1128,6 +1137,44 @@
       "path": "D:/AlientAI/Data/Prospective/us_smallcap_range_volume_baseline_clone_h05_v1_*/snapshot.json"
     },
     "us_smallcap_clone_five_session_outcomes": {
+      "data_type": "Append-only five-session prospective outcomes",
+      "source": "The exact source-tagged Schwab observation route",
+      "timing_contract": "Append only after the fifth subsequent completed regular-session close; pending outcomes never suppress a new attempt",
+      "kind": "logical"
+    },
+    "us_smallcap_clone_superseded": {
+      "data_type": "Immutable scope-replacement record",
+      "source": "Jeff's explicit Nasdaq-only universe direction",
+      "timing_contract": "All-market setup produced zero observations and may not resume under its old model ID",
+      "kind": "json_status",
+      "path": "data_v2/rcef_research/us_smallcap_range_volume_baseline_clone_h05_v1_20260807/superseded.json",
+      "status_field": "status",
+      "required_status": "SUPERSEDED_BEFORE_OBSERVATION"
+    },
+    "nasdaq_smallcap_clone_contract": {
+      "data_type": "Frozen model-3 artifact identity and Nasdaq-only small-cap screen",
+      "source": "AlienTAI immutable research contract",
+      "timing_contract": "Same Schwab model/features/horizon/cost/cutoff/capacity; only the point-in-time Nasdaq candidate universe changes",
+      "kind": "file",
+      "path": "nasdaq_smallcap_range_volume_baseline_clone_contract.json"
+    },
+    "nasdaq_smallcap_clone_readiness": {
+      "data_type": "Exact Nasdaq listing, Schwab daily-history, market-cap, source and cutoff readiness",
+      "source": "AlienTAI fail-closed readiness audit",
+      "timing_contract": "All 4,952 active Nasdaq stocks require same-cutoff source-pure Schwab inputs before the universe may be compiled",
+      "kind": "json_status",
+      "path": "data_v2/rcef_research/nasdaq_smallcap_range_volume_baseline_clone_h05_v1_20260807/readiness.json",
+      "status_field": "status",
+      "required_status": "READY_TO_SCORE"
+    },
+    "nasdaq_smallcap_clone_future_snapshot": {
+      "data_type": "Immutable Nasdaq-screened universe scores and selections",
+      "source": "Frozen model-3 artifact over a source-pure Schwab Nasdaq snapshot",
+      "timing_contract": "Build after a completed decision session and before the next observation window; never backfill, overwrite or splice providers",
+      "kind": "glob",
+      "path": "D:/AlientAI/Data/Prospective/nasdaq_smallcap_range_volume_baseline_clone_h05_v1_*/snapshot.json"
+    },
+    "nasdaq_smallcap_clone_five_session_outcomes": {
       "data_type": "Append-only five-session prospective outcomes",
       "source": "The exact source-tagged Schwab observation route",
       "timing_contract": "Append only after the fifth subsequent completed regular-session close; pending outcomes never suppress a new attempt",

@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 12:44 Pacific (user-authorized archive cancellation)
+Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -64,16 +64,17 @@ automatic resume without new explicit authorization.
 
 ## Development and future-test candidates without prospective evidence yet
 
-- All-market small-cap range/volume baseline clone, 5 sessions: this isolated
+- Nasdaq small-cap range/volume baseline clone, 5 sessions: this isolated
   setup keeps model 3's frozen LightGBM artifact, 22-feature order, 5-session
   horizon, `0.20886314398519493` cutoff, five-position cap, and 0.25% cost;
-  only the candidate universe changes. The preserved entire-market listing has
-  14,277 active listings and 8,570 stocks. The screen requires market cap below
-  $2 billion, close below $50, relative volume at least 2.0, EMA-aligned
-  uptrend, and ATR(14) at least 3% of price. **BLOCKED WITH EXACT EVIDENCE:**
-  source-pure Schwab technical and same-cutoff market-cap snapshots for all
-  8,570 stocks do not exist, so no partial universe or observation was written.
-  It inherits none of the Nasdaq baseline's performance evidence.
+  only the candidate universe changes. The preserved Nasdaq listing has 6,247
+  active listings: 4,952 stocks and 1,295 excluded ETFs. The screen requires
+  market cap below $2 billion, close below $50, relative volume at least 2.0,
+  EMA-aligned uptrend, and ATR(14) at least 3% of price. **BLOCKED WITH EXACT
+  EVIDENCE:** source-pure Schwab technical and same-cutoff market-cap snapshots
+  for all 4,952 stocks do not exist, so no partial universe or observation was
+  written. It inherits none of the Nasdaq baseline's performance evidence.
+  The earlier all-market scope was superseded with zero observations.
 - Calibrated first-passage barrier model, 10 sessions: the corrected
   source-pure Alpha Vantage build covers 48 liquid names and estimates a
   conservative/optimistic probability interval for reaching +1.5% before

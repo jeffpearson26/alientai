@@ -4,12 +4,16 @@ Date frozen: 2026-08-07 Pacific time
 
 Model ID: `us_smallcap_range_volume_baseline_clone_h05_v1_20260807`
 
-Status: `BLOCKED_WITH_EXACT_DATA_EVIDENCE / PROSPECTIVE_NOT_STARTED`
+Status: `SUPERSEDED_BEFORE_OBSERVATION`
 
 This is an isolated research-only clone of model 3, the frozen Nasdaq-101
 five-session technical baseline. It does not alter that model or inherit any
 of its historical or prospective evidence. Paper and live execution remain
 disabled.
+
+Jeff replaced this scope with the Nasdaq-only contract before any universe,
+selection, or outcome was written. Preserve this document and contract as
+historical setup evidence only; do not resume the all-market model ID.
 
 ## What remains identical
 

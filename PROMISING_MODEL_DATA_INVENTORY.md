@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T19:45:14.653060+00:00`
+Automatically refreshed: `2026-08-07T19:47:39.477028+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -39,7 +39,8 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |
 | Calibrated first-passage probability bounds, 10 sessions | **BLOCKED** | barrier_probability_future_snapshot |
-| All-market small-cap range/volume baseline clone, 5 sessions | **DEVELOPMENT_NOT_TESTING** | us_smallcap_clone_readiness, us_smallcap_clone_future_snapshot |
+| Superseded all-market small-cap baseline clone (zero observations) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Nasdaq small-cap range/volume baseline clone, 5 sessions | **DEVELOPMENT_NOT_TESTING** | nasdaq_smallcap_clone_readiness, nasdaq_smallcap_clone_future_snapshot |
 
 ## Data requirements
 
@@ -147,3 +148,8 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `us_smallcap_clone_readiness` | Exact all-market listing, Schwab daily-history, market-cap, source and cutoff readiness | AlienTAI fail-closed readiness audit | — | **BLOCKED** | JSON status='BLOCKED_WITH_EXACT_DATA_EVIDENCE'; required 'READY_TO_SCORE' |
 | `us_smallcap_clone_future_snapshot` | Immutable screened-universe scores and selections | Frozen model-3 artifact over a source-pure Schwab all-market snapshot | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/us_smallcap_range_volume_baseline_clone_h05_v1_*/snapshot.json |
 | `us_smallcap_clone_five_session_outcomes` | Append-only five-session prospective outcomes | The exact source-tagged Schwab observation route | — | **CONTRACT** | validated when each observation reaches this stage |
+| `us_smallcap_clone_superseded` | Immutable scope-replacement record | Jeff's explicit Nasdaq-only universe direction | — | **READY** | All-market setup produced zero observations and may not resume under its old model ID |
+| `nasdaq_smallcap_clone_contract` | Frozen model-3 artifact identity and Nasdaq-only small-cap screen | AlienTAI immutable research contract | — | **READY** | Same Schwab model/features/horizon/cost/cutoff/capacity; only the point-in-time Nasdaq candidate universe changes |
+| `nasdaq_smallcap_clone_readiness` | Exact Nasdaq listing, Schwab daily-history, market-cap, source and cutoff readiness | AlienTAI fail-closed readiness audit | — | **BLOCKED** | JSON status='BLOCKED_WITH_EXACT_DATA_EVIDENCE'; required 'READY_TO_SCORE' |
+| `nasdaq_smallcap_clone_future_snapshot` | Immutable Nasdaq-screened universe scores and selections | Frozen model-3 artifact over a source-pure Schwab Nasdaq snapshot | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/nasdaq_smallcap_range_volume_baseline_clone_h05_v1_*/snapshot.json |
+| `nasdaq_smallcap_clone_five_session_outcomes` | Append-only five-session prospective outcomes | The exact source-tagged Schwab observation route | — | **CONTRACT** | validated when each observation reaches this stage |
