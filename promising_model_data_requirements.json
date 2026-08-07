@@ -305,12 +305,16 @@
       ]
     },
     {
-      "model_id": "external_lambdarank_120_h20_alpha_vantage_clone_candidate_20260806",
+      "model_id": "external_lambdarank_120_h20_alpha_vantage_v2_20260806",
       "display_name": "Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions",
-      "lifecycle": "development",
+      "lifecycle": "future_test_candidate",
       "requirements": [
         "external_lambdarank_bundle",
-        "external_lambdarank_alpha_vantage_daily_clone_input"
+        "external_lambdarank_alpha_vantage_daily_clone_input",
+        "external_lambdarank_alpha_vantage_panel_audit",
+        "external_lambdarank_alpha_vantage_model_audit",
+        "external_lambdarank_alpha_vantage_future_snapshot",
+        "external_lambdarank_alpha_vantage_twenty_session_outcomes"
       ]
     }
   ],
@@ -874,6 +878,37 @@
       "path": "D:/AlientAI/Data/AlphaVantage_2026/external_lambdarank_120_plus_spy_adjusted_daily_full_20260806/content_audit.json",
       "status_field": "status",
       "required_status": "PASS"
+    },
+    "external_lambdarank_alpha_vantage_panel_audit": {
+      "data_type": "Source-pure Alpha Vantage 120-stock panel and sealed-split audit",
+      "source": "Alpha Vantage",
+      "timing_contract": "Adjusted OHLC, raw point-in-time volume, exact 120-name cross-sections, next-open to twentieth-close labels, 20-session boundary embargo",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/Compiled/external_lambdarank_120_h20_alpha_vantage_v2_20260806/independent_content_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "external_lambdarank_alpha_vantage_model_audit": {
+      "data_type": "Alpha Vantage LightGBM model and one-time sealed-test audit",
+      "source": "AlienTAI source-pure trainer",
+      "timing_contract": "Fixed hyperparameters and top-10 policy; 497-date purged development followed by one 130-date sealed test; future eligibility begins after 2026-08-06",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Models/external_lambdarank_120_h20_alpha_vantage_v2_20260806/independent_model_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "external_lambdarank_alpha_vantage_future_snapshot": {
+      "data_type": "Immutable prospective Alpha Vantage 120-name feature snapshot",
+      "source": "Alpha Vantage TIME_SERIES_DAILY_ADJUSTED",
+      "timing_contract": "New separately audited compact/full archive for the exact completed decision session; build only after 2026-08-06 and before next-session entry; outcomes forbidden",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_alpha_vantage_v2_*/snapshot_manifest.json"
+    },
+    "external_lambdarank_alpha_vantage_twenty_session_outcomes": {
+      "data_type": "Future-only Alpha Vantage twenty-session outcomes",
+      "source": "The exact source-tagged Alpha Vantage observation archive",
+      "timing_contract": "Append only after each observation's twentieth subsequent session close; never backfill, retune, or substitute Schwab",
+      "kind": "logical"
     },
     "external_lambdarank_fallback_schwab_daily": {
       "data_type": "Same-provider long-history fallback for TSM and SPY",

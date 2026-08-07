@@ -50,12 +50,17 @@ The automatically refreshed data-family and coverage matrix is
   the provider payload settles; require one unambiguous completed candle for
   all 121 series and never backfill.
 - Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions: the exact
-  120-stock universe plus SPY now has a full adjusted-daily archive on drive D.
-  Its independent audit passed 121/121 files, zero failures, 726 common dates
-  from September 14, 2023 through August 6, 2026, and 726-6,731 rows per
-  series. This is data readiness, not model evidence. A new Alpha
-  Vantage-specific panel, model, thresholds, sealed test, and prospective
-  journal must be built; it cannot inherit or update the frozen Schwab model.
+  120-stock universe plus SPY has a source-pure full adjusted archive and an
+  independently audited leakage-corrected `v2` model using adjusted OHLC and
+  raw point-in-time volume. Development passed over 497 dates with Rank IC
+  `0.06197`, exact top-10 `+2.0230%` mean net, `+1.4517%` median, and
+  `56.34%` wins. Its one-time 130-date sealed test passed with Rank IC
+  `0.08305`, top-10 `+5.1226%` mean net, `+2.7377%` median, `57.00%` wins,
+  and all 20 non-overlap rotations positive. **Future test: NOT_STARTED.**
+  Decisions through August 6 are blocked by the immutable cutoff; the next
+  eligible session needs a new audited Alpha Vantage archive and pre-entry
+  snapshot. Fixed-universe bias, overlap, and adjusted-history revision risk
+  mean this is promising evidence, not established profitability.
 - Defined-risk options-volatility picker: strategy layer, explicit policy,
   readiness safeguards, and exact point-in-time multi-leg fill compiler exist;
   learned direction/move heads and full chronological backtest are pending.

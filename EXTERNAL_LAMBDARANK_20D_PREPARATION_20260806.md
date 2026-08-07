@@ -140,3 +140,31 @@ This archive does not unblock, extend, score, or evaluate the frozen Schwab
 model. It is input for a separately identified Alpha Vantage clone that must
 be rebuilt and validated from the beginning with new source-specific panels,
 training artifacts, thresholds, sealed-test identity, and future journal.
+
+The initial pre-freeze `v1` build was rejected and preserved because it
+split-adjusted historical volume using future split coefficients, which could
+leak a later corporate action into a prior relative-volume feature. It is
+never eligible for testing. The corrected separate clone is model ID
+`external_lambdarank_120_h20_alpha_vantage_v2_20260806`; it uses adjusted
+OHLC but raw point-in-time volume. Its panel audit
+passed 80,040 feature rows and 77,640 labeled rows with exact 120-name
+cross-sections and maximum label error `1.42e-14`. The fixed chronology used
+497 development dates, a 20-session boundary embargo, and a 130-date final
+sealed test that remained unloaded until the development gate passed.
+
+Development evidence: Rank IC `0.06197`; exact daily top-10 mean
+`+2.0230%` net, median `+1.4517%`, and `56.34%` wins across 4,970 overlapping
+selections. The one-time sealed test then passed: Rank IC `0.08305`; exact
+top-10 mean `+5.1226%` net, median `+2.7377%`, and `57.00%` wins across 1,300
+overlapping selections. All 20 sealed non-overlap rotations were positive.
+The independent model audit passed, and the LightGBM text-model SHA256 is
+`7f2c65ca020dc7307f2cd0efa3604fa1fd906d5789db410818a9d2170dd6c134`.
+
+This remains historical evidence from a fixed contemporary universe with
+survivorship/selection bias and adjustment-revision risk. Future test status
+is `NOT_STARTED`. The immutable cutoff rejects decisions through 2026-08-06.
+For each later eligible session, collect a new exact 121-series Alpha Vantage
+compact or full adjusted archive, content-audit it, build the immutable
+snapshot before next-session entry, and append the top-10 observation to the
+separate future journal. Never inherit Schwab observations or retune from
+future outcomes.

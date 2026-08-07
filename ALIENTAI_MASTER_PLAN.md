@@ -1112,3 +1112,21 @@ feature-family ablation order, chronological splits, and promotion gates.
   frozen Schwab model. It may support a newly trained Alpha Vantage clone, but
   it cannot unblock, score, extend, or evaluate the Schwab model and inherits
   none of that model's evidence or thresholds.
+- 2026-08-06: Built the completely separate Alpha Vantage clone. The initial
+  pre-freeze `v1` was rejected and preserved after detecting that its
+  split-adjusted volume used future split coefficients and could leak a later
+  corporate action. The corrected model is
+  `external_lambdarank_120_h20_alpha_vantage_v2_20260806`, using adjusted
+  OHLC and raw point-in-time volume. Its independently
+  audited panel has 80,040 feature rows, 77,640 labeled rows, exact 120-name
+  dates, next-open to twentieth-close
+  labels, and negligible `1.42e-14` maximum label error. The predeclared split
+  used 497 purged development dates, a 20-session boundary embargo, and a
+  final 130-date sealed test. Development passed at 0.06197 Rank IC and
+  +2.0230% exact top-10 mean net; the sealed test was opened once and passed
+  at 0.08305 Rank IC, +5.1226% mean net, +2.7377% median, and 57.00% wins,
+  with all 20 non-overlap rotations positive. The independent model audit
+  passed. Fixed-universe survivorship bias, overlap, favorable-regime risk,
+  and adjusted-history revisions remain material limitations. Freeze the
+  model and begin only future Alpha Vantage observations after August 6;
+  never mix its evidence or source with the Schwab model.

@@ -1540,3 +1540,30 @@ series. Preserve this as input to a new Alpha Vantage clone only. Never use it
 to unblock, score, extend, or evaluate the frozen Schwab model. A clone needs
 new source-specific panels, training, thresholds, sealed-test identity,
 model ID, and append-only future journal before it can make any observation.
+
+The pre-freeze `v1` Alpha Vantage build is preserved but permanently rejected:
+it split-adjusted volume using future split coefficients, creating a possible
+future-information leak. Never use or promote it. The corrected separate
+model is frozen as
+`external_lambdarank_120_h20_alpha_vantage_v2_20260806`; adjusted OHLC uses
+same-date adjusted-close scaling, while volume remains raw and point-in-time.
+Its independent
+panel audit passed 80,040 feature rows and 77,640 labeled rows. The immutable
+split has 497 purged development dates, a 20-session boundary embargo, and a
+130-date sealed test. Development passed with Rank IC 0.06197 and exact
+top-10 +2.0230% mean net, +1.4517% median, and 56.34% wins. The sealed test
+was then opened once and passed with Rank IC 0.08305, exact top-10 +5.1226%
+mean net, +2.7377% median, 57.00% wins, and all 20 non-overlap rotations
+positive. The independent model audit passed; model SHA256 begins
+`7f2c65ca020d`. Treat this as promising but biased historical evidence, not
+established profitability.
+
+Its future test is `NOT_STARTED`, and decisions through 2026-08-06 are
+immutably ineligible. After each later completed session, collect a new exact
+121-series Alpha Vantage adjusted-daily compact/full archive into a new dated
+root, run `audit_alpha_vantage_adjusted_daily_archive.py`, then use
+`build_external_lambdarank_alpha_vantage_20d_snapshot.py` and
+`score_external_lambdarank_alpha_vantage_20d.py` before next-session entry.
+Keep its journal, snapshots, outcomes, thresholds, and source completely
+separate from the Schwab model. Pending 20-session outcomes never suppress a
+new eligible daily observation.

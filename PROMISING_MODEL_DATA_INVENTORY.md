@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T05:37:08.391588+00:00`
+Automatically refreshed: `2026-08-07T05:59:59.112424+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -35,7 +35,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | S&P data-ready pure daily-technical ranker, 20 sessions (development hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
-| Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |
 
 ## Data requirements
 
@@ -117,6 +117,10 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `external_lambdarank_model_audit` | Safe LightGBM text-model and OOF evidence audit | AlienTAI corrected LambdaRank trainer | — | **READY** | Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06 |
 | `external_lambdarank_primary_schwab_daily` | Primary daily OHLCV for the exact 120-stock universe plus SPY | Schwab | 2026-08-05 | **BLOCKED** | duplicate source sessions are unusable for 121/121 symbols; examples: AAPL=2026-08-05, MSFT=2026-08-05, NVDA=2026-08-05, AMZN=2026-08-05, META=2026-08-05 |
 | `external_lambdarank_alpha_vantage_daily_clone_input` | Source-pure full adjusted-daily archive for the exact 120-stock universe plus SPY | Alpha Vantage | — | **READY** | Separate clone input only; full TIME_SERIES_DAILY_ADJUSTED through 2026-08-06; never substitute into or evaluate the frozen Schwab model |
+| `external_lambdarank_alpha_vantage_panel_audit` | Source-pure Alpha Vantage 120-stock panel and sealed-split audit | Alpha Vantage | — | **READY** | Adjusted OHLC, raw point-in-time volume, exact 120-name cross-sections, next-open to twentieth-close labels, 20-session boundary embargo |
+| `external_lambdarank_alpha_vantage_model_audit` | Alpha Vantage LightGBM model and one-time sealed-test audit | AlienTAI source-pure trainer | — | **READY** | Fixed hyperparameters and top-10 policy; 497-date purged development followed by one 130-date sealed test; future eligibility begins after 2026-08-06 |
+| `external_lambdarank_alpha_vantage_future_snapshot` | Immutable prospective Alpha Vantage 120-name feature snapshot | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_alpha_vantage_v2_*/snapshot_manifest.json |
+| `external_lambdarank_alpha_vantage_twenty_session_outcomes` | Future-only Alpha Vantage twenty-session outcomes | The exact source-tagged Alpha Vantage observation archive | — | **CONTRACT** | validated when each observation reaches this stage |
 | `external_lambdarank_fallback_schwab_daily` | Same-provider long-history fallback for TSM and SPY | Schwab | — | **READY** | datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge |
 | `external_lambdarank_future_snapshot` | Immutable prospective 120-name feature snapshot | Corrected Schwab snapshot builder | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_corrected_v2_*/snapshot_manifest.json |
 | `external_lambdarank_twenty_session_outcomes` | Future-only twenty-session next-open-to-close outcomes | The exact frozen Schwab observation source | — | **CONTRACT** | validated when each observation reaches this stage |

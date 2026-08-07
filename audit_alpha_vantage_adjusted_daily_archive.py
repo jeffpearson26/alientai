@@ -81,6 +81,7 @@ def audit_archive(
     symbols: Sequence[str],
     *,
     required_latest_date: str,
+    required_outputsize: str = "full",
 ) -> dict[str, Any]:
     manifest_path = archive / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -140,7 +141,7 @@ def audit_archive(
     manifest_ok = (
         manifest.get("status") == "complete"
         and manifest.get("function") == "TIME_SERIES_DAILY_ADJUSTED"
-        and manifest.get("outputsize") == "full"
+        and manifest.get("outputsize") == required_outputsize
         and not manifest.get("failed")
         and manifest_symbols == expected
     )
@@ -159,7 +160,7 @@ def audit_archive(
         "execution_enabled": False,
         "provider": "Alpha Vantage",
         "endpoint": "TIME_SERIES_DAILY_ADJUSTED",
-        "outputsize": "full",
+        "outputsize": required_outputsize,
         "required_latest_date": required_latest_date,
         "expected_symbols": len(expected),
         "audited_symbols": len(files),
@@ -186,12 +187,18 @@ def main() -> None:
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--required-latest-date", required=True)
+    parser.add_argument(
+        "--required-outputsize",
+        choices=("compact", "full"),
+        default="full",
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     result = audit_archive(
         args.archive,
         read_symbols(args.symbols_file),
         required_latest_date=args.required_latest_date,
+        required_outputsize=args.required_outputsize,
     )
     output = args.output or args.archive / "content_audit.json"
     output.write_text(

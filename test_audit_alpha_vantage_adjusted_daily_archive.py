@@ -118,6 +118,40 @@ class AlphaVantageAdjustedDailyArchiveAuditTests(unittest.TestCase):
             self.assertEqual(result["status"], "FAIL")
             self.assertIn("payload symbol", result["failures"]["AAA"])
 
+    def test_compact_archive_contract_is_supported(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            symbols = ["AAA"]
+            (root / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "status": "complete",
+                        "completed": symbols,
+                        "failed": {},
+                        "function": "TIME_SERIES_DAILY_ADJUSTED",
+                        "outputsize": "compact",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "AAA_daily.json").write_text(
+                json.dumps(
+                    {
+                        "Meta Data": {"2. Symbol": "AAA"},
+                        "Time Series (Daily)": {"2026-08-06": row()},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = audit_archive(
+                root,
+                symbols,
+                required_latest_date="2026-08-06",
+                required_outputsize="compact",
+            )
+            self.assertEqual(result["status"], "PASS")
+            self.assertEqual(result["outputsize"], "compact")
+
 
 if __name__ == "__main__":
     unittest.main()
