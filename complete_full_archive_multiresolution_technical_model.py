@@ -51,9 +51,12 @@ def conflicting_model_jobs() -> list[dict[str, Any]]:
     )
     own_pid = os.getpid()
     output: list[dict[str, Any]] = []
-    for process in psutil.process_iter(["pid", "cmdline"]):
+    for process in psutil.process_iter(["pid", "name", "cmdline"]):
         try:
             if process.info["pid"] == own_pid:
+                continue
+            process_name = str(process.info.get("name") or "").casefold()
+            if not process_name.startswith("python"):
                 continue
             command = " ".join(process.info.get("cmdline") or [])
             if any(pattern in command for pattern in patterns):

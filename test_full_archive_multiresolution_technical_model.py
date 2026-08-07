@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -15,9 +17,59 @@ from build_full_archive_multiresolution_technical_panel import (
     read_symbols,
     split_dates,
 )
+from complete_full_archive_multiresolution_technical_model import (
+    conflicting_model_jobs,
+)
+
+
+class FakeProcess:
+    def __init__(self, pid: int, name: str, command: list[str]) -> None:
+        self.info = {
+            "pid": pid,
+            "name": name,
+            "cmdline": command,
+        }
 
 
 class FullArchiveMultiresolutionTechnicalTests(unittest.TestCase):
+    def test_capacity_detection_ignores_non_python_monitor_text(self) -> None:
+        processes = [
+            FakeProcess(
+                1001,
+                "powershell.exe",
+                [
+                    "powershell.exe",
+                    "-Command",
+                    "inspect train_full_archive_multiresolution_technical.py",
+                ],
+            ),
+            FakeProcess(
+                1002,
+                "python.exe",
+                [
+                    "python.exe",
+                    "compile_rolling_twenty_minute_panel.py",
+                ],
+            ),
+            FakeProcess(
+                os.getpid(),
+                "python.exe",
+                [
+                    "python.exe",
+                    "train_full_archive_multiresolution_technical.py",
+                ],
+            ),
+        ]
+        with patch(
+            "complete_full_archive_multiresolution_technical_model."
+            "psutil.process_iter",
+            return_value=processes,
+        ):
+            actual = conflicting_model_jobs()
+
+        self.assertEqual(1, len(actual))
+        self.assertEqual(1002, actual[0]["pid"])
+
     def test_daily_adjustment_keeps_raw_volume(self) -> None:
         payload = {
             "Time Series (Daily)": {

@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 11:31 Pacific (storage-recovery and active-queue audit)
+Generated: 2026-08-07 12:13 Pacific (active-queue and downstream-readiness audit)
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: research only; no model listed here is authorized for paper or live trading.
 
@@ -27,11 +27,15 @@ The singular five-minute queue initially failed before provider access because
 its recovery command referenced a nonexistent seed alias. It was safely
 restarted with the exact independently audited 8,137-request five-minute seed;
 no five-minute payload or contract was altered. At the 11:31 Pacific
-verification, the production contract remained singular and healthy with
-573/749,640 requests accounted for (154 completed, 419 explicitly
-unavailable, 0 failed), an empty active stderr log, and 832.75 GiB free on D.
+verification, the production contract remained singular and healthy. By the
+12:12 Pacific downstream-readiness audit it had 2,080/749,640 requests
+accounted for (558 completed, 1,522 explicitly unavailable, 0 failed), an
+empty active stderr log, and 832.74 GiB free on D.
 The required provider blackout windows remain encoded, and no competing
-collector, compiler, audit, or trainer was launched.
+collector, compiler, audit, or trainer was launched. The post-download
+orchestrator's capacity detector was hardened to ignore non-Python monitoring
+command text, preventing a false wait before panel/training work; 21 focused
+archive, queue, and multiresolution-model tests plus compilation passed.
 
 ## Primary models
 
