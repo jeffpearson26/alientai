@@ -26,6 +26,19 @@ model contract explicitly requires that exact path; do not splice or redirect
 it to a new provider/archive. Any future physical migration requires a
 separate content-hash audit and path-preserving migration plan.
 
+The first audited path-preserving migration completed on 2026-08-06. The
+logical repository path
+`C:\Users\jeffp\alientai_start_over_8010\data_v2` is now an NTFS junction to
+`D:\AlientAI\Data\RepositoryStorage\alientai_start_over_8010\data_v2`.
+Before the swap, all 3,360 files and 11,074,239,590 bytes were copied and every
+relative path, length, and SHA-256 hash matched with zero mismatches. The
+post-migration tree-manifest SHA-256 is
+`9a931ec904e340c5587c774e77c0272bb7e6cc38d933e7badce7d02f3a6fc89b`.
+The original physical copy is retained on D at
+`D:\AlientAI\Backups\CDriveMigration\data_v2_prejunction_backup_20260806`.
+The model monitor was restarted and returned HTTP 200, and the promising-model
+inventory regenerated successfully through the unchanged logical path.
+
 ## External clean-rank research lead (2026-08-06)
 
 Preserve the source audit in

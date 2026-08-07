@@ -1,7 +1,20 @@
 # AI Semiconductor Five-Day Research Thesis
 
-Status: preserved hypothesis
+Status: implemented research model / `RESEARCH_HOLD`
 Execution enabled: `false`
+
+This Markdown file is the qualitative contract, not an executable model file.
+Its existing executable implementation is:
+
+- `alientai_v2/research/catalyst_momentum_5d.py`
+- `train_ai_semiconductor_catalyst_momentum_5d.py`
+- `test_ai_semiconductor_catalyst_momentum_5d.py`
+- `data_v2/rcef_research/ai_semiconductor_catalyst_momentum_5d_20260804`
+
+The implementation was reverified on 2026-08-06 with all eight targeted tests
+passing. It is operational research code, but it is not an approved or active
+stock picker because its already-observed test did not establish reliable
+selection skill.
 
 ## Durable industry context
 
@@ -94,6 +107,12 @@ hidden ticker identity feature.
 available technical, news, earnings-reaction, analyst-proxy, unusual-call,
 insider, and risk components. Its first 1,694-row experiment is
 `RESEARCH_HOLD`; it must not be tuned against its observed test.
+
+The full available-data variant produced +0.227821% mean net return across 20
+test trades, but -3.578902% median, 25% wins, and a -14.897556% worst trade.
+The positive mean was driven by a few outliers and did not pass an honest
+promotion standard. Do not create a duplicate fit on the same exposed
+chronology or activate a prospective picker from this result.
 
 The next legitimate implementation should wait for the long adjusted technical
 archive and add independently timestamped structured catalyst, capacity,

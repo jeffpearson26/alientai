@@ -59,6 +59,15 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
   or has less than 20 GiB free. Existing frozen evidence and source paths are
   not moved or redirected without a separately audited, hash-preserving
   migration.
+- Audited physical storage migration (2026-08-06): the unchanged logical
+  `data_v2` path is an NTFS junction to
+  `D:\AlientAI\Data\RepositoryStorage\alientai_start_over_8010\data_v2`.
+  All 3,360 files and 11,074,239,590 bytes matched by relative path, length,
+  and SHA-256 before the swap; the active tree-manifest SHA-256 is
+  `9a931ec904e340c5587c774e77c0272bb7e6cc38d933e7badce7d02f3a6fc89b`.
+  A second verified copy remains under `D:\AlientAI\Backups\CDriveMigration`.
+  C-drive free space increased from 3.34 GiB to 13.65 GiB without changing
+  frozen logical paths or model contents.
 - Verified SSD backup created 2026-07-20: `D:\AlientAI\Backups\alientai_start_over_8010_2026-07-20`
 - Expected user-owned dirty state at plan creation:
   - modified `data_v2/v2_settings.json`
@@ -851,7 +860,10 @@ feature-family ablation order, chronological splits, and promotion gates.
   panels, model artifacts, logs, caches, and temporary files now use the
   guarded `D:\AlientAI` runtime roots. Existing frozen evidence and logical
   source paths remain unchanged so storage cleanup cannot alter a frozen
-  contract or invalidate cumulative research.
+  contract or invalidate cumulative research. Jeff then explicitly requested
+  freeing C-drive space by moving AlienTAI files. The full `data_v2` tree was
+  copied, content-hash verified, junctioned to D, retained as a second D-drive
+  backup, and revalidated through the model monitor and data inventory.
 - 2026-08-05: Jeff supplied a complete production-ready cross-sectional
   five-session picker specification with mandatory purged K-fold validation,
   daily scoring, and ranked technical inputs. This explicitly authorized a new

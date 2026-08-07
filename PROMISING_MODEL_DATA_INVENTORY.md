@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-06T19:16:27.391860+00:00`
+Automatically refreshed: `2026-08-07T03:04:53.527924+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -12,12 +12,12 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | Nasdaq-101 baseline | **BLOCKED** | schwab_nasdaq101_daily |
 | Nasdaq-101 QQQ-relative | **BLOCKED** | schwab_nasdaq101_daily |
 | Nasdaq-80 champion | **BLOCKED** | schwab_nasdaq80_daily |
-| AI/semiconductor technical + premarket | **BLOCKED** | alpha_ai17_premarket_0925 |
-| AI/semiconductor narrative earnings | **BLOCKED** | alpha_ai17_premarket_0925 |
-| Original Alpha AI/semiconductor intraday models | **BLOCKED** | alpha_ai17_realtime_premarket_0925 |
-| Schwab 09:35 late-entry models | **DATA_PATH_PRESENT** | None in current local audit |
+| AI/semiconductor technical + premarket | **BLOCKED** | alpha_ai17_daily, alpha_ai17_premarket_0925 |
+| AI/semiconductor narrative earnings | **BLOCKED** | alpha_ai17_daily, alpha_ai17_premarket_0925 |
+| Original Alpha AI/semiconductor intraday models | **BLOCKED** | alpha_ai17_prior_daily, alpha_ai17_prior_calls, alpha_ai17_realtime_premarket_0925 |
+| Schwab 09:35 late-entry models | **BLOCKED** | alpha_ai17_prior_daily, alpha_ai17_prior_calls |
 | Autonomous transparent Nasdaq-101 champion | **DATA_PATH_PRESENT** | None in current local audit |
-| Defined-risk options model (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
+| Defined-risk options model (development) | **DEVELOPMENT_NOT_TESTING** | alpha_ai17_daily |
 | Any-time 5/10/20/30/60/90-minute Nasdaq-101 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Any-time 5/10/20/30/60/90-minute AI/semi-17 clones (development) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Exact Nasdaq + AI semiconductor five-day roadmap (development) | **DEVELOPMENT_NOT_TESTING** | nasdaq_quarterly_point_in_time_membership, nasdaq_ai_roadmap_point_in_time_fundamentals, nasdaq_ai_roadmap_known_earnings_calendar, nasdaq_ai_roadmap_readiness_audit |
@@ -45,18 +45,18 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 | `call_history_10` | Lagged call-activity history | Same provider as the observation | — | **READY** | At least ten prior observations per symbol |
 | `five_session_daily_outcomes` | Five-session future daily OHLCV | Frozen model source | — | **CONTRACT** | validated when each observation reaches this stage |
 | `one_session_daily_outcomes` | One-session future daily OHLCV | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
-| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-05 |
+| `schwab_nasdaq101_daily` | Daily OHLCV for 101-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-06 |
 | `qqq_daily` | QQQ benchmark daily OHLCV | Schwab | — | **READY** | Same completed session as Nasdaq universe |
 | `nasdaq_frozen_artifacts` | Frozen model/report/manifest hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-05 |
+| `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | stale session 2026-08-04 (stored 2026-08-03); expected 2026-08-06 |
 | `nasdaq80_frozen_artifacts` | Frozen model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **READY** | Complete decision-session close before next-open selection |
-| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **READY** | Exact immediately preceding completed session |
+| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
+| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
 | `alpha_ai17_premarket_0925` | Extended-hours five-minute premarket features | Alpha Vantage | 2026-08-04 | **BLOCKED** | only 0 usable rows; 17 required |
 | `timestamped_earnings_events` | Earnings events and guidance available timestamps | Alpha Vantage archived earnings data | — | **READY** | available_at_utc must be no later than decision cutoff |
 | `ai17_frozen_artifacts` | Frozen five-session model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `narrative_frozen_artifacts` | Frozen narrative model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-05 | **READY** | Exact prior session only; calls, not puts/sell volume |
+| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
 | `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed required |
 | `alpha_ai17_exact_intraday_outcomes` | Exact 09:30-10:25 five-minute outcome path | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
 | `alpha_intraday_frozen_artifacts` | Six frozen intraday model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:30 timing contract must match |
