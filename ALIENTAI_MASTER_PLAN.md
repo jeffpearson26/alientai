@@ -1,6 +1,6 @@
 # AlienTAI Dynamic Master Plan
 
-Last updated: 2026-08-05 Pacific time
+Last updated: 2026-08-06 Pacific time
 
 ## Purpose and authority
 
@@ -52,6 +52,13 @@ Real trading and new paper buying remain disabled unless Jeff explicitly request
 - Active data directory: `data_v2`
 - Large external archive: `C:\Users\jeffp\OneDrive\AlienTAI_Data\AlphaVantage_2026`
 - External SSD structure: `D:\AlientAI`
+- D-drive runtime policy (Jeff direction, 2026-08-06): all new large raw
+  downloads, compiled panels, model artifacts, logs, caches, and temporary
+  research files must use `D:\AlientAI`. Every large job must first dot-source
+  `scripts\use_alientai_d_runtime.ps1`, which fails closed if D is unavailable
+  or has less than 20 GiB free. Existing frozen evidence and source paths are
+  not moved or redirected without a separately audited, hash-preserving
+  migration.
 - Verified SSD backup created 2026-07-20: `D:\AlientAI\Backups\alientai_start_over_8010_2026-07-20`
 - Expected user-owned dirty state at plan creation:
   - modified `data_v2/v2_settings.json`
@@ -544,6 +551,12 @@ Done when: This remains an ongoing standard for all phases.
 
 ## Immediate next actions
 
+000. `ONGOING 2026-08-06`: Enforce the D-drive runtime policy before every
+large collector, compiler, trainer, or audit. New large outputs and temporary
+files go under `D:\AlientAI`; never silently fall back to C. Preserve existing
+frozen C-based source paths unless a separate content-hash migration is
+explicitly approved and verified.
+
 000. `COMPLETED RESEARCH_HOLD 2026-08-05`: Preserve the production-style
 purged-CV cross-sectional picker as reusable research infrastructure, but do
 not invert it, tune the observed folds, open its 252-session sealed test,
@@ -834,6 +847,11 @@ feature-family ablation order, chronological splits, and promotion gates.
 
 ## Direction-change log
 
+- 2026-08-06: Jeff directed AlienTAI to use drive D. New large downloads,
+  panels, model artifacts, logs, caches, and temporary files now use the
+  guarded `D:\AlientAI` runtime roots. Existing frozen evidence and logical
+  source paths remain unchanged so storage cleanup cannot alter a frozen
+  contract or invalidate cumulative research.
 - 2026-08-05: Jeff supplied a complete production-ready cross-sectional
   five-session picker specification with mandatory purged K-fold validation,
   daily scoring, and ranked technical inputs. This explicitly authorized a new

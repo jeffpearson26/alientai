@@ -1,6 +1,30 @@
 # AlienTAI Codex Continuation Instructions
 
-Updated: 2026-08-02 Pacific time
+Updated: 2026-08-06 Pacific time
+
+## Mandatory D-drive runtime policy (2026-08-06)
+
+Jeff directed that AlienTAI use drive D for new storage. Before every
+collector, compiler, trainer, content audit, or other potentially large
+research job, dot-source:
+
+```powershell
+. .\scripts\use_alientai_d_runtime.ps1
+```
+
+New raw downloads, compiled panels, model artifacts, logs, caches, and
+process-temporary files must use the resulting `D:\AlientAI\Data`,
+`D:\AlientAI\Models`, `D:\AlientAI\Logs`, and `D:\AlientAI\Temp` roots. The
+helper fails closed if D is unavailable or has less than 20 GiB free. Never
+silently fall back to C for a large output.
+
+Do not move, rewrite, or relabel existing frozen evidence merely to implement
+this policy. The canonical repository, protected settings, small append-only
+journals, and frozen source paths stay where their contracts currently place
+them. A frozen C-based source may be refreshed in place only when its existing
+model contract explicitly requires that exact path; do not splice or redirect
+it to a new provider/archive. Any future physical migration requires a
+separate content-hash audit and path-preserving migration plan.
 
 ## External clean-rank research lead (2026-08-06)
 
