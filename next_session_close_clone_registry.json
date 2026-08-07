@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "RESEARCH_PREPARATION",
+  "status": "COMPLETE_RESEARCH_HOLD",
   "research_only": true,
   "execution_enabled": false,
   "created_date": "2026-08-05",
@@ -21,7 +21,16 @@
       "entry_contract": "next regular-session open",
       "exit_contract": "that next regular session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/autonomous_champion_next_session_close_20260806/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/autonomous_transparent_next_session_close_v1_20260806/training_report.json",
+      "validation_result": {
+        "signals": 4385,
+        "mean_net_return_pct": -0.217387,
+        "win_rate_pct": 45.3364,
+        "passed": false,
+        "sealed_test_status": "SEALED_UNLOADED"
+      }
     },
     {
       "source_model_id": "contextual_options_top_quarter",
@@ -32,7 +41,19 @@
       "entry_contract": "source model's next executable regular-session entry",
       "exit_contract": "the next complete regular session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "ONE_SESSION_LABEL_AND_RETRAIN_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/contextual_options_next_session_close_v1_20260806_v2/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/contextual_options_next_session_close_v1_20260806/training_report.json",
+      "validation_result": {
+        "signals": 188,
+        "decision_dates": 44,
+        "mean_net_return_pct": -0.080045,
+        "median_net_return_pct": 0.046699,
+        "win_rate_pct": 51.5957,
+        "daily_basket_max_drawdown_pct": -10.778613,
+        "passed": false,
+        "sealed_test_status": "SEALED_UNLOADED"
+      }
     },
     {
       "source_model_id": "nasdaq100_complete_101_baseline_v1",
@@ -43,7 +64,19 @@
       "entry_contract": "source model's next executable regular-session entry",
       "exit_contract": "the next complete regular session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/nasdaq101_baseline_next_session_close_v1_20260806/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/nasdaq101_baseline_next_session_close_v1_20260806/training_report.json",
+      "validation_result": {
+        "signals": 100,
+        "decision_dates": 36,
+        "mean_net_return_pct": -0.016665,
+        "median_net_return_pct": 0.167837,
+        "win_rate_pct": 51.0,
+        "capital_scaled_max_drawdown_pct": -9.742011,
+        "passed": false,
+        "sealed_test_status": "SEALED_UNLOADED"
+      }
     },
     {
       "source_model_id": "nasdaq100_complete_101_qqq_relative_v1",
@@ -54,7 +87,20 @@
       "entry_contract": "source model's next executable regular-session entry",
       "exit_contract": "the next complete regular session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/nasdaq101_qqq_relative_next_session_close_v1_20260806/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/nasdaq101_qqq_relative_next_session_close_v1_20260806/training_report.json",
+      "validation_result": {
+        "signals": 25,
+        "decision_dates": 5,
+        "mean_net_return_pct": 0.742039,
+        "median_net_return_pct": 0.784235,
+        "win_rate_pct": 72.0,
+        "tie_expansion_ratio": 7.537313,
+        "passed": false,
+        "sealed_test_status": "SEALED_UNLOADED",
+        "failure_reason": "score ties expanded the broadest candidate fraction by 7.54x and concentrated all selections into five dates"
+      }
     },
     {
       "source_model_id": "nasdaq100_technical_clone_v1",
@@ -65,7 +111,20 @@
       "entry_contract": "source model's next executable regular-session entry",
       "exit_contract": "the next complete regular session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "PANEL_AND_RETRAIN_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/nasdaq80_champion_next_session_close_v1_20260806/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/nasdaq80_champion_next_session_close_v1_20260806/training_report.json",
+      "validation_result": {
+        "broadest_fraction": 0.01,
+        "signals": 71,
+        "decision_dates": 43,
+        "mean_net_return_pct": -0.419475,
+        "median_net_return_pct": -0.076208,
+        "win_rate_pct": 47.8873,
+        "capital_scaled_max_drawdown_pct": -9.733835,
+        "passed": false,
+        "sealed_test_status": "SEALED_UNLOADED"
+      }
     },
     {
       "source_model_id": "ai_semiconductor_60m_calls_frozen_20260731",
@@ -76,7 +135,28 @@
       "entry_contract": "source model's frozen intraday entry",
       "exit_contract": "the following complete regular market session's official close",
       "target_horizon_sessions": 1,
-      "implementation_state": "EXISTING_ONE_SESSION_ANALOG_REVIEW_REQUIRED"
+      "implementation_state": "RESEARCH_HOLD",
+      "panel_path": "D:/AlientAI/Data/Compiled/ai_semiconductor_calls_next_session_close_v1_20260806/panel.jsonl",
+      "report_path": "D:/AlientAI/Models/ai_semiconductor_calls_next_session_close_v1_20260806_v2/training_report.json",
+      "validation_result": {
+        "selected_fraction": 0.5,
+        "signals": 81,
+        "decision_dates": 17,
+        "mean_net_return_pct": 1.415268,
+        "median_net_return_pct": 0.883415,
+        "win_rate_pct": 62.963,
+        "passed": true
+      },
+      "sealed_test_result": {
+        "status": "OPENED_ONCE_AFTER_VALIDATION_PASS",
+        "signals": 88,
+        "decision_dates": 18,
+        "mean_net_return_pct": -1.366578,
+        "median_net_return_pct": -2.024569,
+        "win_rate_pct": 39.7727,
+        "fifth_percentile_net_return_pct": -10.012229,
+        "passed": false
+      }
     }
   ]
 }

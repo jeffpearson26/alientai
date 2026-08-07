@@ -60,11 +60,17 @@ def attach_labels(
         except (KeyError, TypeError, ValueError):
             counts["missing_anchor"] += 1
             continue
-        anchors = [
-            (index, candle) for index, candle in enumerate(candles)
-            if abs((candle["date"] - nominal).days) <= 3
-            and abs(candle["close"] / expected_close - 1.0) <= 0.00001
-        ]
+        anchors = []
+        for offset in range(-3, 4):
+            candidate_day = nominal + __import__("datetime").timedelta(
+                days=offset
+            )
+            index = indexed[symbol].get(candidate_day)
+            if index is None:
+                continue
+            candle = candles[index]
+            if abs(candle["close"] / expected_close - 1.0) <= 0.00001:
+                anchors.append((index, candle))
         if not anchors:
             counts["missing_anchor"] += 1
             continue
