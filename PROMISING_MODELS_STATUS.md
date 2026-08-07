@@ -23,7 +23,9 @@ when its current price is above both the original entry and a quote sampled at
 least five minutes earlier; the account cash and exposure caps still apply.
 
 The app is loopback-only at `http://127.0.0.1:8010/v2/monitor` and its engine is
-running. The first scan at 12:58 Pacific correctly returned `AVOID`: no current
+running. Paper-entry windows are premarket, regular market, and the standard
+after-hours session through 17:00 Pacific; no paper entry is allowed after that
+time. The first scan at 12:58 Pacific correctly returned `AVOID`: no current
 paper payload was written because 46/101 frozen Schwab histories contain
 duplicate source sessions (ADBE, AMD, GOOGL, GOOG, and AMZN are the first five
 examples). Existing positions from removed engines remain in the paper account

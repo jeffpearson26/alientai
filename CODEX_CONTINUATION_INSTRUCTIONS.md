@@ -1879,7 +1879,10 @@ Jeff explicitly replaced the paper-control-panel model list with the frozen
 Nasdaq-101 technical baseline. The sole enabled and main-account-buy-allowlisted
 engine is `nasdaq100_complete_101_baseline_v1`; paper trading is enabled and all
 live/real/options/similarity execution flags are false. The local app is
-loopback-only on port 8010. Preserve the prior paper account: positions opened
+loopback-only on port 8010. Jeff subsequently enabled the standard after-hours
+paper-entry window from immediately after 13:00 through 17:00 Pacific. The
+regular and premarket windows remain unchanged; fail closed after 17:00.
+Preserve the prior paper account: positions opened
 by removed engines may be managed and exited, but their engines may not open or
 add positions.
 

@@ -45,6 +45,8 @@ def main() -> None:
     settings.update({
         "v2_enabled": True,
         "paper_trading_enabled": True,
+        "allow_afterhours_buys": True,
+        "afterhours_buy_end_minutes": 1020,
         "enabled_engines": [MODEL_ID],
         "main_account_enabled_buy_engines": [MODEL_ID],
         "nasdaq101_baseline_paper_enabled": True,

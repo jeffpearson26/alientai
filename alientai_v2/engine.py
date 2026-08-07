@@ -391,7 +391,10 @@ def manage_open_positions(account: Dict[str, Any], settings: Dict[str, Any]) -> 
 
 
 
-def market_buy_window_status(settings: Dict[str, Any]) -> Dict[str, Any]:
+def market_buy_window_status(
+    settings: Dict[str, Any],
+    now_local_dt: datetime | None = None,
+) -> Dict[str, Any]:
     """
     Decide whether V2 is allowed to open NEW paper buys right now.
 
@@ -399,12 +402,11 @@ def market_buy_window_status(settings: Dict[str, Any]) -> Dict[str, Any]:
     It does not affect managing existing positions.
     """
 
-    from datetime import datetime
-    try:
-        from zoneinfo import ZoneInfo
-        now_local_dt = datetime.now(ZoneInfo("America/Los_Angeles"))
-    except Exception:
-        now_local_dt = datetime.now()
+    if now_local_dt is None:
+        try:
+            now_local_dt = datetime.now(ZoneInfo("America/Los_Angeles"))
+        except Exception:
+            now_local_dt = datetime.now()
 
     now_local = now_local_dt.isoformat(timespec="seconds")
     hour = int(now_local_dt.hour)
@@ -419,6 +421,7 @@ def market_buy_window_status(settings: Dict[str, Any]) -> Dict[str, Any]:
         or settings.get("premarket_buys_enabled", False)
         or settings.get("allow_extended_hours_buys", False)
     )
+    allow_afterhours = bool(settings.get("allow_afterhours_buys", False))
 
     # Premarket paper-buy window: 1:00 AM to 6:29 AM Pacific.
     # This lets V2 test premarket behavior, but still blocks overnight dead hours.
@@ -441,6 +444,15 @@ def market_buy_window_status(settings: Dict[str, Any]) -> Dict[str, Any]:
             "session": "regular",
         }
 
+    afterhours_close = int(settings.get("afterhours_buy_end_minutes", 17 * 60))
+    if allow_afterhours and regular_close < minutes_now <= afterhours_close:
+        return {
+            "new_buys_allowed": True,
+            "reason": "After-hours paper buys enabled through 17:00 Pacific.",
+            "now_local": now_local,
+            "session": "afterhours",
+        }
+
     if minutes_now < regular_open:
         return {
             "new_buys_allowed": False,
@@ -451,9 +463,9 @@ def market_buy_window_status(settings: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "new_buys_allowed": False,
-        "reason": "After regular market close 13:00 Pacific: new paper buys disabled.",
+        "reason": "Outside enabled paper-buy sessions: new paper buys disabled.",
         "now_local": now_local,
-        "session": "after_close",
+        "session": "closed",
     }
 
 def rotate_portfolio_for_better_candidates(
