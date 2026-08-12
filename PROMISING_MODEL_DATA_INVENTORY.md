@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-07T20:05:07.118560+00:00`
+Automatically refreshed: `2026-08-12T00:17:33.399645+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -8,7 +8,7 @@ This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` me
 
 | State | Sole enabled model | Paper buys | Live trading | Current payload / blocker |
 |---|---|---|---|---|
-| **ENABLED_ABSTAINING** | `nasdaq100_complete_101_baseline_v1` | enabled | disabled | duplicate source sessions are unusable for 46/102 symbols; examples: ADBE=2026-08-05, AMD=2026-08-05, GOOGL=2026-08-05, GOOG=2026-08-05, AMZN=2026-08-05 |
+| **DISABLED** | `configuration mismatch` | enabled | disabled | duplicate source sessions are unusable for 46/102 symbols; examples: ADBE=2026-08-05, AMD=2026-08-05, GOOGL=2026-08-05, GOOG=2026-08-05, AMZN=2026-08-05 |
 
 Paper-account actions are simulation evidence and are never merged into prospective model evidence.
 
@@ -65,17 +65,17 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | `nasdaq_frozen_artifacts` | Frozen model/report/manifest hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `schwab_nasdaq80_daily` | Daily OHLCV for frozen 80-symbol universe | Schwab | 2026-08-04 | **BLOCKED** | duplicate source sessions are unusable for 42/80 symbols; examples: AAPL=2026-08-05, ADBE=2026-08-05, ADI=2026-08-05, ADP=2026-08-05, AMAT=2026-08-05 |
 | `nasdaq80_frozen_artifacts` | Frozen model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
-| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
+| `alpha_ai17_daily` | Daily OHLCV for frozen 17-symbol universe | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-11 |
+| `alpha_ai17_prior_daily` | Prior-session technical features for 17 symbols | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-11 |
 | `alpha_ai17_premarket_0925` | Extended-hours five-minute premarket features | Alpha Vantage | 2026-08-04 | **BLOCKED** | only 0 usable rows; 17 required |
 | `timestamped_earnings_events` | Earnings events and guidance available timestamps | Alpha Vantage archived earnings data | — | **READY** | available_at_utc must be no later than decision cutoff |
 | `ai17_frozen_artifacts` | Frozen five-session model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
 | `narrative_frozen_artifacts` | Frozen narrative model/report/universe hashes | Local immutable artifacts | — | **READY** | Hashes must match before every observation |
-| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-06 |
+| `alpha_ai17_prior_calls` | Prior-session unusual call-option features | Alpha Vantage | 2026-08-05 | **BLOCKED** | stale date 2026-08-05; expected 2026-08-11 |
 | `alpha_ai17_realtime_premarket_0925` | Realtime five-minute premarket candles | Alpha Vantage realtime entitlement | 2026-08-03 | **BLOCKED** | manifest status=failed_closed, completed=0, unavailable=0, failed=1; 17 completed required |
 | `alpha_ai17_exact_intraday_outcomes` | Exact 09:30-10:25 five-minute outcome path | Alpha Vantage | — | **CONTRACT** | validated when each observation reaches this stage |
 | `alpha_intraday_frozen_artifacts` | Six frozen intraday model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:30 timing contract must match |
-| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | 2026-08-06 | **READY** | All exact 09:25 interval-start candles captured 09:30-09:34:59 ET |
+| `schwab_ai17_0925_snapshot` | Current-session extended-hours five-minute snapshot | Schwab | 2026-08-11 | **READY** | All exact 09:25 interval-start candles captured 09:30-09:34:59 ET |
 | `schwab_ai17_1030_outcomes` | Exact 09:35-entry through 10:30-bar outcome path | Schwab | — | **CONTRACT** | validated when each observation reaches this stage |
 | `schwab_late_frozen_artifacts` | Frozen Schwab late-entry model/report hashes | Local immutable artifacts | — | **READY** | Hashes and 09:35 timing contract must match |
 | `point_in_time_option_selection_chains` | Option chain observable at selection | Alpha Vantage archive | — | **READY** | Selection snapshot strictly before entry snapshot |

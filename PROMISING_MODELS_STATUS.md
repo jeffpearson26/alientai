@@ -1,6 +1,7 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)
+Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)  
+Schema-v3 completion correction: 2026-08-11 17:17 Pacific
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: prospective research evidence remains separate from execution. Only the
 Nasdaq-101 technical baseline is explicitly authorized for the local V2 paper
@@ -164,10 +165,14 @@ automatic resume without new explicit authorization.
   timestamps, gap handling, abstention, calibration/policy separation, and
   genuinely unloaded sealed tests. The earlier schema-v2 full 20-minute run is
   immutable `RESEARCH_HOLD` (best validation -0.2238% mean net, 38.84% wins;
-  test sealed). Schema-v3 5/10/20/30-minute variants are now also
-  `RESEARCH_HOLD` with their tests sealed. The 60- and 90-minute builds are
-  not scheduled until the next development-work window; no compiler or
-  trainer is currently running.
+  test sealed). All six schema-v3 5/10/20/30/60/90-minute variants completed
+  in separate horizon-specific panel and model roots and returned
+  `RESEARCH_HOLD`. For the 60- and 90-minute variants, each panel completed
+  7,512 shards with zero failures for the exact 101-symbol universe, schema
+  version 3, nanosecond timestamps, `next_minute_open` entry, and
+  `exit_bar_close` targets. Neither policy-validation stage passed, so both
+  sealed tests remain unopened and unloaded. No compiler or trainer is
+  currently running.
 - Any-time one-minute AI/semiconductor-17 horizon clones
   (5/10/20/30/60/90 minutes): the separate 869-request supplement is complete
   and independently audited (793 valid files, 76 unavailable, 10,412,846 rows,
