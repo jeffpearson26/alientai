@@ -110,12 +110,15 @@ automatic resume without new explicit authorization.
   29,516-row sealed test retained AUC `0.54999` and `+0.6156%` Brier skill for
   the conservative bound, AUC `0.60775` and `+3.7183%` Brier skill for the
   optimistic bound, with calibration errors `0.00828` and `0.01251`.
-  **Future test: NOT_STARTED.** The first eligible decision is the completed
-  August 7 session. A new exact-48 adjusted-daily source snapshot must be
-  journaled after that close and before the next open. The cancelled bulk
-  archive no longer owns provider capacity, but no August 6 backfill is
-  permitted. This is probability evidence, not a validated trade-return
-  policy.
+  **Future test: ACTIVE; FIRST CALIBRATION OUTCOME PENDING.** A fresh
+  source-pure compact archive for the August 11 decision passed independent
+  audit for all 48 symbols, with 100 common dates through exactly August 11
+  and zero failures. The immutable snapshot scored and append-only journaled
+  all 48 probability intervals before the next open. The highest conservative
+  bounds were KO `25.7491%`, WMT `25.7491%`, PEP `25.6075%`, ABBV `25.0965%`,
+  and BAC `25.0965%`. Every row remains `AVOID`; outcomes may resolve early or
+  after the full ten-session timeout. This is probability evidence, not a
+  validated trade-return policy.
 - Corrected external LambdaRank 120-stock ranker, 20 sessions: the immutable
   `v2` panel passed an independent 75,000-row/625-date content audit, and its
   purged out-of-fold development gate passed with `0.08552` mean Rank IC,

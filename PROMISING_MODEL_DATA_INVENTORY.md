@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-12T00:52:43.385882+00:00`
+Automatically refreshed: `2026-08-12T08:53:17.412071+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -46,7 +46,7 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **DATA_PATH_PRESENT** | None in current local audit |
-| Calibrated first-passage probability bounds, 10 sessions | **BLOCKED** | barrier_probability_future_snapshot |
+| Calibrated first-passage probability bounds, 10 sessions | **DATA_PATH_PRESENT** | None in current local audit |
 | Superseded all-market small-cap baseline clone (zero observations) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Nasdaq small-cap range/volume baseline clone, 5 sessions | **DEVELOPMENT_NOT_TESTING** | nasdaq_smallcap_clone_readiness, nasdaq_smallcap_clone_future_snapshot |
 
@@ -137,7 +137,7 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | `barrier_probability_alpha_daily_inputs` | Full adjusted-daily histories for the exact 48-symbol barrier universe | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **READY** | One source file per symbol; same-row adjusted OHLC and raw point-in-time volume; MS/NOW unadjusted compact rows excluded; every source hash frozen in the panel manifest |
 | `barrier_probability_panel_audit` | Independent source, label, feature-sample, chronology, and sealed-partition audit | AlienTAI local auditor | — | **READY** | 188,667 labels reconstructed; two-sided ten-session development embargoes; label information must end within its assigned stage |
 | `barrier_probability_model_audit` | Independent LightGBM text-model, calibration, validation-gate, and one-time sealed-test audit | AlienTAI local auditor | — | **READY** | Both bound heads rescored; 29,516 sealed probabilities verified; prospective eligibility begins with the completed 2026-08-07 session |
-| `barrier_probability_future_snapshot` | Outcome-free exact-48 barrier feature snapshot and append-only probability journal | New independently audited Alpha Vantage adjusted-daily archive | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/barrier_probability_48_h10_alpha_vantage_v1_*/snapshot_manifest.json |
+| `barrier_probability_future_snapshot` | Outcome-free exact-48 barrier feature snapshot and append-only probability journal | New independently audited Alpha Vantage adjusted-daily archive | — | **READY** | Build after each completed eligible decision close and before the next open; score all 48 names even while earlier ten-session paths remain pending; no backfill or provider splice |
 | `barrier_probability_ten_session_outcomes` | Append-only prospective first-passage outcomes | Exact source-tagged Alpha Vantage adjusted-daily observation route | — | **CONTRACT** | validated when each observation reaches this stage |
 | `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |
 | `external_lambdarank_panel_audit` | Corrected source-pure 120-stock training panel audit | Schwab daily OHLCV with per-file date-schema mapping | — | **READY** | Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels |
