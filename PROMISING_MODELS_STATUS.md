@@ -1,6 +1,6 @@
 # AlienTAI Promising Model Register
 
-Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)  
+Generated: 2026-08-07 12:48 Pacific (Nasdaq-only clone scope audit)
 Schema-v3 completion correction: 2026-08-11 17:17 Pacific
 Purpose: permanent morning operating list for every legitimate research lead.
 Safety: prospective research evidence remains separate from execution. Only the
