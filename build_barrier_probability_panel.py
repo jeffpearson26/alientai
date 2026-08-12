@@ -61,15 +61,29 @@ def symbol_filename(symbol: str) -> str:
 def source_map(
     config: dict[str, Any],
     symbols: list[str],
-) -> dict[str, Path]:
-    mapping: dict[str, Path] = {}
+) -> dict[str, tuple[Path, str]]:
+    mapping: dict[str, tuple[Path, str]] = {}
+    aliases = {
+        str(key).upper(): str(value).upper()
+        for key, value in (config.get("source_symbol_aliases") or {}).items()
+    }
+    if not set(aliases).issubset(symbols):
+        raise ValueError("source symbol aliases must only name universe symbols")
     for route in config["source_routes"]:
         root = Path(route["root"])
-        for symbol in route["symbols"]:
+        route_symbols = (
+            symbols
+            if route.get("all_universe_symbols") is True
+            else route["symbols"]
+        )
+        for symbol in route_symbols:
             symbol = str(symbol).upper()
             if symbol in mapping:
                 raise ValueError(f"duplicate source route for {symbol}")
-            mapping[symbol] = root / symbol_filename(symbol)
+            mapping[symbol] = (
+                root / symbol_filename(symbol),
+                aliases.get(symbol, symbol),
+            )
     if set(mapping) != set(symbols):
         missing = sorted(set(symbols) - set(mapping))
         extra = sorted(set(mapping) - set(symbols))
@@ -120,9 +134,15 @@ def build_rows(
         counts[str(label["outcome_status"])] += 1
         if label.get("label_lower_bound") is None:
             continue
-        features = technical_features(
-            candles[decision_index + 1 - FEATURE_LOOKBACK : decision_index + 1]
-        )
+        try:
+            features = technical_features(
+                candles[
+                    decision_index + 1 - FEATURE_LOOKBACK : decision_index + 1
+                ]
+            )
+        except ValueError:
+            counts["feature_unavailable"] += 1
+            continue
         row = {
             "schema_version": 1,
             "model_id": model_id,
@@ -156,6 +176,10 @@ def main() -> None:
     config = json.loads(args.config.read_text(encoding="utf-8"))
     if not config.get("research_only") or config.get("execution_enabled"):
         raise ValueError("config must remain research-only")
+    aliases = {
+        str(key).upper(): str(value).upper()
+        for key, value in (config.get("source_symbol_aliases") or {}).items()
+    }
     universe_path = Path(config["universe_file"])
     symbols = read_symbols(universe_path)
     routes = source_map(config, symbols)
@@ -171,9 +195,9 @@ def main() -> None:
     outcome_counts: Counter[str] = Counter()
     with temporary.open("w", encoding="utf-8", newline="\n") as handle:
         for symbol in symbols:
-            path = routes[symbol]
+            path, expected_source_symbol = routes[symbol]
             source_records[symbol] = file_record(path)
-            candles = adjusted_daily_candles(path, symbol)
+            candles = adjusted_daily_candles(path, expected_source_symbol)
             rows, counts = build_rows(
                 model_id=str(config["model_id"]),
                 symbol=symbol,
@@ -271,6 +295,7 @@ def main() -> None:
         "universe_sha256": sha256(universe_path),
         "symbols": symbols,
         "symbol_count": len(symbols),
+        "source_symbol_aliases": aliases,
         "feature_names": list(FEATURE_NAMES),
         "feature_lookback_sessions": FEATURE_LOOKBACK,
         "start_date": config["start_date"],

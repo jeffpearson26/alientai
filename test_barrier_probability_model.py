@@ -8,6 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
+from build_barrier_probability_panel import source_map
+
 from alientai_v2.research.barrier_probability_model import (
     FEATURE_LOOKBACK,
     FEATURE_NAMES,
@@ -200,6 +202,57 @@ class BarrierChronologyTests(unittest.TestCase):
         np.testing.assert_allclose(lower, [0.2, 0.6])
         np.testing.assert_allclose(upper, [0.4, 0.8])
         np.testing.assert_array_equal(crossed, [False, True])
+
+
+class BarrierSourceRoutingTests(unittest.TestCase):
+    def test_single_route_can_cover_frozen_universe(self):
+        symbols = ["AAA", "BRK.B"]
+        mapping = source_map(
+            {
+                "source_routes": [
+                    {
+                        "root": "D:/source",
+                        "all_universe_symbols": True,
+                    }
+                ]
+            },
+            symbols,
+        )
+        self.assertEqual(
+            mapping["AAA"],
+            (Path("D:/source/AAA_daily.json"), "AAA"),
+        )
+        self.assertEqual(
+            mapping["BRK.B"],
+            (Path("D:/source/BRK-B_daily.json"), "BRK.B"),
+        )
+
+    def test_source_route_preserves_explicit_provider_alias(self):
+        mapping = source_map(
+            {
+                "source_symbol_aliases": {"MMC": "MRSH"},
+                "source_routes": [
+                    {"root": "D:/source", "all_universe_symbols": True}
+                ],
+            },
+            ["MMC"],
+        )
+        self.assertEqual(
+            mapping["MMC"],
+            (Path("D:/source/MMC_daily.json"), "MRSH"),
+        )
+
+    def test_source_route_rejects_alias_outside_universe(self):
+        with self.assertRaisesRegex(ValueError, "aliases"):
+            source_map(
+                {
+                    "source_symbol_aliases": {"OTHER": "ALIAS"},
+                    "source_routes": [
+                        {"root": "D:/source", "all_universe_symbols": True}
+                    ],
+                },
+                ["AAA"],
+            )
 
 
 if __name__ == "__main__":

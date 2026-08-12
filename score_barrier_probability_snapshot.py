@@ -18,9 +18,6 @@ from alientai_v2.research.barrier_probability_model import (
 )
 
 
-MODEL_ID = "barrier_probability_48_h10_alpha_vantage_v1_20260807"
-
-
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -64,13 +61,14 @@ def main() -> None:
     )
     snapshot_path = Path(snapshot_manifest["artifact"]["path"])
     report_path = args.model_dir / "training_report.json"
-    audit_path = args.model_dir / "independent_model_audit.json"
+    audit_path = Path(snapshot_manifest["model_audit_path"])
     report = json.loads(report_path.read_text(encoding="utf-8"))
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    model_id = str(report.get("model_id") or "")
     if (
-        snapshot_manifest.get("model_id") != MODEL_ID
-        or report.get("model_id") != MODEL_ID
-        or audit.get("model_id") != MODEL_ID
+        not model_id
+        or snapshot_manifest.get("model_id") != model_id
+        or audit.get("model_id") != model_id
         or audit.get("status") != "PASS"
         or report.get("status")
         != "FROZEN_PENDING_PROSPECTIVE_REVIEW"
@@ -86,8 +84,13 @@ def main() -> None:
         raise ValueError("snapshot model-audit hash mismatch")
 
     rows = read_jsonl(snapshot_path)
-    if len(rows) != 48 or len({row["symbol"] for row in rows}) != 48:
-        raise ValueError("snapshot must contain the exact 48-name universe")
+    expected_rows = int(snapshot_manifest.get("eligible_candidate_count", -1))
+    if (
+        not rows
+        or len(rows) != expected_rows
+        or len({row["symbol"] for row in rows}) != expected_rows
+    ):
+        raise ValueError("snapshot eligible universe is incomplete")
     matrix = np.asarray(
         [[float(row[name]) for name in FEATURE_NAMES] for row in rows],
         dtype=np.float32,
@@ -140,14 +143,14 @@ def main() -> None:
     existing = read_jsonl(args.journal)
     decision_date = str(snapshot_manifest["decision_date"])
     if any(
-        row.get("model_id") == MODEL_ID
+        row.get("model_id") == model_id
         and row.get("decision_date") == decision_date
         for row in existing
     ):
         raise ValueError("journal already contains this decision date")
     observation = {
         "schema_version": 1,
-        "model_id": MODEL_ID,
+        "model_id": model_id,
         "decision_date": decision_date,
         "observed_at_utc": datetime.now(timezone.utc).isoformat(),
         "source_provider": "Alpha Vantage",

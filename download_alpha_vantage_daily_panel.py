@@ -45,12 +45,27 @@ def main() -> None:
         choices=("TIME_SERIES_DAILY", "TIME_SERIES_DAILY_ADJUSTED"),
         default="TIME_SERIES_DAILY",
     )
+    parser.add_argument(
+        "--symbol-aliases",
+        type=Path,
+        help="Optional JSON mapping frozen universe symbols to provider symbols.",
+    )
     args = parser.parse_args()
     load_dotenv(ROOT / ".env")
     api_key = str(os.getenv("ALPHA_VANTAGE_API_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("ALPHA_VANTAGE_API_KEY is required")
     args.output.mkdir(parents=True, exist_ok=True)
+    aliases = (
+        {
+            str(key).upper(): str(value).upper()
+            for key, value in json.loads(
+                args.symbol_aliases.read_text(encoding="utf-8")
+            ).items()
+        }
+        if args.symbol_aliases
+        else {}
+    )
     completed, failed = [], {}
     for index, symbol in enumerate(read_symbols(args.symbols_file), 1):
         path = args.output / f"{symbol.replace('/', '-').replace('.', '-')}_daily.json"
@@ -58,7 +73,8 @@ def main() -> None:
             completed.append(symbol)
             continue
         try:
-            payload = fetch(symbol, api_key, args.outputsize, args.function)
+            provider_symbol = aliases.get(symbol, symbol)
+            payload = fetch(provider_symbol, api_key, args.outputsize, args.function)
             temporary = path.with_suffix(".json.tmp")
             temporary.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
             temporary.replace(path)
@@ -75,6 +91,7 @@ def main() -> None:
         "failed": failed,
         "function": args.function,
         "outputsize": args.outputsize,
+        "source_symbol_aliases": aliases,
     }
     (args.output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": manifest["status"], "completed": len(completed), "failed": len(failed)}))

@@ -363,6 +363,19 @@
       ]
     },
     {
+      "model_id": "barrier_probability_sp500_496_h10_alpha_vantage_v1_20260812",
+      "display_name": "S&P 500 calibrated first-passage probability bounds, 10 sessions",
+      "lifecycle": "future_test_candidate",
+      "requirements": [
+        "barrier_probability_sp500_frozen_spec",
+        "barrier_probability_sp500_alpha_daily_audit",
+        "barrier_probability_sp500_panel_audit",
+        "barrier_probability_sp500_model_audit",
+        "barrier_probability_sp500_future_snapshot",
+        "barrier_probability_sp500_ten_session_outcomes"
+      ]
+    },
+    {
       "model_id": "us_smallcap_range_volume_baseline_clone_h05_v1_20260807",
       "display_name": "Superseded all-market small-cap baseline clone (zero observations)",
       "lifecycle": "development",
@@ -1008,6 +1021,53 @@
       "data_type": "Append-only prospective first-passage outcomes",
       "source": "Exact source-tagged Alpha Vantage adjusted-daily observation route",
       "timing_contract": "Append on definite early resolution or after ten complete sessions; same-session double touches retain lower/upper labels; never retune",
+      "kind": "logical"
+    },
+    "barrier_probability_sp500_frozen_spec": {
+      "data_type": "Frozen S&P 500 first-passage probability contract",
+      "source": "AlienTAI research specification",
+      "timing_contract": "Separate 496-identity clone; next-open entry; +1.5%/-0.5% barriers; ten sessions; no inherited evidence or provider splice",
+      "kind": "file",
+      "path": "SP500_BARRIER_PROBABILITY_MODEL_SPEC_20260812.md"
+    },
+    "barrier_probability_sp500_alpha_daily_audit": {
+      "data_type": "Full adjusted-daily S&P archive and identity audit",
+      "source": "Alpha Vantage TIME_SERIES_DAILY_ADJUSTED",
+      "timing_contract": "496/496 frozen identities; explicit provider aliases and historical terminal dates; exact latest completed session for active names",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/AlphaVantage_2026/barrier_probability_sp500_496_adjusted_daily_full_20260812/content_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "barrier_probability_sp500_panel_audit": {
+      "data_type": "Independent S&P source, label, feature, chronology, and sealed-partition audit",
+      "source": "AlienTAI local auditor",
+      "timing_contract": "1,914,495 rows verified; 7,629 feature samples recomputed; unavailable windows excluded without imputation",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Data/Compiled/barrier_probability_sp500_496_h10_alpha_vantage_v1_20260812_r1/content_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "barrier_probability_sp500_model_audit": {
+      "data_type": "Independent S&P LightGBM/calibration/sealed-test audit",
+      "source": "AlienTAI local auditor",
+      "timing_contract": "Every validation gate passed and 303,572 sealed predictions were independently verified",
+      "kind": "json_status",
+      "path": "D:/AlientAI/Models/barrier_probability_sp500_496_h10_alpha_vantage_v1_20260812/model_audit.json",
+      "status_field": "status",
+      "required_status": "PASS"
+    },
+    "barrier_probability_sp500_future_snapshot": {
+      "data_type": "Outcome-free S&P barrier snapshot and append-only probability journal",
+      "source": "Independently audited Alpha Vantage adjusted-daily archive",
+      "timing_contract": "Score every eligible identity after the completed close and before next open; terminal or feature-unavailable identities explicitly abstain",
+      "kind": "manifest_glob",
+      "path": "D:/AlientAI/Data/Snapshots/barrier_probability_sp500_496_h10_alpha_vantage_v1_20260812/*/snapshot_manifest.json"
+    },
+    "barrier_probability_sp500_ten_session_outcomes": {
+      "data_type": "Append-only prospective S&P first-passage outcomes",
+      "source": "Exact source-tagged Alpha Vantage adjusted-daily observation route",
+      "timing_contract": "Append only on definite early resolution or after ten completed sessions; never retune",
       "kind": "logical"
     },
     "external_lambdarank_bundle": {

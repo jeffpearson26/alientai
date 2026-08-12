@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-12T08:53:17.412071+00:00`
+Automatically refreshed: `2026-08-12T10:02:16.449310+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -47,6 +47,7 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
 | Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **DATA_PATH_PRESENT** | None in current local audit |
 | Calibrated first-passage probability bounds, 10 sessions | **DATA_PATH_PRESENT** | None in current local audit |
+| S&P 500 calibrated first-passage probability bounds, 10 sessions | **DATA_PATH_PRESENT** | None in current local audit |
 | Superseded all-market small-cap baseline clone (zero observations) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Nasdaq small-cap range/volume baseline clone, 5 sessions | **DEVELOPMENT_NOT_TESTING** | nasdaq_smallcap_clone_readiness, nasdaq_smallcap_clone_future_snapshot |
 
@@ -139,6 +140,12 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | `barrier_probability_model_audit` | Independent LightGBM text-model, calibration, validation-gate, and one-time sealed-test audit | AlienTAI local auditor | — | **READY** | Both bound heads rescored; 29,516 sealed probabilities verified; prospective eligibility begins with the completed 2026-08-07 session |
 | `barrier_probability_future_snapshot` | Outcome-free exact-48 barrier feature snapshot and append-only probability journal | New independently audited Alpha Vantage adjusted-daily archive | — | **READY** | Build after each completed eligible decision close and before the next open; score all 48 names even while earlier ten-session paths remain pending; no backfill or provider splice |
 | `barrier_probability_ten_session_outcomes` | Append-only prospective first-passage outcomes | Exact source-tagged Alpha Vantage adjusted-daily observation route | — | **CONTRACT** | validated when each observation reaches this stage |
+| `barrier_probability_sp500_frozen_spec` | Frozen S&P 500 first-passage probability contract | AlienTAI research specification | — | **READY** | Separate 496-identity clone; next-open entry; +1.5%/-0.5% barriers; ten sessions; no inherited evidence or provider splice |
+| `barrier_probability_sp500_alpha_daily_audit` | Full adjusted-daily S&P archive and identity audit | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **READY** | 496/496 frozen identities; explicit provider aliases and historical terminal dates; exact latest completed session for active names |
+| `barrier_probability_sp500_panel_audit` | Independent S&P source, label, feature, chronology, and sealed-partition audit | AlienTAI local auditor | — | **READY** | 1,914,495 rows verified; 7,629 feature samples recomputed; unavailable windows excluded without imputation |
+| `barrier_probability_sp500_model_audit` | Independent S&P LightGBM/calibration/sealed-test audit | AlienTAI local auditor | — | **READY** | Every validation gate passed and 303,572 sealed predictions were independently verified |
+| `barrier_probability_sp500_future_snapshot` | Outcome-free S&P barrier snapshot and append-only probability journal | Independently audited Alpha Vantage adjusted-daily archive | — | **READY** | Score every eligible identity after the completed close and before next open; terminal or feature-unavailable identities explicitly abstain |
+| `barrier_probability_sp500_ten_session_outcomes` | Append-only prospective S&P first-passage outcomes | Exact source-tagged Alpha Vantage adjusted-daily observation route | — | **CONTRACT** | validated when each observation reaches this stage |
 | `external_lambdarank_bundle` | Jeff-supplied LambdaRank source bundle | Immutable external ZIP | — | **READY** | SHA256 dcfcd7e3403d93842ec732b2b8a46d99cf71fe8e15176ff7c1041299d94aff4d; bundled joblib is untrusted and must remain quarantined and unloaded |
 | `external_lambdarank_panel_audit` | Corrected source-pure 120-stock training panel audit | Schwab daily OHLCV with per-file date-schema mapping | — | **READY** | Next-session-open entry, twentieth subsequent close, 0.25% cost, exact full-universe dates, purged labels |
 | `external_lambdarank_model_audit` | Safe LightGBM text-model and OOF evidence audit | AlienTAI corrected LambdaRank trainer | — | **READY** | Development gate only; no historical sealed test; future-only eligibility begins after 2026-08-06 |

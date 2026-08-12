@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "model_id": "barrier_probability_sp500_496_h10_alpha_vantage_v1_20260812",
+  "research_only": true,
+  "execution_enabled": false,
+  "provider": "Alpha Vantage",
+  "universe_file": "sp500_expanded_symbols.txt",
+  "universe_count": 496,
+  "universe_sha256": "7cb50d31ad5ECB0123b811b9c88e161beee84d3b185742799353fb774720d1c8",
+  "start_date": "2010-01-01",
+  "upper_barrier_pct": 1.5,
+  "lower_barrier_pct": 0.5,
+  "maximum_horizon_sessions": 10,
+  "decision_time": "official completed regular-session close",
+  "entry": "next regular-session adjusted open",
+  "label_price_fields": "same-date adjusted OHLC; raw point-in-time volume",
+  "timeout_policy": "failure",
+  "same_session_double_touch_policy": "probability bounds",
+  "embargo_sessions_each_side": 10,
+  "source_symbol_aliases": {
+    "BF.B": "BF-B",
+    "BK": "BNY",
+    "MMC": "MRSH"
+  },
+  "source_terminal_dates": {
+    "CTRA": "2026-05-06",
+    "DAY": "2026-02-03",
+    "DFS": "2025-05-16",
+    "EA": "2026-08-04",
+    "HES": "2025-07-18",
+    "HOLX": "2026-04-07",
+    "IPG": "2025-11-26",
+    "JNPR": "2025-07-02",
+    "K": "2025-12-11"
+  },
+  "require_common_source_date_intersection": false,
+  "source_routes": [
+    {
+      "root": "D:/AlientAI/Data/AlphaVantage_2026/barrier_probability_sp500_496_adjusted_daily_full_20260812",
+      "all_universe_symbols": true
+    }
+  ]
+}

@@ -119,6 +119,22 @@ automatic resume without new explicit authorization.
   and BAC `25.0965%`. Every row remains `AVOID`; outcomes may resolve early or
   after the full ten-session timeout. This is probability evidence, not a
   validated trade-return policy.
+- S&P 500 calibrated first-passage barrier clone, 10 sessions: the isolated
+  496-identity Alpha Vantage clone passed its 1,914,495-row independent panel
+  audit with 7,629 feature recomputations and zero errors. Every frozen
+  policy-validation gate passed. Its one-time 303,572-row sealed test retained
+  conservative-bound AUC `0.53282`, Brier skill `+0.3276%`, calibration error
+  `0.00195`, and positive date-cluster Brier-improvement CI; the optimistic
+  bound retained AUC `0.60414` and Brier skill `+3.5283%`. The independent
+  model audit rescored all 303,572 sealed predictions with zero errors.
+  **Future test: ACTIVE; FIRST CALIBRATION OUTCOME PENDING.** The August 11
+  source-pure snapshot journaled 486 eligible probabilities before the next
+  open. Nine terminal historical constituents explicitly abstained, and ANSS
+  abstained because its frozen ADX feature was unavailable. The maximum
+  conservative bound was `23.4558%`; BXP had the highest optimistic bound
+  within that tied conservative tier at `40.3839%`, followed by UPS and GS at
+  `39.5122%`. All rows remain `AVOID`; this is probability calibration
+  evidence, not a validated trading policy or profitability finding.
 - Corrected external LambdaRank 120-stock ranker, 20 sessions: the immutable
   `v2` panel passed an independent 75,000-row/625-date content audit, and its
   purged out-of-fold development gate passed with `0.08552` mean Rank IC,

@@ -16,10 +16,6 @@ from alientai_v2.research.barrier_probability_model import (
 )
 
 
-MODEL_ID = "barrier_probability_48_h10_alpha_vantage_v1_20260807"
-FIRST_ELIGIBLE_DECISION_DATE = "2026-08-07"
-
-
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -48,25 +44,33 @@ def main() -> None:
     parser.add_argument("--model-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
-    if args.decision_date < FIRST_ELIGIBLE_DECISION_DATE:
-        raise ValueError("decision date predates the frozen prospective window")
     if args.output_dir.exists() and any(args.output_dir.iterdir()):
         raise FileExistsError("output directory must be empty")
 
     model_report_path = args.model_dir / "training_report.json"
     model_audit_path = args.model_dir / "independent_model_audit.json"
+    if not model_audit_path.is_file():
+        model_audit_path = args.model_dir / "model_audit.json"
     model_report = json.loads(
         model_report_path.read_text(encoding="utf-8")
     )
     model_audit = json.loads(model_audit_path.read_text(encoding="utf-8"))
+    model_id = str(model_report.get("model_id") or "")
     if (
-        model_report.get("model_id") != MODEL_ID
+        not model_id
         or model_report.get("status")
         != "FROZEN_PENDING_PROSPECTIVE_REVIEW"
-        or model_audit.get("model_id") != MODEL_ID
+        or model_audit.get("model_id") != model_id
         or model_audit.get("status") != "PASS"
     ):
         raise ValueError("frozen model identity or audit mismatch")
+    sealed_last_date = str(
+        model_report.get("partitions", {})
+        .get("sealed_test", {})
+        .get("last_decision_date", "")
+    )
+    if args.decision_date <= sealed_last_date:
+        raise ValueError("decision date is not after the sealed test")
     archive_audit_path = args.archive / "content_audit.json"
     archive_audit = json.loads(
         archive_audit_path.read_text(encoding="utf-8")
@@ -81,27 +85,56 @@ def main() -> None:
     symbols = read_symbols(args.symbols)
     if symbols != model_report.get("universe"):
         raise ValueError("snapshot universe differs from frozen model universe")
+    panel_manifest = json.loads(
+        Path(model_report["panel_manifest_path"]).read_text(encoding="utf-8")
+    )
+    source_aliases = {
+        str(key).upper(): str(value).upper()
+        for key, value in (panel_manifest.get("source_symbol_aliases") or {}).items()
+    }
+    if source_aliases != {
+        str(key).upper(): str(value).upper()
+        for key, value in (archive_audit.get("source_symbol_aliases") or {}).items()
+    }:
+        raise ValueError("snapshot source aliases differ from frozen panel")
+    terminal_dates = {
+        str(key).upper(): str(value)
+        for key, value in (archive_audit.get("required_terminal_dates") or {}).items()
+    }
     rows = []
     sources = {}
+    unavailable = {}
     for symbol in symbols:
         path = args.archive / filename(symbol)
-        candles = adjusted_daily_candles(path, symbol)
+        candles = adjusted_daily_candles(path, source_aliases.get(symbol, symbol))
         if candles[-1]["market_date"] != args.decision_date:
-            raise ValueError(
-                f"{symbol}: latest date {candles[-1]['market_date']} "
-                f"is not {args.decision_date}"
-            )
+            if terminal_dates.get(symbol) == candles[-1]["market_date"]:
+                unavailable[symbol] = {
+                    "reason": "frozen_terminal_history",
+                    "latest_date": candles[-1]["market_date"],
+                }
+                continue
+            raise ValueError(f"{symbol}: source is stale without a frozen terminal date")
         if len(candles) < FEATURE_LOOKBACK:
-            raise ValueError(f"{symbol}: insufficient feature history")
+            unavailable[symbol] = {"reason": "insufficient_feature_history"}
+            continue
+        try:
+            features = technical_features(candles[-FEATURE_LOOKBACK:])
+        except ValueError as exc:
+            unavailable[symbol] = {
+                "reason": "feature_unavailable",
+                "detail": str(exc),
+            }
+            continue
         rows.append(
             {
                 "schema_version": 1,
-                "model_id": MODEL_ID,
+                "model_id": model_id,
                 "provider": "Alpha Vantage",
                 "market_date": args.decision_date,
                 "symbol": symbol,
                 "decision_adjusted_close": float(candles[-1]["close"]),
-                **technical_features(candles[-FEATURE_LOOKBACK:]),
+                **features,
                 "outcomes_attached": False,
                 "research_only": True,
                 "execution_decision": "AVOID",
@@ -113,10 +146,8 @@ def main() -> None:
             "rows": len(candles),
             "latest_date": candles[-1]["market_date"],
         }
-    if len(rows) != len(symbols) or len({row["symbol"] for row in rows}) != len(
-        symbols
-    ):
-        raise ValueError("snapshot universe is incomplete")
+    if not rows or len({row["symbol"] for row in rows}) != len(rows):
+        raise ValueError("snapshot has no unique eligible candidates")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     snapshot_path = args.output_dir / "feature_snapshot.jsonl"
@@ -126,11 +157,14 @@ def main() -> None:
     manifest = {
         "status": "complete",
         "schema_version": 1,
-        "model_id": MODEL_ID,
+        "model_id": model_id,
         "decision_date": args.decision_date,
         "observed_at_utc": datetime.now(timezone.utc).isoformat(),
         "provider": "Alpha Vantage",
         "candidate_count": len(symbols),
+        "eligible_candidate_count": len(rows),
+        "unavailable_candidate_count": len(unavailable),
+        "unavailable_candidates": unavailable,
         "symbols_path": str(args.symbols.resolve()),
         "symbols_sha256": sha256(args.symbols),
         "feature_names": list(FEATURE_NAMES),

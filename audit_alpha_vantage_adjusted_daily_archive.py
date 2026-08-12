@@ -82,10 +82,25 @@ def audit_archive(
     *,
     required_latest_date: str,
     required_outputsize: str = "full",
+    symbol_aliases: dict[str, str] | None = None,
+    required_terminal_dates: dict[str, str] | None = None,
+    require_common_date_intersection: bool = True,
 ) -> dict[str, Any]:
     manifest_path = archive / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     expected = list(symbols)
+    aliases = {
+        str(key).upper(): str(value).upper()
+        for key, value in (symbol_aliases or {}).items()
+    }
+    if not set(aliases).issubset(expected):
+        raise ValueError("symbol aliases must only name frozen universe symbols")
+    terminal_dates = {
+        str(key).upper(): str(value)
+        for key, value in (required_terminal_dates or {}).items()
+    }
+    if not set(terminal_dates).issubset(expected):
+        raise ValueError("terminal dates must only name frozen universe symbols")
     failures: dict[str, str] = {}
     files: dict[str, dict[str, Any]] = {}
     common_dates: set[str] | None = None
@@ -107,9 +122,11 @@ def audit_archive(
             payload_symbol = str(
                 (payload.get("Meta Data") or {}).get("2. Symbol") or ""
             ).upper()
-            if payload_symbol != symbol:
+            expected_payload_symbol = aliases.get(symbol, symbol)
+            if payload_symbol != expected_payload_symbol:
                 raise ValueError(
-                    f"payload symbol {payload_symbol!r}; expected {symbol!r}"
+                    f"payload symbol {payload_symbol!r}; "
+                    f"expected {expected_payload_symbol!r} for {symbol!r}"
                 )
             series = _series(payload)
             invalid_dates = sorted(
@@ -123,9 +140,10 @@ def audit_archive(
                 )
             dates = set(series)
             latest = max(dates)
-            if latest != required_latest_date:
+            expected_latest = terminal_dates.get(symbol, required_latest_date)
+            if latest != expected_latest:
                 raise ValueError(
-                    f"latest date {latest}; required {required_latest_date}"
+                    f"latest date {latest}; required {expected_latest}"
                 )
             common_dates = dates if common_dates is None else common_dates & dates
             files[symbol] = {
@@ -144,6 +162,11 @@ def audit_archive(
         and manifest.get("outputsize") == required_outputsize
         and not manifest.get("failed")
         and manifest_symbols == expected
+        and {
+            str(key).upper(): str(value).upper()
+            for key, value in (manifest.get("source_symbol_aliases") or {}).items()
+        }
+        == aliases
     )
     status = (
         "PASS"
@@ -151,7 +174,7 @@ def audit_archive(
         and not failures
         and not orphan_files
         and len(files) == len(expected)
-        and bool(common_dates)
+        and (bool(common_dates) or not require_common_date_intersection)
         else "FAIL"
     )
     return {
@@ -159,9 +182,12 @@ def audit_archive(
         "research_only": True,
         "execution_enabled": False,
         "provider": "Alpha Vantage",
+        "source_symbol_aliases": aliases,
         "endpoint": "TIME_SERIES_DAILY_ADJUSTED",
         "outputsize": required_outputsize,
         "required_latest_date": required_latest_date,
+        "required_terminal_dates": terminal_dates,
+        "common_date_intersection_required": require_common_date_intersection,
         "expected_symbols": len(expected),
         "audited_symbols": len(files),
         "manifest_ok": manifest_ok,
@@ -187,6 +213,13 @@ def main() -> None:
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--symbols-file", type=Path, required=True)
     parser.add_argument("--required-latest-date", required=True)
+    parser.add_argument("--symbol-aliases", type=Path)
+    parser.add_argument("--required-terminal-dates", type=Path)
+    parser.add_argument(
+        "--allow-empty-common-date-intersection",
+        action="store_true",
+        help="Permit non-overlapping historical memberships while still auditing every file.",
+    )
     parser.add_argument(
         "--required-outputsize",
         choices=("compact", "full"),
@@ -199,6 +232,19 @@ def main() -> None:
         read_symbols(args.symbols_file),
         required_latest_date=args.required_latest_date,
         required_outputsize=args.required_outputsize,
+        symbol_aliases=(
+            json.loads(args.symbol_aliases.read_text(encoding="utf-8"))
+            if args.symbol_aliases
+            else None
+        ),
+        required_terminal_dates=(
+            json.loads(args.required_terminal_dates.read_text(encoding="utf-8"))
+            if args.required_terminal_dates
+            else None
+        ),
+        require_common_date_intersection=(
+            not args.allow_empty_common_date_intersection
+        ),
     )
     output = args.output or args.archive / "content_audit.json"
     output.write_text(

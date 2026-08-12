@@ -73,6 +73,10 @@ def audit(panel_dir: Path) -> dict[str, Any]:
 
     source_candles: dict[str, list[dict[str, Any]]] = {}
     date_indices: dict[str, dict[str, int]] = {}
+    source_symbol_aliases = {
+        str(key).upper(): str(value).upper()
+        for key, value in (manifest.get("source_symbol_aliases") or {}).items()
+    }
     for symbol in manifest.get("symbols") or []:
         record = (manifest.get("source_files") or {}).get(symbol) or {}
         path = Path(str(record.get("path") or ""))
@@ -93,7 +97,10 @@ def audit(panel_dir: Path) -> dict[str, Any]:
                 errors.append(f"{symbol}: source manifest hash mismatch")
                 continue
         try:
-            candles = adjusted_daily_candles(path, symbol)
+            candles = adjusted_daily_candles(
+                path,
+                source_symbol_aliases.get(symbol, symbol),
+            )
         except Exception as exc:
             errors.append(f"{symbol}: source content invalid: {exc}")
             continue
