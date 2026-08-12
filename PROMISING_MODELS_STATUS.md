@@ -137,16 +137,17 @@ automatic resume without new explicit authorization.
   `0.06197`, exact top-10 `+2.0230%` mean net, `+1.4517%` median, and
   `56.34%` wins. Its one-time 130-date sealed test passed with Rank IC
   `0.08305`, top-10 `+5.1226%` mean net, `+2.7377%` median, `57.00%` wins,
-  and all 20 non-overlap rotations positive. **Future test: NOT_STARTED.**
-  Decisions through August 6 are blocked by the immutable cutoff; the next
-  eligible session needs a new audited Alpha Vantage archive and pre-entry
-  snapshot. The fail-closed one-command future runner is ready and correctly
-  reports August 7 as `NOT_SCHEDULED_YET` until 16:15 Eastern; it checks the
-  cutoff, duplicate collectors, D-drive space, credentials, exact 121-series
-  coverage, content audit, snapshot hashes, and duplicate journal dates before
-  appending anything. Fixed-universe bias, overlap, and adjusted-history
-  revision risk mean this is promising evidence, not established
-  profitability.
+  and all 20 non-overlap rotations positive. **Future test: ACTIVE; FIRST
+  OUTCOME PENDING.** The first eligible observation was created after the
+  August 11 close and before the August 12 entry. Its fresh source-pure compact
+  archive passed the independent audit for all 121 required series, with 100
+  common dates through exactly August 11 and zero failures. The frozen top-10
+  ranking is MU, ARM, AMAT, INTC, ACN, ADBE, AMZN, FTNT, BSX, and INTU. The
+  observation is append-only, research-only, and enters at the next complete
+  regular-session adjusted open; its outcome remains pending until the
+  twentieth subsequent regular-session adjusted close. Fixed-universe bias,
+  overlap, and adjusted-history revision risk mean this is promising evidence,
+  not established profitability.
 - Approved Alpha Vantage/Schwab fallback routing: Jeff authorized either
   provider when rows are missing, duplicated, or conflicting. The 120-stock
   LambdaRank route is ready because both providers have separately identified,

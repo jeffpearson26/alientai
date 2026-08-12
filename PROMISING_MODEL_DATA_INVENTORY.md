@@ -1,6 +1,6 @@
 # Promising Model Data Inventory
 
-Automatically refreshed: `2026-08-12T00:17:33.399645+00:00`
+Automatically refreshed: `2026-08-12T00:52:43.385882+00:00`
 
 This is a readiness inventory, not a profitability claim. `DATA_PATH_PRESENT` means no required local dependency is missing; each dated observation must still pass its exact freshness, timing, universe, and hash checks.
 
@@ -45,7 +45,7 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | Full-archive Nasdaq-101 daily + five-minute technical ranker, 20 sessions (cancelled partial archive) | **DEVELOPMENT_NOT_TESTING** | full_nasdaq_adjusted_5min_audit, full_archive_multiresolution_panel_audit, full_archive_multiresolution_h20_report, full_archive_multiresolution_model_audit |
 | External clean-rank S&P-120-style 20-session model (audit hold) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Corrected external LambdaRank 120-stock model, 20 sessions | **BLOCKED** | external_lambdarank_primary_schwab_daily, external_lambdarank_future_snapshot |
-| Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **BLOCKED** | external_lambdarank_alpha_vantage_future_snapshot |
+| Source-pure Alpha Vantage LambdaRank clone candidate, 20 sessions | **DATA_PATH_PRESENT** | None in current local audit |
 | Calibrated first-passage probability bounds, 10 sessions | **BLOCKED** | barrier_probability_future_snapshot |
 | Superseded all-market small-cap baseline clone (zero observations) | **DEVELOPMENT_NOT_TESTING** | None in current local audit |
 | Nasdaq small-cap range/volume baseline clone, 5 sessions | **DEVELOPMENT_NOT_TESTING** | nasdaq_smallcap_clone_readiness, nasdaq_smallcap_clone_future_snapshot |
@@ -146,7 +146,7 @@ Paper-account actions are simulation evidence and are never merged into prospect
 | `external_lambdarank_alpha_vantage_daily_clone_input` | Source-pure full adjusted-daily archive for the exact 120-stock universe plus SPY | Alpha Vantage | — | **READY** | Separate clone input only; full TIME_SERIES_DAILY_ADJUSTED through 2026-08-06; never substitute into or evaluate the frozen Schwab model |
 | `external_lambdarank_alpha_vantage_panel_audit` | Source-pure Alpha Vantage 120-stock panel and sealed-split audit | Alpha Vantage | — | **READY** | Adjusted OHLC, raw point-in-time volume, exact 120-name cross-sections, next-open to twentieth-close labels, 20-session boundary embargo |
 | `external_lambdarank_alpha_vantage_model_audit` | Alpha Vantage LightGBM model and one-time sealed-test audit | AlienTAI source-pure trainer | — | **READY** | Fixed hyperparameters and top-10 policy; 497-date purged development followed by one 130-date sealed test; future eligibility begins after 2026-08-06 |
-| `external_lambdarank_alpha_vantage_future_snapshot` | Immutable prospective Alpha Vantage 120-name feature snapshot | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **BLOCKED** | no file matches D:/AlientAI/Data/Prospective/external_lambdarank_120_h20_alpha_vantage_v2_*/snapshot_manifest.json |
+| `external_lambdarank_alpha_vantage_future_snapshot` | Immutable prospective Alpha Vantage 120-name feature snapshot | Alpha Vantage TIME_SERIES_DAILY_ADJUSTED | — | **READY** | New separately audited compact/full archive for the exact completed decision session; build only after 2026-08-06 and before next-session entry; outcomes forbidden |
 | `external_lambdarank_alpha_vantage_twenty_session_outcomes` | Future-only Alpha Vantage twenty-session outcomes | The exact source-tagged Alpha Vantage observation archive | — | **CONTRACT** | validated when each observation reaches this stage |
 | `approved_source_fallback_registry` | Jeff-authorized source-pure Alpha Vantage/Schwab fallback routes | Immutable local routing registry and independent validator | — | **READY** | Route only between separately identified complete-provider model observations; never splice rows, rewrite frozen evidence, backfill, or shorten a frozen/prospective horizon |
 | `external_lambdarank_fallback_schwab_daily` | Same-provider long-history fallback for TSM and SPY | Schwab | — | **READY** | datetime_ms/datetime_utc schema uses the stored U.S. session date with no offset; exact overlap equality is required before a component merge |
