@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Reproduce the terminal AI/semiconductor H05 model gates and artifact hashes."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -21,9 +22,9 @@ from train_ai_semiconductor_setup_barrier_h05_lgbm import (
 
 
 ROOT = Path(__file__).resolve().parent
-CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
-PANEL_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
-OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_MODEL_AUDIT_20260825.json"
+DEFAULT_CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
+DEFAULT_PANEL_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
+DEFAULT_OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_MODEL_AUDIT_20260825.json"
 
 
 def sha256(path: Path) -> str:
@@ -39,9 +40,12 @@ def resolve(value: str) -> Path:
     return path if path.is_absolute() else ROOT / path
 
 
-def audit() -> dict[str, Any]:
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
-    panel_audit = json.loads(PANEL_AUDIT.read_text(encoding="utf-8"))
+def audit(
+    contract_path: Path = DEFAULT_CONTRACT,
+    panel_audit_path: Path = DEFAULT_PANEL_AUDIT,
+) -> dict[str, Any]:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    panel_audit = json.loads(panel_audit_path.read_text(encoding="utf-8"))
     panel_root = resolve(str(contract["panel_output_root"]))
     model_root = resolve(str(contract["model_output_root"]))
     panel_summary = json.loads((panel_root / "summary.json").read_text(encoding="utf-8"))
@@ -50,9 +54,9 @@ def audit() -> dict[str, Any]:
     errors: list[str] = []
     if panel_audit.get("status") != "PASS":
         errors.append("panel audit is not PASS")
-    if report.get("contract_sha256") != sha256(CONTRACT):
+    if report.get("contract_sha256") != sha256(contract_path):
         errors.append("contract hash mismatch")
-    if report.get("panel_audit_sha256") != sha256(PANEL_AUDIT):
+    if report.get("panel_audit_sha256") != sha256(panel_audit_path):
         errors.append("panel audit hash mismatch")
     for flag in ("execution_enabled", "paper_trading_enabled", "orders_created", "provider_contacted", "prospective_outcomes_read", "hyperparameter_search_performed", "sealed_test_retrained_after_open"):
         if bool(report.get(flag)):
@@ -137,8 +141,8 @@ def audit() -> dict[str, Any]:
         "execution_enabled": False,
         "orders_created": False,
         "contract_id": contract["contract_id"],
-        "contract_sha256": sha256(CONTRACT),
-        "panel_audit_sha256": sha256(PANEL_AUDIT),
+        "contract_sha256": sha256(contract_path),
+        "panel_audit_sha256": sha256(panel_audit_path),
         "training_report_sha256": sha256(report_path),
         "terminal_disposition": report.get("status"),
         "policy_passing_engines": passing,
@@ -150,8 +154,13 @@ def audit() -> dict[str, Any]:
 
 
 def main() -> None:
-    report = audit()
-    OUTPUT.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
+    parser.add_argument("--panel-audit", type=Path, default=DEFAULT_PANEL_AUDIT)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    args = parser.parse_args()
+    report = audit(args.contract, args.panel_audit)
+    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": report["status"],
         "terminal_disposition": report["terminal_disposition"],

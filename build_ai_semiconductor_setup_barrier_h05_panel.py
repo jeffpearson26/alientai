@@ -48,12 +48,14 @@ def partition_for_date(market_date: str, partitions: Sequence[Mapping[str, Any]]
     return matches[0]
 
 
-def build_panel(contract: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def build_panel(
+    contract: Mapping[str, Any], contract_path: Path = DEFAULT_CONTRACT
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     source = resolve(str(contract["source_archive"]))
     universe = resolve(str(contract["universe_file"]))
     source_audit_path = resolve(str(contract["source_subset_audit"]))
     source_audit = json.loads(source_audit_path.read_text(encoding="utf-8"))
-    if source_audit.get("status") != "PASS" or source_audit.get("contract_sha256") != sha256(DEFAULT_CONTRACT):
+    if source_audit.get("status") != "PASS" or source_audit.get("contract_sha256") != sha256(contract_path):
         raise ValueError("exact source subset audit is not a current PASS")
     if sha256(source / "manifest.json") != str(contract["source_archive_manifest_sha256"]):
         raise ValueError("source manifest hash mismatch")
@@ -199,7 +201,7 @@ def build_panel(contract: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict
         "sealed_test_predictions_read": False,
         "orders_created": False,
         "contract_id": contract["contract_id"],
-        "contract_sha256": sha256(DEFAULT_CONTRACT),
+        "contract_sha256": sha256(contract_path),
         "source_subset_audit_sha256": sha256(source_audit_path),
         "source_manifest_sha256": sha256(source / "manifest.json"),
         "universe_sha256": sha256(universe),
@@ -223,12 +225,10 @@ def main() -> None:
     parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     args = parser.parse_args()
     contract = json.loads(args.contract.read_text(encoding="utf-8"))
-    if args.contract.resolve() != DEFAULT_CONTRACT.resolve():
-        raise ValueError("this frozen compiler accepts only its exact contract")
     output_root = resolve(str(contract["panel_output_root"]))
     if output_root.exists() and any(output_root.iterdir()):
         raise ValueError(f"panel output root must be new or empty: {output_root}")
-    rows, summary = build_panel(contract)
+    rows, summary = build_panel(contract, args.contract)
     output_root.mkdir(parents=True, exist_ok=True)
     rows_path = output_root / "rows.jsonl"
     with rows_path.open("w", encoding="utf-8", newline="\n") as handle:

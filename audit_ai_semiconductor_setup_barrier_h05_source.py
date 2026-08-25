@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Audit the exact source subset for the frozen AI/semiconductor H05 setup model."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -11,8 +12,8 @@ from alientai_v2.research.ai_semiconductor_setup_barrier_h05 import load_rows
 
 
 ROOT = Path(__file__).resolve().parent
-CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
-OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_SOURCE_AUDIT_20260825.json"
+DEFAULT_CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
+DEFAULT_OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_SOURCE_AUDIT_20260825.json"
 
 
 def sha256(path: Path) -> str:
@@ -28,8 +29,8 @@ def resolve(value: str) -> Path:
     return path if path.is_absolute() else ROOT / path
 
 
-def audit() -> dict[str, Any]:
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+def audit(contract_path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
     source = resolve(str(contract["source_archive"]))
     manifest_path = source / "manifest.json"
     universe_path = resolve(str(contract["universe_file"]))
@@ -99,7 +100,7 @@ def audit() -> dict[str, Any]:
         "provider_contacted": False,
         "orders_created": False,
         "contract_id": contract["contract_id"],
-        "contract_sha256": sha256(CONTRACT),
+        "contract_sha256": sha256(contract_path),
         "source_manifest_status_preserved": manifest.get("status"),
         "source_manifest_sha256": sha256(manifest_path),
         "required_symbols": required,
@@ -115,8 +116,12 @@ def audit() -> dict[str, Any]:
 
 
 def main() -> None:
-    report = audit()
-    OUTPUT.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    args = parser.parse_args()
+    report = audit(args.contract)
+    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     if report["status"] != "PASS":
         raise SystemExit(1)

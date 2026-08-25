@@ -1,0 +1,137 @@
+{
+  "contract_id": "ai_semiconductor_setup_barrier_h05_lgbm_ev_only_v2_20260825",
+  "contract_sha256": "50500e8096516431b32d88f2415a38746aeab0f4d58a6d916497bc78eb3390e1",
+  "errors": [],
+  "execution_enabled": false,
+  "files": {
+    "ALAB": {
+      "first_date": "2024-03-20",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\ALAB_daily.json",
+      "rows": 608,
+      "sha256": "cde1a782cf6f983ce0ed394dda35f534b6a263e4d16abd96cce15bcafa220a9b"
+    },
+    "AMD": {
+      "first_date": "1999-11-01",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\AMD_daily.json",
+      "rows": 6742,
+      "sha256": "7714d4bf8cd7d8293c786794dc36c3eb420aeb532d095c85e439c587f4fff785"
+    },
+    "ARM": {
+      "first_date": "2023-09-14",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\ARM_daily.json",
+      "rows": 737,
+      "sha256": "a7d7dac1c3fe5eb2c1be47455c87ddc5bfd1725242c05761dda2134aad21a0fc"
+    },
+    "AVGO": {
+      "first_date": "2009-08-06",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\AVGO_daily.json",
+      "rows": 4287,
+      "sha256": "f2fabf7455f1c0bc0764e50c03d1889b6eb8628769d4aaf701fc9f6c8e08e427"
+    },
+    "CRDO": {
+      "first_date": "2022-01-27",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\CRDO_daily.json",
+      "rows": 1146,
+      "sha256": "1d667e2a24eadaa38974b24acfe8456a4076bdb8bdf76956ff6c67b66b7b5ed5"
+    },
+    "MRVL": {
+      "first_date": "2000-06-30",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\MRVL_daily.json",
+      "rows": 6574,
+      "sha256": "4631ce5c4ce1642699f7590ab7e4a20b9e19aa27b5b37f28a1fede1467ec00bf"
+    },
+    "MU": {
+      "first_date": "1999-11-01",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\MU_daily.json",
+      "rows": 6742,
+      "sha256": "ca502c6e9182584ac5091c404f6347736f9886677ef859aef9dc3e41063348e7"
+    },
+    "NVDA": {
+      "first_date": "1999-11-01",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\NVDA_daily.json",
+      "rows": 6742,
+      "sha256": "e0117bf56c41ed5eb816b5606a807de3ad49cd47958b096518270078e17f53ec"
+    },
+    "QQQ": {
+      "first_date": "1999-11-01",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\QQQ_daily.json",
+      "rows": 6742,
+      "sha256": "233dfb3d7ac9bb1b98d521452c3573bb6cf82ed8e128cded9e9ca8259a0aca68"
+    },
+    "SMCI": {
+      "first_date": "2007-03-29",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\SMCI_daily.json",
+      "rows": 4881,
+      "sha256": "a4232ce314433ad646798841a131d83a5a17d3d4ab34ed8f3d937ac397d1f62c"
+    },
+    "SNDK": {
+      "first_date": "2025-02-24",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\SNDK_daily.json",
+      "rows": 376,
+      "sha256": "e2e6cb2cc31b5cedc1cb41239410c75cebdc0f22a692586dc361bf46812269bc"
+    },
+    "SOXX": {
+      "first_date": "2001-07-13",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\SOXX_daily.json",
+      "rows": 6314,
+      "sha256": "63d0aaf3521371c4a0c213fbf6017597f33e689906d5c63492bb19945a5fa620"
+    },
+    "SPY": {
+      "first_date": "1999-11-01",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\SPY_daily.json",
+      "rows": 6742,
+      "sha256": "75c2295acdfde4d6e95e9f3e7d5b0ec185728a4e175da124f2aa0908b3712c11"
+    },
+    "VIXY": {
+      "first_date": "2011-01-04",
+      "latest_date": "2026-08-21",
+      "path": "D:\\AlientAI\\Data\\AlphaVantage_2026\\all_active_us_adjusted_daily_full_20260823\\VIXY_daily.json",
+      "rows": 3931,
+      "sha256": "6897412b7e86d3dee3f3088a8ff2458503f7a1227ebe7cf4be12ac71d22379e0"
+    }
+  },
+  "orders_created": false,
+  "provider_contacted": false,
+  "required_latest_source_date": "2026-08-21",
+  "required_symbol_count": 14,
+  "required_symbols": [
+    "NVDA",
+    "AMD",
+    "AVGO",
+    "MU",
+    "MRVL",
+    "CRDO",
+    "ALAB",
+    "ARM",
+    "SMCI",
+    "SNDK",
+    "QQQ",
+    "SOXX",
+    "SPY",
+    "VIXY"
+  ],
+  "research_only": true,
+  "schema_version": 1,
+  "source_manifest_sha256": "9ae25f2dc954f9dbbfd0d3de093b682037bddd2f894bc03709b2ad6e740b752c",
+  "source_manifest_status_preserved": "COMPLETE_WITH_RETRYABLE_FAILURES",
+  "status": "PASS",
+  "unrelated_broad_archive_failures_preserved": [
+    "DJIA"
+  ],
+  "volatility_context_is_proxy": true,
+  "volatility_context_symbol": "VIXY",
+  "volatility_level_feature_permitted": false
+}

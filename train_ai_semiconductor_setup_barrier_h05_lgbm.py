@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Train, calibrate, gate, and conditionally open the sealed AI/semi H05 test."""
 
+import argparse
 import hashlib
 import json
 import math
@@ -25,8 +26,8 @@ from alientai_v2.research.ai_semiconductor_setup_barrier_h05 import (
 
 
 ROOT = Path(__file__).resolve().parent
-CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
-PANEL_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
+DEFAULT_CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
+DEFAULT_PANEL_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
 
 
 def sha256(path: Path) -> str:
@@ -310,9 +311,13 @@ def research_director(selections_by_engine: Mapping[str, Sequence[dict[str, Any]
 
 
 def main() -> None:
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
-    panel_audit = json.loads(PANEL_AUDIT.read_text(encoding="utf-8"))
-    if panel_audit.get("status") != "PASS" or panel_audit.get("contract_sha256") != sha256(CONTRACT):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
+    parser.add_argument("--panel-audit", type=Path, default=DEFAULT_PANEL_AUDIT)
+    args = parser.parse_args()
+    contract = json.loads(args.contract.read_text(encoding="utf-8"))
+    panel_audit = json.loads(args.panel_audit.read_text(encoding="utf-8"))
+    if panel_audit.get("status") != "PASS" or panel_audit.get("contract_sha256") != sha256(args.contract):
         raise ValueError("panel audit is not a current PASS")
     panel_root = resolve(str(contract["panel_output_root"]))
     panel_summary = json.loads((panel_root / "summary.json").read_text(encoding="utf-8"))
@@ -429,8 +434,8 @@ def main() -> None:
         "sealed_test_opened": sealed_test_opened,
         "sealed_test_retrained_after_open": False,
         "contract_id": contract["contract_id"],
-        "contract_sha256": sha256(CONTRACT),
-        "panel_audit_sha256": sha256(PANEL_AUDIT),
+        "contract_sha256": sha256(args.contract),
+        "panel_audit_sha256": sha256(args.panel_audit),
         "panel_summary_sha256": sha256(panel_root / "summary.json"),
         "features": FEATURE_NAMES,
         "engines": engine_reports,

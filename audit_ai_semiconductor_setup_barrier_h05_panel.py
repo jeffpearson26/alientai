@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Independently audit the frozen AI/semiconductor setup-barrier H05 panel."""
 
+import argparse
 import hashlib
 import json
 import math
@@ -19,9 +20,9 @@ from alientai_v2.research.ai_semiconductor_setup_barrier_h05 import (
 
 
 ROOT = Path(__file__).resolve().parent
-CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
-SOURCE_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_SOURCE_AUDIT_20260825.json"
-OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
+DEFAULT_CONTRACT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_LGBM_CONTRACT_20260825.json"
+DEFAULT_SOURCE_AUDIT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_SOURCE_AUDIT_20260825.json"
+DEFAULT_OUTPUT = ROOT / "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_PANEL_AUDIT_20260825.json"
 
 
 def sha256(path: Path) -> str:
@@ -37,18 +38,21 @@ def resolve(value: str) -> Path:
     return path if path.is_absolute() else ROOT / path
 
 
-def audit() -> dict[str, Any]:
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+def audit(
+    contract_path: Path = DEFAULT_CONTRACT,
+    source_audit_path: Path = DEFAULT_SOURCE_AUDIT,
+) -> dict[str, Any]:
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
     panel_root = resolve(str(contract["panel_output_root"]))
     summary_path = panel_root / "summary.json"
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
-    source_audit = json.loads(SOURCE_AUDIT.read_text(encoding="utf-8"))
+    source_audit = json.loads(source_audit_path.read_text(encoding="utf-8"))
     errors: list[str] = []
     if source_audit.get("status") != "PASS":
         errors.append("source audit is not PASS")
-    if summary.get("contract_sha256") != sha256(CONTRACT):
+    if summary.get("contract_sha256") != sha256(contract_path):
         errors.append("contract hash mismatch")
-    if summary.get("source_subset_audit_sha256") != sha256(SOURCE_AUDIT):
+    if summary.get("source_subset_audit_sha256") != sha256(source_audit_path):
         errors.append("source audit hash mismatch")
     for flag in ("execution_enabled", "paper_trading_enabled", "provider_contacted", "prospective_outcomes_read", "sealed_test_predictions_read", "orders_created"):
         if bool(summary.get(flag)):
@@ -150,8 +154,8 @@ def audit() -> dict[str, Any]:
         "execution_enabled": False,
         "orders_created": False,
         "contract_id": contract["contract_id"],
-        "contract_sha256": sha256(CONTRACT),
-        "source_audit_sha256": sha256(SOURCE_AUDIT),
+        "contract_sha256": sha256(contract_path),
+        "source_audit_sha256": sha256(source_audit_path),
         "panel_summary_sha256": sha256(summary_path),
         "rows_inspected": inspected,
         "symbols": len(symbol_counts),
@@ -166,8 +170,13 @@ def audit() -> dict[str, Any]:
 
 
 def main() -> None:
-    report = audit()
-    OUTPUT.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
+    parser.add_argument("--source-audit", type=Path, default=DEFAULT_SOURCE_AUDIT)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    args = parser.parse_args()
+    report = audit(args.contract, args.source_audit)
+    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     if report["status"] != "PASS":
         raise SystemExit(1)
