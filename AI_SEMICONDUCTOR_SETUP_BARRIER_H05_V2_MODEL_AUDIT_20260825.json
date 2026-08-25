@@ -1,0 +1,518 @@
+{
+  "contract_id": "ai_semiconductor_setup_barrier_h05_lgbm_ev_only_v2_20260825",
+  "contract_sha256": "50500e8096516431b32d88f2415a38746aeab0f4d58a6d916497bc78eb3390e1",
+  "errors": [],
+  "execution_enabled": false,
+  "orders_created": false,
+  "panel_audit_sha256": "4988270df4686b283266508e2726727ec32204fabeb1bf3577aaa878946e20e9",
+  "policy_passing_engines": [
+    "SECTOR_RIP_MOMENTUM_V1"
+  ],
+  "recomputed_policy_validation": {
+    "BREAKOUT_ANTICIPATION_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": false,
+        "minimum_candidate_dates": false,
+        "minimum_candidates": false,
+        "minimum_mean_net_return_pct": false,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": false,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": null,
+        "average_winner_pct": null,
+        "by_regime": {},
+        "by_symbol": {},
+        "candidate_dates": 0,
+        "candidates": 0,
+        "ending_research_capital": 10000.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": null,
+          "rows": 0,
+          "soxx_mean_net_return_pct": null
+        },
+        "maximum_drawdown_pct": 0.0,
+        "mean_net_return_pct": null,
+        "median_net_return_pct": null,
+        "observed_months": 11,
+        "probability": {
+          "brier": 0.2354113520408163,
+          "brier_skill_pct": 0.0,
+          "ece_10bin": 0.05484693877551022
+        },
+        "profit_factor": 0.0,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3673469387755102,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.0870534359090006,
+            "mean_predicted_probability": 0.3125,
+            "minimum_probability": 0.0,
+            "rows": 98
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.0,
+        "sortino_per_trade": 0.0,
+        "target_first_rate_pct": null,
+        "trades_per_observed_month": 0.0
+      }
+    },
+    "PULLBACK_CONTINUATION_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": false,
+        "minimum_candidate_dates": true,
+        "minimum_candidates": true,
+        "minimum_mean_net_return_pct": true,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": true,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": -1.7500000000000004,
+        "average_winner_pct": 2.7500000000000027,
+        "by_regime": {
+          "SOXX_NONPOSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": 0.5000000000000007,
+            "target_first_rate_pct": 50.0,
+            "trades": 2
+          },
+          "SOXX_POSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": 0.3676470588235306,
+            "target_first_rate_pct": 47.05882352941176,
+            "trades": 17
+          },
+          "SOXX_POSITIVE_20D__VOL_PROXY_RISING": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 3
+          }
+        },
+        "by_symbol": {
+          "ALAB": {
+            "mean_net_return_pct": 2.7500000000000027,
+            "target_first_rate_pct": 100.0,
+            "trades": 1
+          },
+          "AMD": {
+            "mean_net_return_pct": 0.5000000000000026,
+            "target_first_rate_pct": 50.0,
+            "trades": 6
+          },
+          "AVGO": {
+            "mean_net_return_pct": -0.46428571428571447,
+            "target_first_rate_pct": 28.57142857142857,
+            "trades": 7
+          },
+          "CRDO": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "MU": {
+            "mean_net_return_pct": 0.5000000000000007,
+            "target_first_rate_pct": 50.0,
+            "trades": 2
+          },
+          "NVDA": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 3
+          },
+          "SMCI": {
+            "mean_net_return_pct": 2.7500000000000027,
+            "target_first_rate_pct": 100.0,
+            "trades": 1
+          },
+          "SNDK": {
+            "mean_net_return_pct": 2.7500000000000027,
+            "target_first_rate_pct": 100.0,
+            "trades": 1
+          }
+        },
+        "candidate_dates": 22,
+        "candidates": 22,
+        "ending_research_capital": 10020.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": -0.3208883030829812,
+          "rows": 22,
+          "soxx_mean_net_return_pct": -0.06410344387232675
+        },
+        "maximum_drawdown_pct": -0.9499999999999953,
+        "mean_net_return_pct": 0.09090909090909172,
+        "median_net_return_pct": -1.7499999999999958,
+        "observed_months": 10,
+        "probability": {
+          "brier": 0.24322230795610425,
+          "brier_skill_pct": -2.8637787113459154,
+          "ece_10bin": 0.08070987654320995
+        },
+        "profit_factor": 1.0879120879120887,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3765432098765432,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.03188631851701656,
+            "mean_predicted_probability": 0.3402777777777778,
+            "minimum_probability": 0.0,
+            "rows": 162
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.040144204651639925,
+        "sortino_per_trade": 0.10322795481850273,
+        "target_first_rate_pct": 40.909090909090914,
+        "trades_per_observed_month": 2.2
+      }
+    },
+    "SECTOR_RIP_MOMENTUM_V1": {
+      "all_gates_pass": true,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": true,
+        "minimum_candidate_dates": true,
+        "minimum_candidates": true,
+        "minimum_mean_net_return_pct": true,
+        "minimum_median_net_return_pct": true,
+        "minimum_profit_factor": true,
+        "minimum_target_first_rate_pct": true
+      },
+      "metrics": {
+        "average_loser_pct": -1.7499999999999987,
+        "average_winner_pct": 2.7500000000000027,
+        "by_regime": {
+          "SOXX_NONPOSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": -1.7499999999999902,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "SOXX_POSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": 0.9500000000000011,
+            "target_first_rate_pct": 60.0,
+            "trades": 15
+          },
+          "SOXX_POSITIVE_20D__VOL_PROXY_RISING": {
+            "mean_net_return_pct": -1.7499999999999902,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          }
+        },
+        "by_symbol": {
+          "ALAB": {
+            "mean_net_return_pct": 2.7500000000000027,
+            "target_first_rate_pct": 100.0,
+            "trades": 1
+          },
+          "AMD": {
+            "mean_net_return_pct": 1.2500000000000013,
+            "target_first_rate_pct": 66.66666666666666,
+            "trades": 6
+          },
+          "ARM": {
+            "mean_net_return_pct": -1.7499999999999902,
+            "target_first_rate_pct": 0.0,
+            "trades": 2
+          },
+          "AVGO": {
+            "mean_net_return_pct": 2.7500000000000027,
+            "target_first_rate_pct": 100.0,
+            "trades": 1
+          },
+          "MRVL": {
+            "mean_net_return_pct": -1.7500000000000069,
+            "target_first_rate_pct": 0.0,
+            "trades": 2
+          },
+          "MU": {
+            "mean_net_return_pct": 0.5000000000000007,
+            "target_first_rate_pct": 50.0,
+            "trades": 2
+          },
+          "NVDA": {
+            "mean_net_return_pct": 1.250000000000005,
+            "target_first_rate_pct": 66.66666666666666,
+            "trades": 3
+          }
+        },
+        "candidate_dates": 17,
+        "candidates": 17,
+        "ending_research_capital": 10107.5,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": -0.13295097225066274,
+          "rows": 17,
+          "soxx_mean_net_return_pct": -0.12238618651477674
+        },
+        "maximum_drawdown_pct": -1.036525172754199,
+        "mean_net_return_pct": 0.6323529411764727,
+        "median_net_return_pct": 2.7500000000000027,
+        "observed_months": 12,
+        "probability": {
+          "brier": 0.2218058004468181,
+          "brier_skill_pct": 2.3847515130255945,
+          "ece_10bin": 0.03383503410224629
+        },
+        "profit_factor": 1.767857142857146,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3431372549019608,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.19807296393537663,
+            "mean_predicted_probability": 0.30930222079971453,
+            "minimum_probability": 0.0,
+            "rows": 306
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.27312737633807044,
+        "sortino_per_trade": 0.7023275391550391,
+        "target_first_rate_pct": 52.94117647058824,
+        "trades_per_observed_month": 1.4166666666666667
+      }
+    }
+  },
+  "recomputed_sealed_test": {
+    "SECTOR_RIP_MOMENTUM_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": false,
+        "minimum_brier_skill_pct": false,
+        "minimum_candidate_dates": false,
+        "minimum_candidates": false,
+        "minimum_mean_net_return_pct": false,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": false,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": -1.7499999999999987,
+        "average_winner_pct": null,
+        "by_regime": {
+          "SOXX_NONPOSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "SOXX_POSITIVE_20D__VOL_PROXY_CALMING": {
+            "mean_net_return_pct": -1.7499999999999976,
+            "target_first_rate_pct": 0.0,
+            "trades": 3
+          }
+        },
+        "by_symbol": {
+          "AMD": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "ARM": {
+            "mean_net_return_pct": -1.7499999999999902,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "MRVL": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          },
+          "NVDA": {
+            "mean_net_return_pct": -1.7500000000000013,
+            "target_first_rate_pct": 0.0,
+            "trades": 1
+          }
+        },
+        "candidate_dates": 4,
+        "candidates": 4,
+        "ending_research_capital": 9930.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": -0.9253607497416131,
+          "rows": 4,
+          "soxx_mean_net_return_pct": -1.8023821472961248
+        },
+        "maximum_drawdown_pct": -0.7000000000000006,
+        "mean_net_return_pct": -1.7499999999999987,
+        "median_net_return_pct": -1.7500000000000013,
+        "observed_months": 7,
+        "probability": {
+          "brier": 0.22610854510598885,
+          "brier_skill_pct": -9.448451356490212,
+          "ece_10bin": 0.116056752259382
+        },
+        "profit_factor": 0.0,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.2914572864321608,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.43844221105527614,
+            "mean_predicted_probability": 0.29586995971078034,
+            "minimum_probability": 0.0,
+            "rows": 199
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": -315167940334829.1,
+        "sortino_per_trade": -315167940334829.1,
+        "target_first_rate_pct": 0.0,
+        "trades_per_observed_month": 0.5714285714285714
+      }
+    }
+  },
+  "research_only": true,
+  "schema_version": 1,
+  "sealed_test_opened": true,
+  "status": "PASS",
+  "terminal_disposition": "SEALED_TEST_COMPLETE_RESEARCH_HOLD",
+  "training_report_sha256": "3580cff7585e3b5f7e1924d435244c2fe07d230b3bc85baf767a22c1ab2e4439"
+}

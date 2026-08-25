@@ -52,3 +52,14 @@ has not started. The next permitted stage is exactly one training run against
 the V2 panel and V2 panel audit, only while schema-v3 and every other isolated
 clone trainer are idle. Keep the sealed test unloaded unless every unchanged
 policy-validation gate passes.
+
+## Terminal training checkpoint
+
+The one permitted V2 training run is complete. Sector-Rip Momentum passed every
+policy-validation gate on 17 candidates with +0.6324% mean net return and a
+1.7679 profit factor, so its sealed test was opened exactly once. The lead did
+not reproduce: all four sealed candidates stopped first, for -1.75% mean net
+return, 0% target-first rate, zero profit factor, and -9.4485% Brier skill.
+Pullback and Breakout did not pass policy validation and their tests remained
+unopened. V2 is terminal `SEALED_TEST_COMPLETE_RESEARCH_HOLD`; its independent
+model audit passes. Never retune or reopen this identity.
