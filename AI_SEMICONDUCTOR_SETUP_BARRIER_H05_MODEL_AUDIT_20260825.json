@@ -1,0 +1,285 @@
+{
+  "contract_id": "ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "contract_sha256": "8269039fc4545816b8bc3ce145ad81432a9070d84482121fb6af58097ad2544e",
+  "errors": [],
+  "execution_enabled": false,
+  "orders_created": false,
+  "panel_audit_sha256": "e2a41d360e77be73e977fc0d126c401c027bfd648b7bc2b36df1f577ef64cb30",
+  "policy_passing_engines": [],
+  "recomputed_policy_validation": {
+    "BREAKOUT_ANTICIPATION_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": false,
+        "minimum_candidate_dates": false,
+        "minimum_candidates": false,
+        "minimum_mean_net_return_pct": false,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": false,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": null,
+        "average_winner_pct": null,
+        "by_regime": {},
+        "by_symbol": {},
+        "candidate_dates": 0,
+        "candidates": 0,
+        "ending_research_capital": 10000.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": null,
+          "rows": 0,
+          "soxx_mean_net_return_pct": null
+        },
+        "maximum_drawdown_pct": 0.0,
+        "mean_net_return_pct": null,
+        "median_net_return_pct": null,
+        "observed_months": 11,
+        "probability": {
+          "brier": 0.2354113520408163,
+          "brier_skill_pct": 0.0,
+          "ece_10bin": 0.05484693877551022
+        },
+        "profit_factor": 0.0,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3673469387755102,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.0870534359090006,
+            "mean_predicted_probability": 0.3125,
+            "minimum_probability": 0.0,
+            "rows": 98
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.0,
+        "sortino_per_trade": 0.0,
+        "target_first_rate_pct": null,
+        "trades_per_observed_month": 0.0
+      }
+    },
+    "PULLBACK_CONTINUATION_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": false,
+        "minimum_candidate_dates": false,
+        "minimum_candidates": false,
+        "minimum_mean_net_return_pct": false,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": false,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": null,
+        "average_winner_pct": null,
+        "by_regime": {},
+        "by_symbol": {},
+        "candidate_dates": 0,
+        "candidates": 0,
+        "ending_research_capital": 10000.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": null,
+          "rows": 0,
+          "soxx_mean_net_return_pct": null
+        },
+        "maximum_drawdown_pct": 0.0,
+        "mean_net_return_pct": null,
+        "median_net_return_pct": null,
+        "observed_months": 10,
+        "probability": {
+          "brier": 0.24322230795610425,
+          "brier_skill_pct": -2.8637787113459154,
+          "ece_10bin": 0.08070987654320995
+        },
+        "profit_factor": 0.0,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3765432098765432,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.03188631851701656,
+            "mean_predicted_probability": 0.3402777777777778,
+            "minimum_probability": 0.0,
+            "rows": 162
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.0,
+        "sortino_per_trade": 0.0,
+        "target_first_rate_pct": null,
+        "trades_per_observed_month": 0.0
+      }
+    },
+    "SECTOR_RIP_MOMENTUM_V1": {
+      "all_gates_pass": false,
+      "gate_checks": {
+        "maximum_drawdown_pct": true,
+        "maximum_ece_10bin": true,
+        "minimum_brier_skill_pct": true,
+        "minimum_candidate_dates": false,
+        "minimum_candidates": false,
+        "minimum_mean_net_return_pct": false,
+        "minimum_median_net_return_pct": false,
+        "minimum_profit_factor": false,
+        "minimum_target_first_rate_pct": false
+      },
+      "metrics": {
+        "average_loser_pct": null,
+        "average_winner_pct": null,
+        "by_regime": {},
+        "by_symbol": {},
+        "candidate_dates": 0,
+        "candidates": 0,
+        "ending_research_capital": 10000.0,
+        "matched_controls": {
+          "qqq_mean_net_return_pct": null,
+          "rows": 0,
+          "soxx_mean_net_return_pct": null
+        },
+        "maximum_drawdown_pct": 0.0,
+        "mean_net_return_pct": null,
+        "median_net_return_pct": null,
+        "observed_months": 12,
+        "probability": {
+          "brier": 0.2218058004468181,
+          "brier_skill_pct": 2.3847515130255945,
+          "ece_10bin": 0.03383503410224629
+        },
+        "profit_factor": 0.0,
+        "reliability_table": [
+          {
+            "action": "IGNORE",
+            "actual_target_first_rate": 0.3431372549019608,
+            "maximum_exclusive_probability": 0.55,
+            "mean_net_return_pct": -0.19807296393537663,
+            "mean_predicted_probability": 0.30930222079971453,
+            "minimum_probability": 0.0,
+            "rows": 306
+          },
+          {
+            "action": "WATCH",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.6,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.55,
+            "rows": 0
+          },
+          {
+            "action": "SMALL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.65,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.6,
+            "rows": 0
+          },
+          {
+            "action": "NORMAL_RESEARCH_POSITION",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 0.7,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.65,
+            "rows": 0
+          },
+          {
+            "action": "BEST_RESEARCH_CANDIDATE",
+            "actual_target_first_rate": null,
+            "maximum_exclusive_probability": 1.01,
+            "mean_net_return_pct": null,
+            "mean_predicted_probability": null,
+            "minimum_probability": 0.7,
+            "rows": 0
+          }
+        ],
+        "sharpe_per_trade": 0.0,
+        "sortino_per_trade": 0.0,
+        "target_first_rate_pct": null,
+        "trades_per_observed_month": 0.0
+      }
+    }
+  },
+  "recomputed_sealed_test": null,
+  "research_only": true,
+  "schema_version": 1,
+  "sealed_test_opened": false,
+  "status": "PASS",
+  "terminal_disposition": "RESEARCH_HOLD_POLICY_VALIDATION_FAILED",
+  "training_report_sha256": "ddcc2cc08eaef3faa20ea74155bbae99eb5288271fc71e42469062cfcb2635ed"
+}

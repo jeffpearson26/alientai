@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_PANEL_COMPILATION_OR_TRAINING",
+  "contract_id": "ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "model_family_id": "ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "research_only": true,
+  "execution_enabled": false,
+  "paper_trading_enabled": false,
+  "provider_contact_permitted": false,
+  "orders_permitted": false,
+  "evidence_inheritance": "none",
+  "purpose": "Test three narrow AI/semiconductor setup engines on the probability that a +3% target is reached before a -1.5% stop within five regular sessions.",
+  "provider": "Alpha Vantage",
+  "source_endpoint": "TIME_SERIES_DAILY_ADJUSTED",
+  "source_archive": "D:/AlientAI/Data/AlphaVantage_2026/all_active_us_adjusted_daily_full_20260823",
+  "source_archive_manifest_sha256": "9ae25f2dc954f9dbbfd0d3de093b682037bddd2f894bc03709b2ad6e740b752c",
+  "source_subset_audit": "AI_SEMICONDUCTOR_SETUP_BARRIER_H05_SOURCE_AUDIT_20260825.json",
+  "required_latest_source_date": "2026-08-21",
+  "universe_file": "research_universes/ai_semiconductor_focused10_20260825.txt",
+  "universe_sha256": "e33eee7c526b1fbdbaa14cfa6b019c77c7caf8a86619335c8d096ee71ff2f5df",
+  "candidate_symbols": ["NVDA", "AMD", "AVGO", "MU", "MRVL", "CRDO", "ALAB", "ARM", "SMCI", "SNDK"],
+  "context_symbols": ["QQQ", "SOXX", "SPY", "VIXY"],
+  "volatility_context": {
+    "requested_concept": "VIX level and change",
+    "implemented_source_pure_proxy": "VIXY adjusted-return changes only",
+    "level_feature_permitted": false,
+    "reason": "The exact cash VIX series is absent from the frozen Alpha Vantage archive. VIXY preserves one-provider source purity and may indicate volatility-direction changes, but it is not the VIX and must never be represented as the VIX level.",
+    "future_exact_vix_rule": "An exact-VIX version requires a separately frozen successor identity and may not inherit this model's evidence."
+  },
+  "historical_window": {
+    "start_date": "2016-01-04",
+    "last_decision_date": "2026-08-14",
+    "fixed_current_universe_bias": true,
+    "listing_age_rule": "A symbol enters only after it has 60 completed source sessions; no pre-listing rows are fabricated.",
+    "selection_bias_disclosure": "The ten-name 2026 thematic universe was selected with hindsight. Historical passage is development evidence only and cannot authorize trading."
+  },
+  "decision_and_exit": {
+    "decision": "after a completed regular-session adjusted close",
+    "entry": "next complete regular-session adjusted open",
+    "horizon_sessions": 5,
+    "profit_target_pct_from_entry": 3.0,
+    "protective_stop_pct_from_entry": 1.5,
+    "round_trip_cost_pct": 0.25,
+    "cost_interpretation": "combined spread, slippage, and fees deducted from every completed research trade",
+    "same_session_dual_barrier_behavior": "STOP_FIRST_CONSERVATIVE",
+    "timeout_exit": "fifth subsequent complete regular-session adjusted close",
+    "target_label": "TARGET_FIRST",
+    "shared_exit_engine": true
+  },
+  "engines": {
+    "PULLBACK_CONTINUATION_V1": {
+      "description": "Strong uptrend, positive sector relative strength, and a short pullback on softer volume.",
+      "rules": {
+        "close_above_ema20_and_ema50": true,
+        "ema20_above_ema50": true,
+        "minimum_ema20_slope_5d_pct": 0.0,
+        "minimum_stock_minus_soxx_20d_pct": 0.0,
+        "pullback_return_3d_pct_range": [-6.0, 0.5],
+        "maximum_pullback_volume_ratio_3_vs_prior10": 1.05,
+        "minimum_distance_from_20d_high_pct": -10.0
+      }
+    },
+    "BREAKOUT_ANTICIPATION_V1": {
+      "description": "Range and ATR compression near a 20-session high with improving relative strength.",
+      "rules": {
+        "close_above_ema20": true,
+        "minimum_position_in_20d_range": 0.70,
+        "minimum_distance_from_20d_high_pct": -4.0,
+        "maximum_range_compression_5_vs20": 0.85,
+        "maximum_atr_contraction_5_vs20": 0.95,
+        "minimum_relative_strength_acceleration_vs_soxx": 0.0
+      }
+    },
+    "SECTOR_RIP_MOMENTUM_V1": {
+      "description": "Semiconductor breadth and sector momentum are unusually strong while the volatility proxy is not exploding.",
+      "rules": {
+        "minimum_soxx_return_1d_pct": 0.75,
+        "minimum_qqq_return_1d_pct": 0.0,
+        "minimum_universe_green_fraction": 0.70,
+        "minimum_universe_above_20dma_fraction": 0.60,
+        "maximum_vixy_return_1d_pct": 5.0,
+        "minimum_stock_return_1d_pct": 0.0,
+        "minimum_stock_minus_soxx_5d_pct": -2.0
+      }
+    }
+  },
+  "feature_contract": {
+    "feature_count": 49,
+    "minimum_usable_breadth_symbols": 5,
+    "families": ["trend", "momentum_change", "volume", "volatility", "market_context", "breadth", "setup_identity"],
+    "relative_strength_acceleration": "(stock_5d_return - context_5d_return) - (stock_20d_return - context_20d_return) / 4",
+    "availability": "Every feature uses only values from the completed decision session or earlier.",
+    "news_options_fundamentals_permitted": false,
+    "prospective_outcomes_permitted": false
+  },
+  "chronological_partitions": [
+    {"name": "TRAIN", "first_date": "2016-01-04", "last_date": "2022-12-30", "expected_context_dates": 1762},
+    {"name": "EMBARGO_1", "first_date": "2023-01-03", "last_date": "2023-01-09", "expected_context_dates": 5},
+    {"name": "FIT_VALIDATION", "first_date": "2023-01-10", "last_date": "2023-12-29", "expected_context_dates": 245},
+    {"name": "EMBARGO_2", "first_date": "2024-01-02", "last_date": "2024-01-08", "expected_context_dates": 5},
+    {"name": "CALIBRATION", "first_date": "2024-01-09", "last_date": "2024-12-31", "expected_context_dates": 247},
+    {"name": "EMBARGO_3", "first_date": "2025-01-02", "last_date": "2025-01-08", "expected_context_dates": 5},
+    {"name": "POLICY_VALIDATION", "first_date": "2025-01-09", "last_date": "2025-12-31", "expected_context_dates": 245},
+    {"name": "EMBARGO_4", "first_date": "2026-01-02", "last_date": "2026-01-08", "expected_context_dates": 5},
+    {"name": "SEALED_TEST", "first_date": "2026-01-09", "last_date": "2026-08-14", "expected_context_dates": 150}
+  ],
+  "walk_forward_diagnostics": [
+    {"train_through": "2020-12-31", "evaluate_first": "2021-01-04", "evaluate_last": "2021-12-31"},
+    {"train_through": "2021-12-31", "evaluate_first": "2022-01-03", "evaluate_last": "2022-12-30"},
+    {"train_through": "2022-12-30", "evaluate_first": "2023-01-10", "evaluate_last": "2023-12-29"}
+  ],
+  "training_design": {
+    "algorithm": "LightGBM binary classifier",
+    "one_model_per_engine": true,
+    "hyperparameter_search": false,
+    "walk_forward_diagnostic_num_boost_round": 300,
+    "fixed_hyperparameters": {
+      "learning_rate": 0.03,
+      "num_leaves": 15,
+      "max_depth": 5,
+      "min_data_in_leaf": 40,
+      "feature_fraction": 0.80,
+      "bagging_fraction": 0.80,
+      "bagging_freq": 1,
+      "lambda_l1": 0.20,
+      "lambda_l2": 1.00,
+      "num_boost_round": 900,
+      "early_stopping_rounds": 60,
+      "seed": 20260825
+    },
+    "fit_rows": "Only rows where that engine's frozen setup detector is true.",
+    "early_stopping_partition": "FIT_VALIDATION",
+    "probability_calibration_partition": "CALIBRATION",
+    "calibration_method": "isotonic PAVA",
+    "policy_evaluation_partition": "POLICY_VALIDATION",
+    "sealed_test_rule": "Open exactly once for an engine only if every frozen policy-validation gate passes; otherwise keep that engine SEALED_UNLOADED.",
+    "cross_sectional_ranking": "Within each engine and decision date, descending expected net return, then calibrated target-first probability, then symbol.",
+    "research_director": "A deterministic, untrained selector may compare only independently policy-passing engines and choose the highest positive expected-value candidate; no consensus or learned combiner is permitted."
+  },
+  "probability_actions": [
+    {"minimum": 0.00, "maximum_exclusive": 0.55, "action": "IGNORE"},
+    {"minimum": 0.55, "maximum_exclusive": 0.60, "action": "WATCH"},
+    {"minimum": 0.60, "maximum_exclusive": 0.65, "action": "SMALL_RESEARCH_POSITION"},
+    {"minimum": 0.65, "maximum_exclusive": 0.70, "action": "NORMAL_RESEARCH_POSITION"},
+    {"minimum": 0.70, "maximum_exclusive": 1.01, "action": "BEST_RESEARCH_CANDIDATE"}
+  ],
+  "frozen_policy": {
+    "minimum_calibrated_target_first_probability": 0.60,
+    "minimum_expected_net_return_pct": 0.0,
+    "maximum_candidates_per_engine_per_decision_date": 1,
+    "forced_selection": false,
+    "abstention_is_valid": true,
+    "simulated_account_usd_per_engine": 10000.0,
+    "fixed_comparison_notional_usd": 1000.0,
+    "maximum_simultaneous_positions": 5
+  },
+  "policy_validation_gates": {
+    "minimum_candidates": 12,
+    "minimum_candidate_dates": 12,
+    "minimum_mean_net_return_pct": 0.0,
+    "minimum_median_net_return_pct": 0.0,
+    "minimum_target_first_rate_pct": 50.0,
+    "minimum_profit_factor": 1.05,
+    "maximum_drawdown_pct": -8.0,
+    "minimum_brier_skill_pct": 0.0,
+    "maximum_ece_10bin": 0.10
+  },
+  "required_evaluation": [
+    "expectancy after 0.25% total costs",
+    "profit factor",
+    "maximum drawdown on each $10,000 research account",
+    "Sharpe and Sortino on realized trade returns",
+    "average winner and loser",
+    "trades per observed month",
+    "target-first rate",
+    "Brier skill and calibration error",
+    "performance by broad and semiconductor regime",
+    "performance by symbol",
+    "QQQ and SOXX matched-period controls",
+    "expanding walk-forward diagnostics"
+  ],
+  "panel_output_root": "D:/AlientAI/Data/Compiled/ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "model_output_root": "D:/AlientAI/Models/ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "future_only_start_date": "2026-08-26",
+  "prohibitions": [
+    "No provider call during this build",
+    "No provider splice",
+    "No prospective journal or outcome input",
+    "No random row split",
+    "No hyperparameter or threshold search",
+    "No threshold change after policy-validation results are visible",
+    "No sealed-test opening after a failed gate",
+    "No favorable-window selection",
+    "No forced trade",
+    "No paper or live order",
+    "No engine.py or settings change"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "contract_id": "ai_semiconductor_setup_barrier_h05_lgbm_v1_20260825",
+  "contract_sha256": "8269039fc4545816b8bc3ce145ad81432a9070d84482121fb6af58097ad2544e",
+  "errors": [],
+  "execution_enabled": false,
+  "orders_created": false,
+  "outcome_counts": {
+    "DUAL_HIT_STOP_FIRST_CONSERVATIVE": 1115,
+    "STOP_FIRST": 11016,
+    "TARGET_FIRST": 6063,
+    "TIMEOUT": 427
+  },
+  "panel_summary_sha256": "37f5ca051adaff31e457f763db68800934db08e937db634d0b834937cb36bd23",
+  "partition_dates": {
+    "CALIBRATION": 247,
+    "EMBARGO_1": 5,
+    "EMBARGO_2": 5,
+    "EMBARGO_3": 5,
+    "EMBARGO_4": 5,
+    "FIT_VALIDATION": 245,
+    "POLICY_VALIDATION": 245,
+    "SEALED_TEST": 150,
+    "TRAIN": 1762
+  },
+  "partition_rows": {
+    "CALIBRATION": 2114,
+    "EMBARGO_1": 35,
+    "EMBARGO_2": 40,
+    "EMBARGO_3": 45,
+    "EMBARGO_4": 50,
+    "FIT_VALIDATION": 1730,
+    "POLICY_VALIDATION": 2361,
+    "SEALED_TEST": 1500,
+    "TRAIN": 10746
+  },
+  "research_only": true,
+  "rows_inspected": 18621,
+  "same_session_dual_barrier_behavior": "STOP_FIRST_CONSERVATIVE",
+  "schema_version": 1,
+  "setup_counts": {
+    "BREAKOUT_ANTICIPATION_V1": 760,
+    "PULLBACK_CONTINUATION_V1": 1433,
+    "SECTOR_RIP_MOMENTUM_V1": 2332
+  },
+  "source_audit_sha256": "42f8db156fd207128455cbf8fdcd75f73a56f924a482e725a3749cfac99fa82e",
+  "status": "PASS",
+  "symbols": 10
+}
